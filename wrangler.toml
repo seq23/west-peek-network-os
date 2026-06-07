@@ -1,9 +1,3 @@
 name = "west-peek-network-os"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-06-07"
-
-[vars]
-APP_BASE_URL = "https://network.joinwestpeek.com"
-AI_PROVIDER = "anthropic"
-GMAIL_TRIGGER_PHRASE = "#wpnetwork"
-ACCEPTED_TRIGGER_ALIASES = "#addtowestpeek,#westpeeknetwork"
