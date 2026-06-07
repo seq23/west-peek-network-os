@@ -1,0 +1,35 @@
+{
+  "name": "west-peek-network-os",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "West Peek Network OS — private internal relationship intelligence app for adding people to the West Peek Network.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "validate:structure": "node scripts/validate-structure.mjs",
+    "validate:secrets": "node scripts/check-no-plaintext-secrets.mjs",
+    "validate:all": "npm run validate:structure && npm run validate:secrets && npm run test:domain",
+    "test:e2e": "playwright test",
+    "test:domain": "node tests/domain/workflows.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "typescript": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "lucide-react": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@playwright/test": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
