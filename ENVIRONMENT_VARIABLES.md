@@ -43,3 +43,5 @@ See `.env.example` for safe placeholder names. Plaintext `.env` and `.env.local`
 ## Production
 
 Production secrets live in Cloudflare secret/environment settings. The script `scripts/secrets/push-cloudflare-secrets.sh` reads `.env.local`, pushes approved keys with Wrangler, and does not print secret values.
+
+- `ANTHROPIC_MODEL` — optional Claude model override for the Relationship Assistant. Default: `claude-3-5-haiku-latest`.

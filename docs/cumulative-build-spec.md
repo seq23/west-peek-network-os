@@ -302,11 +302,11 @@ Google Sheets is not ideal for raw OAuth refresh tokens. Recommended token stora
 
 Best V1: Sheets for CRM data; safer server-side storage for OAuth token material; Sheets only for token metadata/status.
 
-Required Google Sheet tabs: contacts, intake_queue, interactions, relationship_touches, ai_suggestions, approvals, notifications, oauth_accounts, settings, audit_log.
+Required Google Sheet tabs: contacts, intake_queue, interactions, relationship_touches, ai_suggestions, approvals, notifications, oauth_tokens, settings, audit_log.
 
 ## 28. Data schemas
 
-Canonical full schemas live in `docs/data-schemas.md` and `src/domain/types.ts`. They include contacts, intake_queue, interactions, relationship_touches, ai_suggestions, approvals, notifications, oauth_accounts, settings, and audit_log.
+Canonical full schemas live in `docs/data-schemas.md` and `src/domain/types.ts`. They include contacts, intake_queue, interactions, relationship_touches, ai_suggestions, approvals, notifications, oauth_tokens, settings, and audit_log.
 
 ## 29. Routes
 

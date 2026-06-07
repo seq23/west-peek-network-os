@@ -34,7 +34,7 @@ relationship_touches
 ai_suggestions
 approvals
 notifications
-oauth_accounts
+oauth_tokens
 settings
 audit_log
 ```
@@ -52,8 +52,10 @@ contact_id,created_at,updated_at,status,first_name,last_name,full_name,email,pho
 ### intake_queue
 
 ```csv
-intake_id,created_at,updated_at,source,captured_by,source_user_email,gmail_message_id,gmail_thread_id,raw_text,email_subject,email_from,email_to,email_date,parsed_name,parsed_email,parsed_company,parsed_notes,ai_summary,ai_confidence,possible_duplicate_contact_id,review_status,reviewed_by,reviewed_at,converted_contact_id,attached_contact_id,dismiss_reason
+intake_id,created_at,updated_at,source,capture_type,captured_by,source_user_email,source_file_name,source_file_type,gmail_message_id,gmail_thread_id,raw_text,email_subject,email_from,email_to,email_date,parsed_name,parsed_email,parsed_phone,parsed_company,parsed_title,parsed_website,parsed_notes,parsed_owner,parsed_touch,parsed_priority,parsed_due,parsed_needs_touch,extracted_text,transcript_text,missing_fields,ai_summary,ai_confidence,internal_data_trace,human_review_required,execution_allowed,review_status,reviewed_by,reviewed_at,converted_contact_id,attached_contact_id,dismiss_reason,event_id,event_name,event_slug
 ```
+
+Flexible captures may leave any non-ID field blank. Missing values are nonblocking and are reviewed later.
 
 ### interactions
 
@@ -85,10 +87,10 @@ approval_id,created_at,updated_at,approval_type,source_entity_type,source_entity
 notification_id,created_at,updated_at,recipient_email,recipient_user_id,notification_type,channel,subject,body_preview,entity_type,entity_id,priority,status,sent_at,read_at,resolved_at,failure_reason
 ```
 
-### oauth_accounts
+### oauth_tokens
 
 ```csv
-account_id,user_email,google_account_email,connected_at,last_sync_at,sync_status,scopes,token_status,last_error
+token_id,created_at,updated_at,provider,user_email,scope,token_type,expires_in,encrypted_payload,encryption_iv,encryption_algorithm,status
 ```
 
 ### settings

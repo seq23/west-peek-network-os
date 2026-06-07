@@ -7,11 +7,15 @@ export interface RuntimeEnv {
 }
 
 export const TAB_HEADERS = {
-  intake_queue: ['intake_id', 'created_at', 'updated_at', 'source', 'captured_by', 'source_user_email', 'raw_text', 'parsed_name', 'parsed_company', 'parsed_notes', 'ai_summary', 'ai_confidence', 'review_status'],
+  intake_queue: ['intake_id', 'created_at', 'updated_at', 'source', 'capture_type', 'captured_by', 'source_user_email', 'source_file_name', 'source_file_type', 'gmail_message_id', 'gmail_thread_id', 'raw_text', 'email_subject', 'email_from', 'email_to', 'email_date', 'parsed_name', 'parsed_email', 'parsed_phone', 'parsed_company', 'parsed_title', 'parsed_website', 'parsed_notes', 'parsed_owner', 'parsed_touch', 'parsed_priority', 'parsed_due', 'parsed_needs_touch', 'extracted_text', 'transcript_text', 'missing_fields', 'ai_summary', 'ai_confidence', 'internal_data_trace', 'human_review_required', 'execution_allowed', 'review_status', 'reviewed_by', 'reviewed_at', 'converted_contact_id', 'attached_contact_id', 'dismiss_reason', 'event_id', 'event_name', 'event_slug'],
   contacts: ['contact_id', 'created_at', 'updated_at', 'status', 'full_name', 'email', 'company', 'relationship_owner', 'priority', 'tags', 'context_summary', 'touch_needed', 'touch_status', 'created_by', 'updated_by'],
   approvals: ['approval_id', 'created_at', 'updated_at', 'approval_type', 'source_entity_type', 'source_entity_id', 'requested_by', 'assigned_to', 'relationship_owner', 'status', 'risk_level', 'suggested_payload', 'approved_by', 'approved_at', 'rejected_by', 'rejected_at'],
   notifications: ['notification_id', 'created_at', 'updated_at', 'recipient_email', 'notification_type', 'channel', 'subject', 'body_preview', 'entity_type', 'entity_id', 'priority', 'status', 'sent_at', 'read_at', 'resolved_at', 'failure_reason'],
-  oauth_tokens: ['token_id', 'created_at', 'updated_at', 'provider', 'user_email', 'scope', 'token_type', 'expires_in', 'encrypted_payload', 'encryption_iv', 'encryption_algorithm', 'status']
+  ai_suggestions: ['suggestion_id', 'created_at', 'updated_at', 'suggestion_type', 'source_entity_type', 'source_entity_id', 'confidence', 'status', 'suggested_payload', 'reasoning_summary', 'reviewed_by', 'reviewed_at', 'applied_entity_type', 'applied_entity_id', 'created_by_agent'],
+  relationship_touches: ['touch_id', 'created_at', 'updated_at', 'contact_id', 'contact_email', 'recipient_name', 'recipient_email', 'company', 'owner', 'reason', 'priority', 'due_date', 'status', 'method', 'card_type', 'card_title', 'draft_message', 'email_subject', 'email_body', 'approval_required', 'execution_allowed', 'internal_data_trace', 'created_by', 'updated_by', 'fulfillment_mode', 'fulfillment_status', 'vendor_name', 'vendor_url', 'vendor_fit', 'vendor_note', 'external_order_id', 'sent_at', 'fulfillment_notes'],
+  oauth_tokens: ['token_id', 'created_at', 'updated_at', 'provider', 'user_email', 'scope', 'token_type', 'expires_in', 'encrypted_payload', 'encryption_iv', 'encryption_algorithm', 'status'],
+  events: ['event_id', 'created_at', 'updated_at', 'event_name', 'event_slug', 'event_date', 'location', 'owner_email', 'status', 'notes', 'public_form_enabled', 'public_form_url'],
+  event_attendees: ['event_attendee_id', 'event_id', 'event_name', 'event_slug', 'created_at', 'updated_at', 'public_name', 'public_email', 'public_company', 'public_title', 'public_phone', 'public_linkedin', 'public_interest', 'private_context', 'private_voice_transcript', 'ai_summary', 'review_status', 'confidence', 'missing_fields', 'source_type', 'created_by', 'source_intake_id', 'consent_follow_up']
 } as const;
 
 export type SheetTab = keyof typeof TAB_HEADERS;
@@ -24,9 +28,10 @@ export function assertSheetsConfigured(env: RuntimeEnv) {
 export async function appendRecord(env: RuntimeEnv, tab: SheetTab, record: Record<string, unknown>) {
   assertSheetsConfigured(env);
   const token = await getServiceAccountToken(env);
+  await ensureTabHeaders(env, token, tab);
   const headers = TAB_HEADERS[tab];
   const row = headers.map((header) => serializeCell(record[header]));
-  const range = encodeURIComponent(`${tab}!A:Z`);
+  const range = encodeURIComponent(`${tab}!A:ZZ`);
   const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -39,7 +44,8 @@ export async function appendRecord(env: RuntimeEnv, tab: SheetTab, record: Recor
 export async function readTab(env: RuntimeEnv, tab: SheetTab) {
   assertSheetsConfigured(env);
   const token = await getServiceAccountToken(env);
-  const range = encodeURIComponent(`${tab}!A:Z`);
+  await ensureTabHeaders(env, token, tab);
+  const range = encodeURIComponent(`${tab}!A:ZZ`);
   const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values/${range}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -47,6 +53,28 @@ export async function readTab(env: RuntimeEnv, tab: SheetTab) {
   const payload = await response.json() as { values?: string[][] };
   const [header = [], ...rows] = payload.values || [];
   return rows.map((row: string[]) => Object.fromEntries(header.map((key: string, index: number) => [key, row[index] || ''])));
+}
+
+
+async function ensureTabHeaders(env: RuntimeEnv, token: string, tab: SheetTab) {
+  const headers = TAB_HEADERS[tab];
+  const headerRange = encodeURIComponent(`${tab}!A1:ZZ1`);
+  const read = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values/${headerRange}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!read.ok) throw new Error(`Google Sheets header read failed for ${tab}: ${read.status} ${await read.text()}`);
+  const payload = await read.json() as { values?: string[][] };
+  const existing = payload.values?.[0] || [];
+  const missingRequired = headers.some((header) => !existing.includes(header));
+  const wrongOrder = headers.some((header, index) => existing[index] !== header);
+  if (!existing.length || missingRequired || wrongOrder) {
+    const update = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values/${headerRange}?valueInputOption=RAW`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [headers] })
+    });
+    if (!update.ok) throw new Error(`Google Sheets header repair failed for ${tab}: ${update.status} ${await update.text()}`);
+  }
 }
 
 export function sheetsUnavailable(error: unknown) {

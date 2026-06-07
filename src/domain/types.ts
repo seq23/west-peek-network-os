@@ -1,16 +1,59 @@
 export type Role = 'Admin' | 'Partner' | 'Operator' | 'Assistant' | 'Read-only';
 export type Owner = 'Sequoia' | 'Scooter' | 'Unassigned';
 export type Priority = 'Low' | 'Normal' | 'High';
-export type TouchMethod = 'undecided' | 'email' | 'handwritten_note' | 'gift' | 'intro' | 'call' | 'meeting' | 'event_invite' | 'other';
-export type TouchStatus = 'needed' | 'planned' | 'drafted' | 'pending_approval' | 'approved' | 'sent' | 'skipped' | 'cancelled' | 'failed';
+export type TouchMethod = 'undecided' | 'email' | 'handwritten_note' | 'virtual_thank_you_card' | 'gift' | 'intro' | 'call' | 'meeting' | 'event_invite' | 'other';
+export type TouchStatus = 'needed' | 'planned' | 'drafted' | 'pending_approval' | 'approved' | 'approved_ready_to_send' | 'opened_vendor' | 'will_do_myself' | 'sent' | 'sent_externally' | 'completed' | 'skipped' | 'cancelled' | 'failed';
 export type ApprovalRisk = 'low' | 'medium' | 'high';
 export type ApprovalStatus = 'pending' | 'approved' | 'edited' | 'rejected' | 'executed' | 'failed' | 'cancelled';
 export type NotificationStatus = 'unread' | 'read' | 'dismissed' | 'resolved' | 'failed';
 export type AiSuggestionStatus = 'pending' | 'approved' | 'edited' | 'dismissed' | 'applied';
 export type AiSuggestionType = 'contact_cleanup' | 'duplicate_candidate' | 'touch_recommendation' | 'email_draft' | 'handwritten_note_draft' | 'gift_idea' | 'follow_up_recommendation' | 'context_summary' | 'tag_recommendation' | 'owner_recommendation' | 'priority_recommendation';
-export type IntakeSource = 'gmail_trigger' | 'manual_note' | 'pasted_notes' | 'business_card_later' | 'voice_note_later';
-export type IntakeReviewStatus = 'new' | 'ai_reviewed' | 'needs_human_review' | 'converted' | 'attached' | 'dismissed' | 'needs_more_info';
+export type IntakeSource = 'gmail_trigger' | 'manual_note' | 'pasted_notes' | 'business_card' | 'notes_screenshot' | 'voice_note' | 'business_card_later' | 'voice_note_later' | 'event_public_form' | 'event_private_note' | 'event_card_upload' | 'event_screenshot' | 'event_voice_note';
+export type CaptureType = 'email_thread' | 'self_email_note' | 'forwarded_email' | 'manual_add' | 'business_card' | 'notes_screenshot' | 'voice_note' | 'thank_you_card' | 'event_public_form' | 'event_private_note' | 'other';
+export type IntakeReviewStatus = 'new' | 'ai_reviewed' | 'pending_human_review' | 'needs_human_review' | 'converted' | 'attached' | 'dismissed' | 'needs_more_info';
 export type InteractionType = 'email' | 'call' | 'meeting' | 'intro' | 'event' | 'note' | 'touch' | 'gift' | 'handwritten_note' | 'other';
+
+
+export interface EventRecord {
+  event_id: string;
+  created_at: string;
+  updated_at: string;
+  event_name: string;
+  event_slug: string;
+  event_date?: string;
+  location?: string;
+  owner_email: string;
+  status: 'active' | 'closed';
+  notes?: string;
+  public_form_enabled: boolean;
+  public_form_url?: string;
+}
+
+export interface EventAttendeeRecord {
+  event_attendee_id: string;
+  event_id: string;
+  event_name: string;
+  event_slug: string;
+  created_at: string;
+  updated_at: string;
+  public_name?: string;
+  public_email?: string;
+  public_company?: string;
+  public_title?: string;
+  public_phone?: string;
+  public_linkedin?: string;
+  public_interest?: string;
+  private_context?: string;
+  private_voice_transcript?: string;
+  ai_summary?: string;
+  review_status: IntakeReviewStatus;
+  confidence?: 'low' | 'medium' | 'high';
+  missing_fields?: string;
+  source_type: string;
+  created_by: string;
+  source_intake_id?: string;
+  consent_follow_up?: boolean;
+}
 
 export interface ContactRecord {
   contact_id: string;
@@ -66,6 +109,7 @@ export interface IntakeRecord {
   created_at: string;
   updated_at: string;
   source: IntakeSource;
+  capture_type?: CaptureType;
   captured_by: string;
   source_user_email?: string;
   gmail_message_id?: string;
@@ -77,11 +121,30 @@ export interface IntakeRecord {
   email_date?: string;
   parsed_name?: string;
   parsed_email?: string;
+  parsed_phone?: string;
   parsed_company?: string;
+  parsed_title?: string;
+  parsed_website?: string;
   parsed_notes?: string;
+  parsed_owner?: Owner;
+  parsed_touch?: TouchMethod;
+  parsed_priority?: Priority;
+  parsed_due?: string;
+  parsed_needs_touch?: boolean;
+  event_id?: string;
+  event_name?: string;
+  event_slug?: string;
+  source_file_name?: string;
+  source_file_type?: string;
+  extracted_text?: string;
+  transcript_text?: string;
+  missing_fields?: string;
   ai_summary?: string;
   ai_confidence?: 'low' | 'medium' | 'high';
   possible_duplicate_contact_id?: string;
+  internal_data_trace?: string;
+  human_review_required?: boolean;
+  execution_allowed?: boolean;
   review_status: IntakeReviewStatus;
   reviewed_by?: string;
   reviewed_at?: string;
@@ -118,6 +181,17 @@ export interface RelationshipTouch {
   due_date: string;
   status: TouchStatus;
   method: TouchMethod;
+  contact_email?: string;
+  recipient_name?: string;
+  recipient_email?: string;
+  company?: string;
+  card_type?: string;
+  card_title?: string;
+  email_subject?: string;
+  email_body?: string;
+  approval_required?: boolean;
+  execution_allowed?: boolean;
+  internal_data_trace?: string;
   vendor_name?: string;
   vendor_url?: string;
   draft_message?: string;
@@ -128,6 +202,13 @@ export interface RelationshipTouch {
   notes?: string;
   created_by?: string;
   updated_by?: string;
+  fulfillment_mode?: 'vendor' | 'self';
+  fulfillment_status?: string;
+  vendor_fit?: string;
+  vendor_note?: string;
+  external_order_id?: string;
+  sent_at?: string;
+  fulfillment_notes?: string;
 }
 
 export interface AiSuggestionRecord {

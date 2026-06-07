@@ -69,3 +69,129 @@ pre { margin: 0; padding: 16px; border-radius: 18px; background: #16130f; color:
 .table th { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--wp-muted); }
 .footer-status { margin-top: 24px; color: var(--wp-muted); font-size: 12px; }
 @media (max-width: 920px) { .shell { grid-template-columns: 1fr; } .sidebar { position: relative; height: auto; } .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; } .topbar { flex-direction: column; } }
+
+.table-like { display: grid; gap: 10px; }
+.table-like > div { display: grid; grid-template-columns: minmax(180px, 0.7fr) 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--wp-line); }
+.table-like > div:last-child { border-bottom: 0; }
+.route-list { display: grid; gap: 16px; }
+.route-card { border: 1px solid var(--wp-line); border-radius: 18px; padding: 16px; background: rgba(255,255,255,0.02); }
+.route-card h3 { margin-top: 0; }
+.route-card ol { padding-left: 20px; }
+@media (max-width: 720px) { .table-like > div { grid-template-columns: 1fr; gap: 4px; } }
+.thank-card {
+  border: 1px solid rgba(255, 122, 0, 0.35);
+  border-radius: 26px;
+  background: linear-gradient(135deg, #0d0d0f 0%, #17110c 100%);
+  color: #fff8ee;
+  padding: 28px;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 24px 80px rgba(0,0,0,.25);
+}
+.thank-card-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #ff7a00;
+  font-weight: 800;
+  letter-spacing: .08em;
+  margin-bottom: 18px;
+}
+.thank-card-kicker {
+  color: #ff7a00;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: 12px;
+  font-weight: 800;
+}
+.thank-card h3 {
+  font-size: clamp(30px, 4vw, 54px);
+  line-height: 1;
+  margin: 12px 0 18px;
+}
+.thank-card p { font-size: 18px; line-height: 1.65; color: #fff4e5; }
+.thank-card-signature { margin-top: 24px; color: #ffb36b; font-weight: 700; }
+.vendor-panel{margin-top:14px;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;background:rgba(255,255,255,.035)}
+.vendor-panel h4{margin:0 0 8px}
+.vendor-panel label{display:block;margin:10px 0 6px;font-weight:700}
+.vendor-panel select{width:100%;border:1px solid rgba(255,255,255,.18);background:#0e0f12;color:#fff;border-radius:12px;padding:10px}
+
+/* Hostile UX/UI overhaul — command-center polish */
+:root {
+  --wp-black: #070707;
+  --wp-ink: #16120d;
+  --wp-muted: #756d64;
+  --wp-line: #e3d8cc;
+  --wp-card: rgba(255,255,255,.9);
+  --wp-cream: #fbf3ea;
+  --wp-orange: #f26a21;
+  --wp-orange-dark: #aa4314;
+  --wp-good: #207348;
+  --wp-warn: #965500;
+  --wp-danger: #9c241b;
+  --wp-shadow: 0 16px 42px rgba(37, 25, 13, 0.10);
+  --wp-tight-shadow: 0 8px 22px rgba(37,25,13,.08);
+}
+body { background: radial-gradient(circle at 15% 0%, rgba(242,106,33,.14), transparent 28%), linear-gradient(180deg, #fffaf3 0%, #f7ecdf 100%); }
+.shell { grid-template-columns: 252px 1fr; }
+.sidebar { padding: 22px 16px; background: linear-gradient(180deg, #070707 0%, #15100d 100%); border-right: 1px solid rgba(242,106,33,.16); overflow-y: auto; }
+.brand { gap: 12px; margin-bottom: 22px; padding: 8px 8px 14px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.brand-logo { width: 44px; height: 44px; border-radius: 12px; background: #fff; object-fit: contain; padding: 5px; }
+.brand-mark { background: #fff; color: #000; }
+.brand-title { font-size: 17px; letter-spacing: -.02em; }
+.brand-sub { color: #b9aa9e; }
+.nav { gap: 5px; }
+.nav button { min-height: 42px; border-radius: 14px; color: #e8dbcf; font-size: 13px; font-weight: 750; }
+.nav button.active, .nav button:hover { background: rgba(242,106,33,.16); box-shadow: inset 3px 0 0 var(--wp-orange); }
+.sidebar-note { background: rgba(255,255,255,.035); }
+.sidebar-note p { margin: 8px 0 0; }
+.main { max-width: 1380px; width: 100%; padding: 26px clamp(16px, 3vw, 34px); }
+.hero-panel { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, .7fr); gap: 18px; align-items: stretch; margin-bottom: 16px; }
+.hero-copy, .status-card { border: 1px solid var(--wp-line); border-radius: 30px; background: rgba(255,255,255,.82); box-shadow: var(--wp-shadow); padding: clamp(22px, 3.8vw, 38px); backdrop-filter: blur(16px); }
+.hero-copy h1 { font-size: clamp(44px, 7vw, 82px); line-height: .92; letter-spacing: -.07em; }
+.hero-subtitle { font-size: clamp(16px, 2vw, 21px); max-width: 780px; }
+.status-card { display: grid; gap: 12px; align-content: start; }
+.status-line { display: grid; grid-template-columns: 120px 1fr; gap: 12px; border-bottom: 1px solid var(--wp-line); padding: 9px 0; font-size: 13px; }
+.status-line span { color: var(--wp-muted); font-weight: 800; }
+.status-line strong { font-weight: 850; color: var(--wp-ink); }
+.status-line strong.good { color: var(--wp-good); }
+.grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.card { border-radius: 22px; box-shadow: var(--wp-tight-shadow); background: var(--wp-card); }
+.metric-card { display: flex; gap: 14px; align-items: center; padding: 18px; }
+.metric-card .metric { min-width: 54px; font-size: 38px; }
+.metric-card p { margin: 3px 0 0; }
+.section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.section-head h2, .section-head h3 { margin: 0; }
+.btn.small { padding: 8px 11px; font-size: 12px; }
+.btn.dark { background: var(--wp-black); color: white; border-color: var(--wp-black); }
+.btn.primary { color: #111; }
+.clean-row { text-align: left; }
+.action-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.quick-action { border: 1px solid var(--wp-line); background: #fff; border-radius: 18px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; text-align: left; color: var(--wp-ink); }
+.quick-action:hover { border-color: rgba(242,106,33,.45); transform: translateY(-1px); }
+.quick-icon { width: 34px; height: 34px; border-radius: 12px; background: #fff0e6; color: var(--wp-orange-dark); display: grid; place-items: center; flex: 0 0 auto; }
+.quick-action small { display: block; color: var(--wp-muted); margin-top: 3px; line-height: 1.35; }
+.panel-button { text-align: left; color: inherit; width: 100%; min-height: 190px; }
+.empty-state { display: grid; place-items: center; text-align: center; gap: 8px; min-height: 92px; color: var(--wp-muted); border: 1px dashed var(--wp-line); border-radius: 18px; padding: 18px; background: rgba(255,255,255,.46); }
+.empty-state p { margin: 0; }
+.truth-strip { margin-top: 18px; display: flex; align-items: center; gap: 10px; color: #613012; background: #fff0e6; border: 1px solid #f2c3a0; border-radius: 18px; padding: 13px 16px; font-weight: 750; }
+.topbar { background: rgba(255,255,255,.58); border: 1px solid var(--wp-line); border-radius: 24px; padding: 20px; box-shadow: var(--wp-tight-shadow); }
+.row { box-shadow: none; }
+.row:hover, .mini-card:hover { border-color: rgba(242,106,33,.42); }
+.mini-card { background: #fff; border: 1px solid var(--wp-line); border-radius: 15px; padding: 11px 12px; color: var(--wp-ink); }
+.form .notice, .notice { box-shadow: none; }
+.table { background: #fff; }
+.table th { background: #fff8ef; }
+.thank-card { background: radial-gradient(circle at 95% 10%, rgba(242,106,33,.18), transparent 32%), linear-gradient(135deg, #070707 0%, #17110c 100%); }
+.thank-card-mark { background: #fff; color: #000; overflow: hidden; }
+.thank-card-mark img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+.vendor-panel { background: #111; color: #fff; }
+.vendor-panel .muted { color: #d7c7ba; }
+@media (max-width: 1100px) { .hero-panel, .grid.cols-4 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 920px) { .shell { grid-template-columns: 1fr; } .sidebar { position: relative; height: auto; } .nav { grid-template-columns: repeat(2,minmax(0,1fr)); } .hero-panel, .grid.cols-4 { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .main { padding: 16px; } .nav, .action-grid { grid-template-columns: 1fr; } .hero-copy h1 { font-size: 46px; } .status-line { grid-template-columns: 1fr; gap: 2px; } }

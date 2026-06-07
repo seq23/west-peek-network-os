@@ -11,7 +11,7 @@ These schemas describe the V1 Google Sheets backing model and the typed domain m
 - ai_suggestions
 - approvals
 - notifications
-- oauth_accounts
+- oauth_tokens
 - settings
 - audit_log
 
@@ -21,9 +21,11 @@ These schemas describe the V1 Google Sheets backing model and the typed domain m
 
 ## intake_queue
 
-`intake_id`, `created_at`, `updated_at`, `source`, `captured_by`, `source_user_email`, `gmail_message_id`, `gmail_thread_id`, `raw_text`, `email_subject`, `email_from`, `email_to`, `email_date`, `parsed_name`, `parsed_email`, `parsed_company`, `parsed_notes`, `ai_summary`, `ai_confidence`, `possible_duplicate_contact_id`, `review_status`, `reviewed_by`, `reviewed_at`, `converted_contact_id`, `attached_contact_id`, `dismiss_reason`.
+`intake_id,created_at,updated_at,source,capture_type,captured_by,source_user_email,source_file_name,source_file_type,gmail_message_id,gmail_thread_id,raw_text,email_subject,email_from,email_to,email_date,parsed_name,parsed_email,parsed_phone,parsed_company,parsed_title,parsed_website,parsed_notes,parsed_owner,parsed_touch,parsed_priority,parsed_due,parsed_needs_touch,extracted_text,transcript_text,missing_fields,ai_summary,ai_confidence,internal_data_trace,human_review_required,execution_allowed,review_status,reviewed_by,reviewed_at,converted_contact_id,attached_contact_id,dismiss_reason,event_id,event_name,event_slug`.
 
-Review statuses: `new`, `ai_reviewed`, `needs_human_review`, `converted`, `attached`, `dismissed`, `needs_more_info`.
+Review statuses: `new`, `ai_reviewed`, `pending_human_review`, `needs_human_review`, `converted`, `attached`, `dismissed`, `needs_more_info`.
+
+Flexible structured intake rule: every field after `#wpnetwork` is optional. The system stores whatever is present, infers name/email from Gmail envelope when available, records `missing_fields`, and can preserve `Owner`, `Touch`, `Priority`, and `Due` as `parsed_owner`, `parsed_touch`, `parsed_priority`, and `parsed_due`. Touch requests create pending relationship touch records only after human review/conversion; nothing sends automatically.
 
 ## interactions
 
@@ -63,7 +65,7 @@ Risk levels: `low`, `medium`, `high`.
 
 Statuses: `unread`, `read`, `dismissed`, `resolved`, `failed`.
 
-## oauth_accounts
+## oauth_tokens
 
 `account_id`, `user_email`, `google_account_email`, `connected_at`, `last_sync_at`, `sync_status`, `scopes`, `token_status`, `last_error`.
 
@@ -80,3 +82,56 @@ Settings include: `GMAIL_TRIGGER_PHRASE`, `ACCEPTED_TRIGGER_ALIASES`, `GOOGLE_SH
 `audit_id`, `created_at`, `actor`, `action`, `entity_type`, `entity_id`, `summary`, `metadata`, `ip_or_session_id`.
 
 Actions include: `login`, `logout`, `gmail_connected`, `gmail_disconnected`, `gmail_sync_started`, `gmail_sync_completed`, `gmail_sync_failed`, `intake_created`, `intake_reviewed`, `contact_created`, `contact_updated`, `contact_merged`, `contact_deleted`, `touch_created`, `touch_updated`, `touch_approved`, `touch_sent`, `approval_created`, `approval_approved`, `approval_rejected`, `notification_sent`, `settings_changed`, `vendor_submission_attempted`, `vendor_submission_completed`, `vendor_submission_failed`.
+
+
+## Added capture fields
+
+`intake_queue` now supports capture/source metadata for business cards, notes screenshots, voice notes, partial Gmail captures, transcripts, extracted text, missing fields, internal data trace, and explicit human-review guardrails.
+
+`relationship_touches` now supports WP virtual thank-you card fields: recipient name/email, card type, card title, draft message, email subject/body, approval_required, execution_allowed, and internal_data_trace.
+
+
+## Events
+
+`events`
+
+- event_id
+- created_at
+- updated_at
+- event_name
+- event_slug
+- event_date
+- location
+- owner_email
+- status: active / closed
+- notes
+- public_form_enabled
+- public_form_url
+
+`event_attendees`
+
+- event_attendee_id
+- event_id
+- event_name
+- event_slug
+- created_at
+- updated_at
+- public_name
+- public_email
+- public_company
+- public_title
+- public_phone
+- public_linkedin
+- public_interest
+- private_context
+- private_voice_transcript
+- ai_summary
+- review_status
+- confidence
+- missing_fields
+- source_type
+- created_by
+- source_intake_id
+- consent_follow_up
+
+Event rows are wrappers over Intake Queue. Public form submissions also append an `intake_queue` row with `source=event_public_form`. Internal event notes append `source=event_private_note`. Event-linked card/screenshot/voice uploads append event-linked intake rows and event_attendees rows.

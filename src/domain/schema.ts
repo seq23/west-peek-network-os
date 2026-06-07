@@ -1,20 +1,20 @@
 import { z } from 'zod';
 
 export const ownerSchema = z.enum(['Sequoia', 'Scooter', 'Unassigned']);
-export const touchMethodSchema = z.enum(['undecided', 'email', 'handwritten_note', 'gift', 'intro', 'call', 'meeting', 'event_invite', 'other']);
+export const touchMethodSchema = z.enum(['undecided', 'email', 'handwritten_note', 'virtual_thank_you_card', 'gift', 'intro', 'call', 'meeting', 'event_invite', 'other']);
 export const touchStatusSchema = z.enum(['needed', 'planned', 'drafted', 'pending_approval', 'approved', 'sent', 'skipped', 'cancelled', 'failed']);
 export const prioritySchema = z.enum(['Low', 'Normal', 'High']);
-export const intakeSourceSchema = z.enum(['gmail_trigger', 'manual_note', 'pasted_notes', 'business_card_later', 'voice_note_later']);
-export const intakeReviewStatusSchema = z.enum(['new', 'ai_reviewed', 'needs_human_review', 'converted', 'attached', 'dismissed', 'needs_more_info']);
+export const intakeSourceSchema = z.enum(['gmail_trigger', 'manual_note', 'pasted_notes', 'business_card', 'notes_screenshot', 'voice_note', 'business_card_later', 'voice_note_later', 'event_public_form', 'event_private_note', 'event_card_upload', 'event_screenshot', 'event_voice_note']);
+export const intakeReviewStatusSchema = z.enum(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'converted', 'attached', 'dismissed', 'needs_more_info']);
 export const approvalStatusSchema = z.enum(['pending', 'approved', 'edited', 'rejected', 'executed', 'failed', 'cancelled']);
 export const approvalRiskSchema = z.enum(['low', 'medium', 'high']);
 export const notificationStatusSchema = z.enum(['unread', 'read', 'dismissed', 'resolved', 'failed']);
 
 export const quickAddSchema = z.object({
-  full_name: z.string().min(1, 'Name is required'),
+  full_name: z.string().optional().or(z.literal('')),
   email: z.string().email().optional().or(z.literal('')),
   company: z.string().optional(),
-  context_summary: z.string().min(1, 'Context is required'),
+  context_summary: z.string().optional(),
   relationship_owner: ownerSchema,
   touch_needed: z.boolean(),
   touch_method: touchMethodSchema,

@@ -17,17 +17,18 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "typescript": "latest",
+    "heic2any": "^0.0.4",
+    "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest",
+    "typescript": "latest",
+    "vite": "latest",
     "zod": "latest"
   },
   "devDependencies": {
+    "@playwright/test": "latest",
     "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "@playwright/test": "latest"
+    "@types/react-dom": "latest"
   },
   "engines": {
     "node": ">=20"

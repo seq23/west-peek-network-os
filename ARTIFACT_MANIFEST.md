@@ -1,44 +1,26 @@
-# Artifact Manifest
+# Artifact Manifest — West Peek Network OS
 
-Repo: west-peek-network-os
-Artifact: full baseline snapshot
-Date: 2026-06-07
+Generated: 2026-06-07
+Artifact: AI / OCR / Audio / Thank-You Capture update
 
-Included:
-- West Peek branded Vite/React app
-- Dashboard, Instructions, Manual Add, Intake, Contacts, Touches, Approvals, Notifications, AI Review, Settings
-- Locked cumulative build spec docs
-- Updated Item #32 encrypted secrets workflow
-- Cloudflare secret push script
-- Google Sheets setup docs with exact tabs/headers
-- Google Sheets runtime persistence helper for Cloudflare Functions
-- Runtime API surfaces for intake, contacts, approvals, notifications, trigger check, health, session
-- Domain workflows for trigger parsing, intake conversion, duplicate detection, touch creation, approval, notification resolution
-- Persistence E2E specs for manual add, intake conversion, reload persistence, duplicate blocking, approval notification resolution
-- Hostile code review notes
+## Included changes
 
-Excluded:
-- node_modules/
-- dist/
-- .git/
-- .env
-- .env.local
-- coverage/
-- playwright-report/
-- test-results/
+- Real Claude relationship assistant route retained and extended.
+- Claude vision extraction for business cards and notes screenshots.
+- Google Speech-to-Text v2 route for direct voice-note transcription.
+- Browser-side iPhone HEIC/HEIF normalization attempt before image upload.
+- Minimal on-the-spot Gmail capture support and partial-contact intake behavior.
+- Expanded Intake Queue schema with capture type, extracted text, transcript, missing fields, and internal data trace.
+- WP-branded Thank-You Card Studio with pending relationship-touch persistence.
+- Guardrails: human_review_required true, execution_allowed false, pending_human_review / pending_approval states.
+- Hostile review documentation for AI/OCR/audio/thank-you changes.
 
-Proof performed before packaging:
-- npm ci
-- npm run build
-- npm run validate:all
-- ZIP integrity/reopen/root checks
+## Validation run
 
-Not proven in this container:
-- Playwright browser E2E, because Chromium browser binary is not installed in the container
-- Google Sheets runtime with real credentials
-- Gmail API runtime
-- Google OAuth runtime
-- Claude API runtime
-- Handwritten/vendor runtime
-- Transactional email runtime
-- Cloudflare deployment
+- npm install --ignore-scripts: passed
+- npm run build: passed
+- npm run validate:all: passed
+
+## Not claimed
+
+Provider runtime calls are not live-proven inside this container. Deployed Google Speech-to-Text, Claude vision, and Claude thank-you generation require configured Cloudflare secrets, provider billing/credits, and live smoke tests.

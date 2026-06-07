@@ -58,6 +58,29 @@ export function requireAuthEnv(env: AuthEnv) {
   if (missing.length) throw new Error(`OAuth runtime is not configured. Missing: ${missing.join(', ')}`);
 }
 
+
+export async function authenticatedUserEmail(request: Request, env: AuthEnv, options: { allowHeaderFallback?: boolean } = {}) {
+  const approvedUsers = allowedEmails(env);
+  const sessionCookie = getCookie(request, 'wpn_session');
+
+  let sessionEmail = '';
+  if (sessionCookie && env.APP_SESSION_SECRET) {
+    const payload = await verifySignedValue(env.APP_SESSION_SECRET, sessionCookie);
+    sessionEmail = typeof payload?.email === 'string' ? payload.email.toLowerCase() : '';
+  }
+
+  const headerEmail = options.allowHeaderFallback ? (request.headers.get('x-west-peek-user-email') || '').toLowerCase() : '';
+  const email = sessionEmail || headerEmail;
+  if (!email || !approvedUsers.includes(email)) return '';
+  return email;
+}
+
+export async function requireAuthenticatedUser(request: Request, env: AuthEnv, options: { allowHeaderFallback?: boolean } = {}) {
+  const email = await authenticatedUserEmail(request, env, options);
+  if (!email) throw new Error('Authentication required. Connect with Google first.');
+  return { email, role: 'Admin' };
+}
+
 export async function createSignedValue(secret: string, payload: Record<string, unknown>) {
   const encodedPayload = base64Url(JSON.stringify(payload));
   const signature = await hmac(secret, encodedPayload);

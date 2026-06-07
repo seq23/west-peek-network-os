@@ -59,6 +59,8 @@ export const initialApprovals: ApprovalRecord[] = [
     created_at: '2026-06-07T10:20:00.000Z',
     updated_at: '2026-06-07T10:20:00.000Z',
     approval_type: 'handwritten_note',
+    source_entity_type: 'relationship_touch',
+    source_entity_id: 'touch_mike_thank_you',
     assigned_to: 'Scooter',
     relationship_owner: 'Scooter',
     status: 'pending',

@@ -1,62 +1,109 @@
-import { ArrowRight, BookOpen, Inbox, Plus, ShieldCheck } from 'lucide-react';
-import type { ApprovalRecord, ContactRecord, IntakeRecord, NotificationRecord, RelationshipTouch } from '../domain/types';
-import { Header } from './App';
+import { AlertCircle, ArrowRight, BookOpen, CalendarDays, CheckCircle2, CreditCard, Inbox, MailCheck, Mic, Plus, RefreshCw, ShieldCheck, Users } from 'lucide-react';
+import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch } from '../domain/types';
 
-type Page = 'dashboard' | 'instructions' | 'add' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
+type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'capture' | 'thankyou' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
 
-export function Dashboard({ data, go }: { data: { contacts: ContactRecord[]; intake: IntakeRecord[]; touches: RelationshipTouch[]; approvals: ApprovalRecord[]; notifications: NotificationRecord[] }; go: (page: Page) => void }) {
+type DashboardData = {
+  contacts: ContactRecord[];
+  intake: IntakeRecord[];
+  touches: RelationshipTouch[];
+  approvals: ApprovalRecord[];
+  notifications: NotificationRecord[];
+  events?: EventRecord[];
+  eventAttendees?: EventAttendeeRecord[];
+};
+
+type RuntimeStatus = {
+  sheetStatus: string;
+  sessionAuthenticated: boolean;
+  sessionEmail?: string;
+  usingLiveSheets: boolean;
+};
+
+const openStatus = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'needs_more_info']);
+const openTouchStatus = new Set(['pending_approval', 'approved_ready_to_send', 'opened_vendor', 'will_do_myself', 'needed', 'planned', 'drafted']);
+
+export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (page: Page) => void; runtime: RuntimeStatus }) {
+  const openIntake = data.intake.filter((item) => openStatus.has(item.review_status));
+  const openTouches = data.touches.filter((item) => openTouchStatus.has(item.status));
+  const pendingApprovals = data.approvals.filter((item) => item.status === 'pending');
+  const activeEvents = (data.events || []).filter((event) => event.status === 'active');
+  const missingInfo = data.intake.filter((item) => item.missing_fields || item.review_status === 'needs_more_info');
+  const nextWork = [
+    ...openIntake.slice(0, 3).map((item) => ({ label: item.parsed_name || item.parsed_email || item.event_name || 'Unreviewed intake', detail: item.parsed_company || item.source || 'Pending human review', page: 'intake' as Page })),
+    ...openTouches.slice(0, 2).map((item) => ({ label: item.recipient_name || item.contact_email || item.reason, detail: `${item.method} • ${item.status}`, page: 'touches' as Page })),
+    ...pendingApprovals.slice(0, 2).map((item) => ({ label: item.approval_type || 'Approval needed', detail: item.risk_level, page: 'approvals' as Page }))
+  ].slice(0, 6);
+
   return <>
-    <div className="topbar">
-      <div>
+    <section className="hero-panel">
+      <div className="hero-copy">
         <div className="eyebrow">West Peek internal</div>
-        <h1>West Peek Network OS</h1>
-        <h2 className="subtitle-heading">Relationship memory without CRM sludge.</h2>
-        <p className="subtitle">Add people to the West Peek Network manually, from Gmail, or while emailing them in the moment. Intake comes first, AI prepares, humans approve.</p>
-      </div>
-      <div className="actions">
-        <button className="btn primary" onClick={() => go('add')}><Plus size={17} /> Add to West Peek Network</button>
-        <button className="btn" onClick={() => go('intake')}><Inbox size={17} /> Review Intake Queue</button>
-        <button className="btn" onClick={() => go('instructions')}><BookOpen size={17} /> How to Add People</button>
-      </div>
-    </div>
-    <div className="grid cols-3">
-      <Metric label="People in Network" value={data.contacts.length} />
-      <Metric label="Intake waiting" value={data.intake.filter((i) => !['converted', 'attached', 'dismissed'].includes(i.review_status)).length} />
-      <Metric label="Approvals needed" value={data.approvals.filter((a) => a.status === 'pending').length} />
-    </div>
-    <div className="grid cols-2" style={{ marginTop: 16 }}>
-      <div className="card">
-        <div className="kicker">Quick actions</div>
-        <div className="list">
-          <Action title="Add to West Peek Network" body="Manual quick add for a person you met or already know." onClick={() => go('add')} />
-          <Action title="Review Intake Queue" body="Convert #wpnetwork captures into clean relationship records." onClick={() => go('intake')} />
-          <Action title="Approvals Needed" body="Review relationship-sensitive actions before execution." onClick={() => go('approvals')} />
-          <Action title="How to Add People" body="Copyable examples for Gmail, live-event capture, and manual add." onClick={() => go('instructions')} />
+        <h1>Network OS</h1>
+        <p className="subtitle hero-subtitle">Capture the person now. Add context later. Nothing becomes final until a human reviews it.</p>
+        <div className="actions">
+          <button className="btn primary" onClick={() => go('events')}><CalendarDays size={17} /> Create event form</button>
+          <button className="btn dark" onClick={() => go('add')}><Plus size={17} /> Add person</button>
+          <button className="btn" onClick={() => go('capture')}><CreditCard size={17} /> Card / voice capture</button>
         </div>
       </div>
-      <div className="card">
-        <div className="kicker">Operating law</div>
-        <h2>AI prepares. Human approves. System executes.</h2>
-        <p className="muted">Network OS keeps the warmth in the relationship and the discipline in the follow-through.</p>
-        <div className="notice"><ShieldCheck size={16} /> Gmail triggers create Intake Queue items. They do not automatically create final West Peek Network records.</div>
+      <div className="status-card">
+        <div className="kicker">Live system status</div>
+        <StatusLine label="Google OAuth" value={runtime.sessionAuthenticated ? `Connected: ${runtime.sessionEmail}` : 'Not connected in this browser'} good={runtime.sessionAuthenticated} />
+        <StatusLine label="Google Sheets" value={runtime.usingLiveSheets ? 'Live snapshot loaded' : runtime.sheetStatus} good={runtime.usingLiveSheets} />
+        <StatusLine label="Claude / Vision" value="Configured route available; run provider smoke test before claiming live OCR." />
+        <StatusLine label="Speech-to-Text" value="Configured route available; real audio test required." />
+        <button className="btn small" onClick={() => go('settings')}><RefreshCw size={15} /> Open settings</button>
       </div>
-    </div>
-    <div className="grid cols-2" style={{ marginTop: 16 }}>
-      <Panel title="AI Suggestions Ready for Review" rows={['Suggested touch drafts, duplicate candidates, and context summaries wait for human approval.']} />
-      <Panel title="Gmail Sync Status" rows={['Provider-gated: connect Google OAuth + Gmail API before production sync.']} />
-      <Panel title="Touches Due This Week" rows={data.touches.map((t) => `${t.owner}: ${t.reason} (${t.method})`)} />
-      <Panel title="Notifications" rows={data.notifications.map((n) => `${n.priority}: ${n.subject}`)} />
-    </div>
-    <div className="footer-status">Baseline proof label: STRUCTURALLY CHECKED target. External providers require configured secrets.</div>
+    </section>
+
+    <section className="grid cols-4 compact-metrics">
+      <Metric label="People" value={data.contacts.length} helper="Final network records" />
+      <Metric label="Open intake" value={openIntake.length} helper="Needs review" />
+      <Metric label="Touchpoints" value={openTouches.length} helper="Open follow-up" />
+      <Metric label="Active events" value={activeEvents.length} helper="Form links live" />
+    </section>
+
+    <section className="grid cols-2" style={{ marginTop: 16 }}>
+      <div className="card work-card">
+        <div className="section-head"><div><div className="kicker">Operator queue</div><h2>Next work</h2></div><button className="btn small" onClick={() => go('intake')}>Review all</button></div>
+        {nextWork.length ? <div className="list">{nextWork.map((item, index) => <button className="row clean-row" key={`${item.label}-${index}`} onClick={() => go(item.page)}><span><strong>{item.label}</strong><br /><span className="muted">{item.detail}</span></span><ArrowRight size={18} /></button>)}</div> : <EmptyState title="Nothing waiting" body="No pending intake, touches, or approvals in the current snapshot." />}
+      </div>
+
+      <div className="card action-grid-card">
+        <div className="kicker">Capture routes</div>
+        <h2>Choose the fastest path</h2>
+        <div className="action-grid">
+          <Action icon={<CalendarDays size={18} />} title="Event link" body="Let people fill out their own details." onClick={() => go('events')} />
+          <Action icon={<Inbox size={18} />} title="#wpnetwork" body="Use any messy email/note with the trigger." onClick={() => go('instructions')} />
+          <Action icon={<Mic size={18} />} title="Voice note" body="Upload audio and turn it into intake." onClick={() => go('capture')} />
+          <Action icon={<MailCheck size={18} />} title="Thank-you" body="Draft a card or touchpoint." onClick={() => go('thankyou')} />
+        </div>
+      </div>
+    </section>
+
+    <section className="grid cols-3" style={{ marginTop: 16 }}>
+      <Panel title="Active events" empty="No active events yet." rows={activeEvents.map((event) => `${event.event_name}${event.location ? ` • ${event.location}` : ''}`)} onClick={() => go('events')} />
+      <Panel title="Missing info" empty="No missing-field items in this snapshot." rows={missingInfo.slice(0, 6).map((item) => `${item.parsed_name || item.parsed_email || item.source}: ${item.missing_fields || 'needs more info'}`)} onClick={() => go('intake')} />
+      <Panel title="Notifications" empty="No unread notifications." rows={data.notifications.filter((n) => n.status === 'unread').slice(0, 6).map((n) => `${n.priority}: ${n.subject}`)} onClick={() => go('notifications')} />
+    </section>
+
+    <div className="truth-strip"><ShieldCheck size={16} /> Intake first. Review before final contact. No automatic emails, cards, vendor orders, payments, or AI execution.</div>
   </>;
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
-  return <div className="card"><div className="metric">{value}</div><div className="muted">{label}</div></div>;
+function StatusLine({ label, value, good = false }: { label: string; value: string; good?: boolean }) {
+  return <div className="status-line"><span>{label}</span><strong className={good ? 'good' : ''}>{value}</strong></div>;
 }
-function Action({ title, body, onClick }: { title: string; body: string; onClick: () => void }) {
-  return <button className="row" onClick={onClick}><span><strong>{title}</strong><br /><span className="muted">{body}</span></span><ArrowRight size={18} /></button>;
+function Metric({ label, value, helper }: { label: string; value: number; helper: string }) {
+  return <div className="card metric-card"><div className="metric">{value}</div><div><strong>{label}</strong><p className="muted">{helper}</p></div></div>;
 }
-function Panel({ title, rows }: { title: string; rows: string[] }) {
-  return <div className="card"><h3>{title}</h3><div className="list">{rows.map((row) => <div className="row" key={row}>{row}</div>)}</div></div>;
+function Action({ icon, title, body, onClick }: { icon: React.ReactNode; title: string; body: string; onClick: () => void }) {
+  return <button className="quick-action" onClick={onClick}><span className="quick-icon">{icon}</span><span><strong>{title}</strong><small>{body}</small></span></button>;
+}
+function Panel({ title, rows, empty, onClick }: { title: string; rows: string[]; empty: string; onClick: () => void }) {
+  return <button className="card panel-button" onClick={onClick}><div className="section-head"><h3>{title}</h3><ArrowRight size={17} /></div>{rows.length ? <div className="list compact-list">{rows.map((row) => <div className="mini-card" key={row}>{row}</div>)}</div> : <EmptyState title={empty} />}</button>;
+}
+function EmptyState({ title, body }: { title: string; body?: string }) {
+  return <div className="empty-state"><AlertCircle size={18} /><strong>{title}</strong>{body && <p>{body}</p>}</div>;
 }

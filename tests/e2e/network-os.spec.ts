@@ -37,17 +37,18 @@ test('surface: all major views are reachable', async ({ page }) => {
   }
 });
 
-test('instructions: canonical triggers and in-the-moment capture examples are present', async ({ page }) => {
+test('instructions: canonical triggers and capture route examples are present', async ({ page }) => {
   await page.getByRole('button', { name: /^How to Add People$/i }).first().click();
 
   await expect(page.getByText('#wpnetwork').first()).toBeVisible();
   await expect(page.getByText('#addtowestpeek')).toBeVisible();
   await expect(page.getByText('#westpeeknetwork')).toBeVisible();
 
-  await expect(page.getByText(/Add someone while emailing them/i)).toBeVisible();
-  await expect(page.getByText(/Clean external email \+ internal capture note/i)).toBeVisible();
-  await expect(page.getByText(/Live email with touch cue/i)).toBeVisible();
-  await expect(page.getByText(/Using the trigger creates an Intake Queue item/i)).toBeVisible();
+  await expect(page.getByText(/Reply in the existing email thread/i)).toBeVisible();
+  await expect(page.getByText(/Forward an email to yourself/i)).toBeVisible();
+  await expect(page.getByText(/Send yourself a standalone note/i)).toBeVisible();
+  await expect(page.getByText(/Live visible trigger/i)).toBeVisible();
+  await expect(page.getByText(/Fast.*Minimal/i)).toBeVisible();
 });
 
 test('transaction+persistence: manual add persists after reload and duplicate email is blocked', async ({ page }) => {
@@ -222,9 +223,11 @@ test('transaction+persistence: notification can be marked read and survives relo
   await expect(page.getByText(/read/i).first()).toBeVisible();
 });
 
-test('surface: AI Review and Settings communicate unproven/provider-gated layers', async ({ page }) => {
+test('surface: AI Review and Settings communicate authenticated provider-gated layers', async ({ page }) => {
   await page.getByRole('button', { name: /^AI Review$/i }).click();
   await expect(page.getByText(/AI Suggestions/i)).toBeVisible();
+  await expect(page.getByText(/Requires Google session/i)).toBeVisible();
+  await expect(page.getByText(/Anthropic API credit/i)).toBeVisible();
 
   await page.getByRole('button', { name: /^Settings$/i }).click();
   await expect(page.getByRole('heading', { name: /^Google Sheets$/i })).toBeVisible();

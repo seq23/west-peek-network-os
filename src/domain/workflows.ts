@@ -77,6 +77,7 @@ export function buildIntakeFromCapture(rawText: string, capturedBy: string): Int
     raw_text: rawText,
     parsed_name: parsed.name,
     parsed_company: parsed.company,
+    parsed_email: extractEmail(rawText),
     parsed_notes: parsed.context,
     ai_summary: parsed.context || 'Captured for West Peek Network review.',
     ai_confidence: parsed.name || parsed.context ? 'medium' : 'low',
@@ -138,12 +139,12 @@ export function createTouchForContact(contact: ContactRecord, method: TouchMetho
 
 export function createApprovalForTouch(touch: RelationshipTouch, contact: ContactRecord): ApprovalRecord {
   const now = new Date().toISOString();
-  const highRiskMethods = new Set<TouchMethod>(['gift', 'handwritten_note']);
+  const highRiskMethods = new Set<TouchMethod>(['gift', 'handwritten_note', 'virtual_thank_you_card']);
   return {
     approval_id: createStableId('approval'),
     created_at: now,
     updated_at: now,
-    approval_type: touch.method === 'gift' ? 'gift' : touch.method === 'handwritten_note' ? 'handwritten_note' : 'relationship_touch',
+    approval_type: touch.method === 'gift' ? 'gift' : touch.method === 'handwritten_note' ? 'handwritten_note' : touch.method === 'virtual_thank_you_card' ? 'virtual_thank_you_card' : 'relationship_touch',
     source_entity_type: 'relationship_touch',
     source_entity_id: touch.touch_id,
     requested_by: contact.created_by,
@@ -220,6 +221,8 @@ function inferPriority(text: string): Priority {
 
 function inferTouch(text: string): TouchMethod {
   const lower = text.toLowerCase();
+  if (lower.includes('virtual thank')) return 'virtual_thank_you_card';
+  if (lower.includes('thank') && lower.includes('card')) return 'virtual_thank_you_card';
   if (lower.includes('handwritten')) return 'handwritten_note';
   if (lower.includes('gift')) return 'gift';
   if (lower.includes('intro')) return 'intro';
@@ -232,4 +235,8 @@ function inferTouch(text: string): TouchMethod {
 
 function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function extractEmail(text: string): string | undefined {
+  return text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
 }
