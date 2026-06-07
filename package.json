@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "West Peek Network OS — private internal relationship intelligence app for adding people to the West Peek Network.",
+  "description": "West Peek Network OS \u2014 private internal relationship intelligence app for adding people to the West Peek Network.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -13,7 +13,8 @@
     "validate:secrets": "node scripts/check-no-plaintext-secrets.mjs",
     "validate:all": "npm run validate:structure && npm run validate:secrets && npm run test:domain",
     "test:e2e": "playwright test",
-    "test:domain": "node tests/domain/workflows.mjs"
+    "test:domain": "node tests/domain/workflows.mjs",
+    "sheets:maintain": "node scripts/sheets/maintain-google-sheet.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
