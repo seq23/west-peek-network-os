@@ -7,7 +7,10 @@ REQUIRED_KEYS=(
   ADMIN_EMAIL_ALLOWLIST
   GOOGLE_CLIENT_ID
   GOOGLE_CLIENT_SECRET
+  GOOGLE_REDIRECT_URI
   GOOGLE_SHEET_ID
+  GOOGLE_SERVICE_ACCOUNT_EMAIL
+  GOOGLE_PRIVATE_KEY
   GMAIL_TRIGGER_PHRASE
   ACCEPTED_TRIGGER_ALIASES
   TOKEN_ENCRYPTION_SECRET
@@ -25,10 +28,17 @@ for key in "${REQUIRED_KEYS[@]}"; do
     echo "Missing required key: $key" >&2
     missing=1
   else
-    echo "Present: $key"
+    value="$(grep -E "^${key}=" "$ENV_FILE" | head -n 1 | cut -d= -f2-)"
+    lower_value="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+    if [[ "$lower_value" == *"replace-with"* || "$lower_value" == *"change-me"* || "$lower_value" == *"local-only"* || "$lower_value" == *"example"* ]]; then
+      echo "Placeholder value must be replaced: $key" >&2
+      missing=1
+    else
+      echo "Present: $key"
+    fi
   fi
 done
 if [[ "$missing" -ne 0 ]]; then
   exit 1
 fi
-echo "Secret key presence check passed. Values were not printed."
+echo "Secret key presence and placeholder check passed. Values were not printed."
