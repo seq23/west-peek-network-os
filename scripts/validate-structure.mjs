@@ -7,7 +7,7 @@ const required = [
   'ENVIRONMENT_VARIABLES.md', '.env.example', '.env.local.example', 'wrangler.toml', 'src/main.tsx',
   'src/ui/App.tsx', 'src/ui/Instructions.tsx', 'src/ui/AddPerson.tsx', 'docs/instructions-page-content.md', 'docs/cumulative-build-spec.md', 'docs/data-schemas.md', 'docs/provider-contracts.md',
   'docs/secrets-and-cloudflare.md', 'docs/playwright-local-testing.md', 'scripts/secrets/decrypt-local-env.sh', 'scripts/secrets/check-secrets.sh',
-  'scripts/secrets/push-cloudflare-secrets.sh', 'secrets/network-os.local.env.gpg', 'src/domain/workflows.ts', 'tests/domain/workflows.mjs', 'functions/api/health.ts', 'functions/api/session.ts', 'functions/api/intake/create.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/triggers/check.ts', 'functions/_shared/sheets.ts'
+  'scripts/secrets/push-cloudflare-secrets.sh', 'secrets/network-os.local.env.gpg', 'src/domain/workflows.ts', 'tests/domain/workflows.mjs', 'functions/api/health.ts', 'functions/api/session.ts', 'functions/auth/google.ts', 'functions/auth/callback/google.ts', 'functions/_shared/auth.ts', 'functions/_shared/tokens.ts', 'functions/api/intake/create.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/triggers/check.ts', 'functions/_shared/sheets.ts'
 ];
 const missing = required.filter((file) => !fs.existsSync(path.join(root, file)));
 if (missing.length) {
@@ -23,8 +23,16 @@ if (missingFragments.length) {
   process.exit(1);
 }
 const cumulative = fs.readFileSync(path.join(root, 'docs/cumulative-build-spec.md'), 'utf8');
-const requiredRuntimeFragments = ['convertIntake', 'approve(', 'markNotificationRead', 'attachIntakeToExisting', 'addIntakeFromRaw', 'findDuplicateContact', 'createNotificationForApproval'];
-const appRuntime = fs.readFileSync(path.join(root, 'src/ui/App.tsx'), 'utf8') + fs.readFileSync(path.join(root, 'src/domain/workflows.ts'), 'utf8');
+const requiredRuntimeFragments = ['convertIntake', 'approve(', 'markNotificationRead', 'attachIntakeToExisting', 'addIntakeFromRaw', 'findDuplicateContact', 'createNotificationForApproval', 'wpn_session', 'oauth_tokens'];
+const appRuntime = [
+  'src/ui/App.tsx',
+  'src/domain/workflows.ts',
+  'functions/api/session.ts',
+  'functions/auth/google.ts',
+  'functions/auth/callback/google.ts',
+  'functions/_shared/auth.ts',
+  'functions/_shared/sheets.ts'
+].map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
 const missingRuntime = requiredRuntimeFragments.filter((fragment) => !appRuntime.includes(fragment));
 if (missingRuntime.length) {
   console.error('Runtime workflow fragments missing:', missingRuntime);

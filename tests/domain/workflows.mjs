@@ -5,6 +5,7 @@ const workflowSource = readFileSync('src/domain/workflows.ts', 'utf8');
 const triggerSource = readFileSync('src/domain/triggers.ts', 'utf8');
 const appSource = readFileSync('src/ui/App.tsx', 'utf8');
 const instructionsSource = readFileSync('src/ui/Instructions.tsx', 'utf8');
+const authSource = readFileSync('functions/_shared/auth.ts', 'utf8') + readFileSync('functions/auth/google.ts', 'utf8') + readFileSync('functions/auth/callback/google.ts', 'utf8') + readFileSync('functions/api/session.ts', 'utf8');
 
 assert.match(triggerSource, /CANONICAL_GMAIL_TRIGGER = '#wpnetwork'/);
 assert.match(triggerSource, /#addtowestpeek/);
@@ -49,6 +50,10 @@ for (const fragment of [
 const functionsSource = readFileSync('functions/api/intake/create.ts', 'utf8') + readFileSync('functions/api/contacts/create.ts', 'utf8') + readFileSync('functions/_shared/sheets.ts', 'utf8');
 for (const fragment of ['appendRecord', 'readTab', "persistence: \'google_sheets\'", 'GOOGLE_PRIVATE_KEY']) {
   assert.ok(functionsSource.includes(fragment), `runtime persistence missing ${fragment}`);
+}
+
+for (const fragment of ['/o/oauth2/v2/auth', 'oauth_tokens', 'gmail.readonly', 'wpn_session', 'ADMIN_EMAIL_ALLOWLIST']) {
+  assert.ok(authSource.includes(fragment), `oauth runtime missing ${fragment}`);
 }
 const e2eSource = readFileSync('tests/e2e/network-os.spec.ts', 'utf8');
 for (const fragment of [

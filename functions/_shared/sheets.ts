@@ -10,10 +10,11 @@ export const TAB_HEADERS = {
   intake_queue: ['intake_id', 'created_at', 'updated_at', 'source', 'captured_by', 'source_user_email', 'raw_text', 'parsed_name', 'parsed_company', 'parsed_notes', 'ai_summary', 'ai_confidence', 'review_status'],
   contacts: ['contact_id', 'created_at', 'updated_at', 'status', 'full_name', 'email', 'company', 'relationship_owner', 'priority', 'tags', 'context_summary', 'touch_needed', 'touch_status', 'created_by', 'updated_by'],
   approvals: ['approval_id', 'created_at', 'updated_at', 'approval_type', 'source_entity_type', 'source_entity_id', 'requested_by', 'assigned_to', 'relationship_owner', 'status', 'risk_level', 'suggested_payload', 'approved_by', 'approved_at', 'rejected_by', 'rejected_at'],
-  notifications: ['notification_id', 'created_at', 'updated_at', 'recipient_email', 'notification_type', 'channel', 'subject', 'body_preview', 'entity_type', 'entity_id', 'priority', 'status', 'sent_at', 'read_at', 'resolved_at', 'failure_reason']
+  notifications: ['notification_id', 'created_at', 'updated_at', 'recipient_email', 'notification_type', 'channel', 'subject', 'body_preview', 'entity_type', 'entity_id', 'priority', 'status', 'sent_at', 'read_at', 'resolved_at', 'failure_reason'],
+  oauth_tokens: ['token_id', 'created_at', 'updated_at', 'provider', 'user_email', 'scope', 'token_type', 'expires_in', 'encrypted_payload', 'encryption_iv', 'encryption_algorithm', 'status']
 } as const;
 
-type SheetTab = keyof typeof TAB_HEADERS;
+export type SheetTab = keyof typeof TAB_HEADERS;
 
 export function assertSheetsConfigured(env: RuntimeEnv) {
   const missing = ['GOOGLE_SHEET_ID', 'GOOGLE_SERVICE_ACCOUNT_EMAIL', 'GOOGLE_PRIVATE_KEY'].filter((key) => !env[key as keyof RuntimeEnv]);
