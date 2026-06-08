@@ -78,12 +78,10 @@ export async function onRequestGet({ request, env }: Context) {
     authenticated_at: Date.now()
   });
 
-  return redirect('/?connected=google', {
-    'set-cookie': [
-      clearCookieHeader('wpn_oauth_state'),
-      cookieHeader('wpn_session', session, 60 * 60 * 24 * 7)
-    ].join(', ')
-  });
+  const headers = new Headers({ location: '/?connected=google' });
+  headers.append('set-cookie', clearCookieHeader('wpn_oauth_state'));
+  headers.append('set-cookie', cookieHeader('wpn_session', session, 60 * 60 * 24 * 7));
+  return new Response(null, { status: 302, headers });
 }
 
 async function exchangeCodeForToken(env: Env, code: string): Promise<GoogleTokenPayload> {
