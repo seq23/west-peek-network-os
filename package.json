@@ -11,10 +11,13 @@
     "typecheck": "tsc --noEmit",
     "validate:structure": "node scripts/validate-structure.mjs",
     "validate:secrets": "node scripts/check-no-plaintext-secrets.mjs",
-    "validate:all": "npm run validate:structure && npm run validate:secrets && npm run test:domain",
+    "validate:all": "npm run validate:structure && npm run validate:secrets && npm run test:domain && npm run validate:playwright:maxdepth",
     "test:e2e": "playwright test",
     "test:domain": "node tests/domain/workflows.mjs",
-    "sheets:maintain": "node scripts/sheets/maintain-google-sheet.mjs"
+    "sheets:maintain": "node scripts/sheets/maintain-google-sheet.mjs",
+    "test:e2e:maxdepth": "playwright test tests/e2e/network-os.spec.ts --trace on --workers=1",
+    "test:e2e:live": "playwright test tests/e2e/network-os.live.spec.ts --trace on --workers=1",
+    "validate:playwright:maxdepth": "node scripts/validate-playwright-max-depth.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

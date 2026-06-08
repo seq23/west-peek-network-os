@@ -19,7 +19,8 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
 
   async function createEvent(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     setStatus('Creating event...');
     try {
       const payload = await createSheetEvent({
@@ -32,7 +33,7 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
       });
       setSelectedId(payload.event.event_id);
       setStatus(`Created ${payload.event.event_name}. Public form: ${absoluteEventLink(payload.event)}`);
-      event.currentTarget.reset();
+      formElement.reset();
       onSaved?.('Event created in Google Sheets.');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not create event.');
@@ -42,7 +43,8 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
   async function addPrivateContext(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selected) return;
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     setStatus('Adding private event context...');
     try {
       await createSheetEventContext({
@@ -55,7 +57,7 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
         source_type: 'event_private_note'
       });
       setStatus('Private context added to the event and Intake Queue.');
-      event.currentTarget.reset();
+      formElement.reset();
       onSaved?.('Event context saved to Google Sheets.');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not add private event context.');

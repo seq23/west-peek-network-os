@@ -100,7 +100,31 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       summary: summarize(report)
     });
   } catch (error) {
-    return json({ ok: false, error: error instanceof Error ? error.message : 'Sheet maintenance failed.' }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+
+    const isAuthFailure =
+      /auth|session|unauthorized|forbidden|allowlist|cookie/i.test(message);
+
+    const isQuotaFailure =
+      /quota|rate.?limit|RESOURCE_EXHAUSTED|ReadRequestsPerMinutePerUser/i.test(message);
+
+    return json(
+      {
+        ok: false,
+        error: isAuthFailure
+          ? 'Authentication required.'
+          : isQuotaFailure
+            ? 'Google Sheets is temporarily rate-limited. Wait briefly and retry.'
+            : 'Sheet maintenance temporarily unavailable.',
+        retry_after_seconds: isQuotaFailure ? 75 : undefined
+      },
+      {
+        status: isAuthFailure ? 401 : isQuotaFailure ? 429 : 503,
+        headers: {
+          'cache-control': 'no-store'
+        }
+      }
+    );
   }
 };
 

@@ -3,23 +3,22 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 30_000,
-  retries: 0,
-  workers: 1,
+  expect: { timeout: 7_500 },
+  fullyParallel: false,
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://127.0.0.1:5173',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173',
     trace: 'on',
-    video: 'on',
-    screenshot: 'on',
-    actionTimeout: 10_000,
-    navigationTimeout: 15_000
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure'
   },
-  webServer: {
-    command: 'npm run dev -- --host 127.0.0.1',
-    url: 'http://127.0.0.1:5173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000
-  },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } }
-  ]
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: 'npm run dev -- --host 127.0.0.1',
+        url: 'http://127.0.0.1:5173',
+        reuseExistingServer: true,
+        timeout: 120_000
+      }
 });
