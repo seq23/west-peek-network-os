@@ -14,8 +14,8 @@ The server-side Gmail intake route accepted `Name`, `Company`, and `Context`, bu
 
 ```text
 #wpnetwork
-Name: Mike MacCombie
-Company: MacCombie Group
+Name: Jordan Miles
+Company: Apex Family Office
 Context: Helped us with an intro.
 Owner: Scooter
 Touch: Handwritten note

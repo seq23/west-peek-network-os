@@ -1,5 +1,5 @@
 import { appendRecord, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
-import { badRequest, clearCookieHeader, cookieHeader, getCookie, isAllowedEmail, redirect, requireAuthEnv, verifySignedValue, createSignedValue, type AuthEnv } from '../../_shared/auth';
+import { badRequest, cookieHeader, getCookie, isAllowedEmail, requireAuthEnv, verifySignedValue, createSignedValue, type AuthEnv } from '../../_shared/auth';
 import { encryptTokenPayload } from '../../_shared/tokens';
 
 type Env = RuntimeEnv & AuthEnv;
@@ -78,10 +78,21 @@ export async function onRequestGet({ request, env }: Context) {
     authenticated_at: Date.now()
   });
 
-  const headers = new Headers({ location: '/?connected=google' });
-  headers.append('set-cookie', clearCookieHeader('wpn_oauth_state'));
-  headers.append('set-cookie', cookieHeader('wpn_session', session, 60 * 60 * 24 * 7));
-  return new Response(null, { status: 302, headers });
+  const next = typeof verifiedState.next === 'string' && verifiedState.next.startsWith('/') ? verifiedState.next : '/';
+  const redirectUrl = new URL(next, url.origin);
+  redirectUrl.searchParams.set('connected', 'google');
+
+  // Cloudflare Pages/Fetch can preserve a single Set-Cookie header more reliably than
+  // multiple OAuth callback cookies. Do not clear the short-lived state cookie here;
+  // it expires on its own. The session cookie is the required production auth artifact.
+  return new Response(null, {
+    status: 302,
+    headers: {
+      location: `${redirectUrl.pathname}${redirectUrl.search}`,
+      'set-cookie': cookieHeader('wpn_session', session, 60 * 60 * 24 * 7),
+      'cache-control': 'no-store'
+    }
+  });
 }
 
 async function exchangeCodeForToken(env: Env, code: string): Promise<GoogleTokenPayload> {

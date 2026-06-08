@@ -39,8 +39,7 @@ for (const fragment of [
   'Capture to Intake Queue',
   'Added to Google Sheets',
   'Open live spreadsheet',
-  'Seed Mike demo record to Google Sheets',
-  'EventsPage',
+    'EventsPage',
   'public form link',
   'updateSheetTouchFulfillment',
   'Handwrytten',
@@ -65,14 +64,37 @@ for (const fragment of [
 assert.ok(instructionsSource.includes('Touch: Handwritten note'), 'instructions must show handwritten note structured example');
 assert.ok(instructionsSource.includes('Any field can be missing'), 'instructions must state structured fields are nonblocking');
 
-const functionsSource = readFileSync('functions/api/admin/seed-mike.ts', 'utf8') + readFileSync('functions/api/sheets/snapshot.ts', 'utf8') + readFileSync('functions/api/intake/review.ts', 'utf8') + readFileSync('functions/api/intake/create.ts', 'utf8') + readFileSync('functions/api/intake/media/create.ts', 'utf8') + readFileSync('functions/api/contacts/create.ts', 'utf8') + readFileSync('functions/api/ai/suggestions/create.ts', 'utf8') + readFileSync('functions/api/touches/thank-you/create.ts', 'utf8') + readFileSync('functions/api/touches/fulfillment/update.ts', 'utf8') + readFileSync('functions/api/events/create.ts', 'utf8') + readFileSync('functions/api/events/context/create.ts', 'utf8') + readFileSync('functions/e/[slug].ts', 'utf8') + readFileSync('functions/_shared/anthropic.ts', 'utf8') + readFileSync('functions/_shared/googleSpeech.ts', 'utf8') + readFileSync('functions/_shared/media.ts', 'utf8') + readFileSync('functions/_shared/sheets.ts', 'utf8') + readFileSync('src/domain/handwrittenVendors.ts', 'utf8') + readFileSync('src/ui/App.tsx', 'utf8');
-for (const fragment of ['appendRecord', 'readTab', "persistence: \'google_sheets\'", 'GOOGLE_PRIVATE_KEY', 'ai_suggestions', '/v1/messages', 'execution_allowed: false', 'requireAuthenticatedUser', 'MAX_RAW_TEXT_CHARS', 'internal_data_trace', 'google_speech_to_text', 'extractIntakeFromImage', 'virtual_thank_you_card', 'relationship_touches', 'seed_mike_fixture', 'latestById', 'converted_contact_id', 'event_attendees', 'event_public_form', 'public_form_enabled', 'pending_human_review', 'parsed_owner', 'parsed_touch', 'parsed_priority', 'parsed_due', 'parsed_needs_touch', 'structured_intake_touch', 'fulfillment_status', 'opened_vendor', 'will_do_myself', 'sent_externally']) {
+const functionsSource = readFileSync('functions/api/sheets/snapshot.ts', 'utf8') + readFileSync('functions/api/intake/review.ts', 'utf8') + readFileSync('functions/api/intake/create.ts', 'utf8') + readFileSync('functions/api/intake/media/create.ts', 'utf8') + readFileSync('functions/api/contacts/create.ts', 'utf8') + readFileSync('functions/api/ai/suggestions/create.ts', 'utf8') + readFileSync('functions/api/touches/thank-you/create.ts', 'utf8') + readFileSync('functions/api/touches/fulfillment/update.ts', 'utf8') + readFileSync('functions/api/events/create.ts', 'utf8') + readFileSync('functions/api/events/context/create.ts', 'utf8') + readFileSync('functions/e/[slug].ts', 'utf8') + readFileSync('functions/_shared/anthropic.ts', 'utf8') + readFileSync('functions/_shared/googleSpeech.ts', 'utf8') + readFileSync('functions/_shared/media.ts', 'utf8') + readFileSync('functions/_shared/sheets.ts', 'utf8') + readFileSync('src/domain/handwrittenVendors.ts', 'utf8') + readFileSync('src/ui/App.tsx', 'utf8');
+for (const fragment of ['appendRecord', 'readTab', "persistence: \'google_sheets\'", 'GOOGLE_PRIVATE_KEY', 'ai_suggestions', '/v1/messages', 'execution_allowed: false', 'requireAuthenticatedUser', 'MAX_RAW_TEXT_CHARS', 'internal_data_trace', 'google_speech_to_text', 'extractIntakeFromImage', 'virtual_thank_you_card', 'relationship_touches', 'latestById', 'converted_contact_id', 'event_attendees', 'event_public_form', 'public_form_enabled', 'pending_human_review', 'parsed_owner', 'parsed_touch', 'parsed_priority', 'parsed_due', 'parsed_needs_touch', 'structured_intake_touch', 'fulfillment_status', 'opened_vendor', 'will_do_myself', 'sent_externally']) {
   assert.ok(functionsSource.includes(fragment), `runtime persistence missing ${fragment}`);
 }
 
 for (const fragment of ['/o/oauth2/v2/auth', 'oauth_tokens', 'gmail.readonly', 'wpn_session', 'ADMIN_EMAIL_ALLOWLIST']) {
   assert.ok(authSource.includes(fragment), `oauth runtime missing ${fragment}`);
 }
+
+
+const callbackSource = readFileSync('functions/auth/callback/google.ts', 'utf8');
+const sheetsClientSource = readFileSync('src/services/sheetsClient.ts', 'utf8');
+const setCookieCount = (callbackSource.match(/'set-cookie'/g) || []).length + (callbackSource.match(/"set-cookie"/g) || []).length;
+assert.equal(setCookieCount, 1, 'OAuth callback must emit one production session Set-Cookie header only; multiple callback cookies caused browser session loss on Cloudflare Pages.');
+assert.ok(callbackSource.includes("cookieHeader('wpn_session'"), 'OAuth callback must set the signed browser session cookie.');
+assert.ok(callbackSource.includes("'cache-control': 'no-store'"), 'OAuth callback redirect must not be cached.');
+assert.ok(!callbackSource.includes('clearCookieHeader'), 'OAuth callback must not emit a second state-clearing Set-Cookie header.');
+assert.ok(appSource.includes("fetch('/api/session', { credentials: 'same-origin' })"), 'Browser session refresh must explicitly include same-origin credentials.');
+assert.ok(appSource.includes("fetch('/api/oauth/status', { credentials: 'same-origin' })"), 'OAuth status refresh must explicitly include same-origin credentials.');
+assert.ok(appSource.includes("fetch('/api/admin/sheets/maintain', { method: 'POST', credentials: 'same-origin' })"), 'Sheet maintenance must explicitly include same-origin credentials.');
+assert.ok(sheetsClientSource.includes("credentials: 'same-origin'"), 'Google Sheets API client must include same-origin credentials for all app writes/reads.');
+
+const fixtureSource = readFileSync('src/data/fixtures.ts', 'utf8');
+assert.ok(!fixtureSource.includes('Mike MacCombie'), 'Fresh browser fixtures must not include Mike before Google Sheets has the row.');
+assert.ok(!appSource.includes('Seed Mike demo record'), 'Settings must not expose a one-off Mike seed button.');
+assert.ok(!functionsSource.includes('seed_mike_fixture'), 'Runtime must not preserve brittle one-off Mike seed flow.');
+const oauthStatusSource = readFileSync('functions/api/oauth/status.ts', 'utf8');
+assert.ok(oauthStatusSource.includes('CACHE_TTL_MS = 75_000'), 'OAuth status refresh must have a cooldown cache to avoid Sheets 429 loops.');
+assert.ok(oauthStatusSource.includes("readTab(env, 'oauth_tokens', { ensureHeaders: false })"), 'OAuth status must not perform header-repair reads on every refresh.');
+assert.ok(oauthStatusSource.includes("status: rateLimited ? 200 : 503"), 'OAuth status quota cooldown must return a handled payload instead of surfacing raw 429 UI errors.');
+
 const e2eSource = readFileSync('tests/e2e/network-os.spec.ts', 'utf8');
 for (const fragment of [
   'manual add persists after reload and duplicate email is blocked',

@@ -54,9 +54,9 @@ test('instructions: canonical triggers and capture route examples are present', 
 test('transaction+persistence: manual add persists after reload and duplicate email is blocked', async ({ page }) => {
   await page.getByRole('button', { name: /^Add to West Peek Network$/i }).first().click();
 
-  await page.getByPlaceholder('Mike MacCombie').fill('Test Person');
-  await page.getByPlaceholder('mike@example.com').fill('test@example.com');
-  await page.getByPlaceholder('MacCombie Group').fill('Test Capital');
+  await page.getByPlaceholder('Jordan Miles').fill('Test Person');
+  await page.getByPlaceholder('jordan@example.com').fill('test@example.com');
+  await page.getByPlaceholder('Apex Family Office').fill('Test Capital');
   await page.getByPlaceholder(/Helped West Peek/i).fill('Met at dinner. Needs thoughtful follow-up.');
   await page.getByRole('main').getByRole('button', { name: /^Add to West Peek Network$/i }).click();
 
@@ -67,8 +67,8 @@ test('transaction+persistence: manual add persists after reload and duplicate em
   await expect(page.getByRole('heading', { name: 'Test Person' })).toBeVisible();
 
   await page.getByRole('button', { name: /^Add to West Peek Network$/i }).first().click();
-  await page.getByPlaceholder('Mike MacCombie').fill('Duplicate Person');
-  await page.getByPlaceholder('mike@example.com').fill('test@example.com');
+  await page.getByPlaceholder('Jordan Miles').fill('Duplicate Person');
+  await page.getByPlaceholder('jordan@example.com').fill('test@example.com');
   await page.getByPlaceholder(/Helped West Peek/i).fill('Duplicate should be blocked.');
   await page.getByRole('main').getByRole('button', { name: /^Add to West Peek Network$/i }).click();
 
@@ -76,8 +76,8 @@ test('transaction+persistence: manual add persists after reload and duplicate em
 
   await page.reload();
   await page.getByRole('button', { name: /^Add to West Peek Network$/i }).first().click();
-  await page.getByPlaceholder('Mike MacCombie').fill('Duplicate Person Reload');
-  await page.getByPlaceholder('mike@example.com').fill('test@example.com');
+  await page.getByPlaceholder('Jordan Miles').fill('Duplicate Person Reload');
+  await page.getByPlaceholder('jordan@example.com').fill('test@example.com');
   await page.getByPlaceholder(/Helped West Peek/i).fill('Duplicate still blocked after reload.');
   await page.getByRole('main').getByRole('button', { name: /^Add to West Peek Network$/i }).click();
 
@@ -133,8 +133,8 @@ Context: Captured with network alias.`);
 
 test('transaction+persistence: intake can attach to existing person', async ({ page }) => {
   await page.getByRole('button', { name: /^Add to West Peek Network$/i }).first().click();
-  await page.getByPlaceholder('Mike MacCombie').fill('Existing Contact');
-  await page.getByPlaceholder('mike@example.com').fill('existing@example.com');
+  await page.getByPlaceholder('Jordan Miles').fill('Existing Contact');
+  await page.getByPlaceholder('jordan@example.com').fill('existing@example.com');
   await page.getByPlaceholder(/Helped West Peek/i).fill('Existing relationship.');
   await page.getByRole('main').getByRole('button', { name: /^Add to West Peek Network$/i }).click();
 
@@ -172,8 +172,8 @@ Context: This should be dismissed.`);
 test('transaction+persistence: relationship touch defaults to Undecided and survives reload', async ({ page }) => {
   await page.getByRole('button', { name: /^Add to West Peek Network$/i }).first().click();
 
-  await page.getByPlaceholder('Mike MacCombie').fill('Touch Person');
-  await page.getByPlaceholder('mike@example.com').fill('touch@example.com');
+  await page.getByPlaceholder('Jordan Miles').fill('Touch Person');
+  await page.getByPlaceholder('jordan@example.com').fill('touch@example.com');
   await page.getByPlaceholder(/Helped West Peek/i).fill('Needs thoughtful follow-up.');
   await page.getByLabel(/Needs Touch/i).check();
   await page.getByRole('main').getByRole('button', { name: /^Add to West Peek Network$/i }).click();
@@ -201,8 +201,8 @@ test('transaction+persistence: approval approve and reject flows update state an
   await expect(page.getByText(/resolved/i).first()).toBeVisible();
 
   await page.getByRole('button', { name: /^Add to West Peek Network$/i }).first().click();
-  await page.getByPlaceholder('Mike MacCombie').fill('Reject Flow Person');
-  await page.getByPlaceholder('mike@example.com').fill('reject-flow@example.com');
+  await page.getByPlaceholder('Jordan Miles').fill('Reject Flow Person');
+  await page.getByPlaceholder('jordan@example.com').fill('reject-flow@example.com');
   await page.getByPlaceholder(/Helped West Peek/i).fill('Needs a touch approval that will be rejected.');
   await page.getByLabel(/Needs Touch/i).check();
   await page.getByRole('main').getByRole('button', { name: /^Add to West Peek Network$/i }).click();

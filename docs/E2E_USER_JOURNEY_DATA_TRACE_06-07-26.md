@@ -42,7 +42,7 @@ Gaps to validate live: deployed Gmail sync/polling behavior.
 Input:
 
 ```text
-#wpnetwork Mike MacCombie helped us with an intro, send handwritten note this week
+#wpnetwork Jordan Miles helped us with an intro, send handwritten note this week
 ```
 
 Trace:
@@ -62,8 +62,8 @@ Input:
 
 ```text
 #wpnetwork
-Name: Mike MacCombie
-Company: MacCombie Group
+Name: Jordan Miles
+Company: Apex Family Office
 Context: Helped us with an intro.
 Owner: Scooter
 Touch: Handwritten note

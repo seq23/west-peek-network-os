@@ -1,38 +1,35 @@
-# Hostile Code Review — Latest Baseline 2026-06-07
+# Hostile Code Review — OAuth Session + Settings Controls 2026-06-07
 
 Scope reviewed:
-- Claude AI suggestion route
-- Claude Vision OCR card/screenshot capture
-- Google Speech-to-Text voice-note capture
-- HEIC/HEIF browser normalization path
-- Thank-You Card Studio
-- Google Sheets sync, snapshot, and Settings spreadsheet link
-- Mike demo seed route
-- How to Add People instructions
+- Google OAuth callback and signed browser session creation
+- Settings refresh buttons
+- Google Sheets snapshot/maintenance auth path
+- Cloudflare Pages cookie behavior risk
+- Encrypted local environment bundle workflow
 
 Findings fixed in this pass:
-1. Spreadsheet schema drift risk: app reads/writes now repair required tab headers before Google Sheets reads/appends.
-2. Manual add was too strict for partial capture: name-only/name+email contacts can now be saved with default enrichment-needed context.
-3. Card/screenshot capture UI did not explicitly distinguish business cards from notes screenshots: added image type selector.
-4. Settings copy referenced outdated Team launchpad and unsupported settings/audit-log persistence claims: corrected to Operator Login and implemented tabs.
+1. OAuth callback emitted multiple Set-Cookie headers during the callback. The Gmail token could be written while the signed browser session cookie failed to stick on Cloudflare Pages. The callback now emits one required production cookie: `wpn_session`.
+2. Callback redirect is now explicitly `cache-control: no-store` and preserves the validated relative `next` path.
+3. Settings/session/OAuth refresh fetches now explicitly include `credentials: 'same-origin'`.
+4. The shared Google Sheets API client now includes `credentials: 'same-origin'` for snapshot reads and all authenticated write actions.
+5. Domain validation now hard-fails if the OAuth callback reintroduces multiple callback cookies or if the Settings/Sheets client drops same-origin credentials.
 
-Current guardrails verified structurally:
-- Provider routes require authenticated signed Google session.
-- Claude/Google provider calls return human_review_required true / execution_allowed false.
-- OCR/audio/thank-you outputs persist as pending review rows, not executed actions.
-- Sheet snapshot collapses append-only update rows by latest timestamp.
-- Direct spreadsheet edits can be pulled into the app with Settings → Refresh from Google Sheets.
-- App write actions append to Google Sheets via authenticated API routes.
+Hostile checks added:
+- Callback must contain exactly one `set-cookie` response header.
+- Callback must set `wpn_session`.
+- Callback must not import/use `clearCookieHeader`.
+- Callback redirect must include `cache-control: no-store`.
+- `/api/session`, `/api/oauth/status`, and `/api/admin/sheets/maintain` UI fetches must include same-origin credentials.
+- `src/services/sheetsClient.ts` must include same-origin credentials.
 
-Validation run:
-- npm install --ignore-scripts: passed
-- npm run build: passed
+Validation run in this artifact:
+- npm run typecheck: passed
 - npm run validate:all: passed
+- npm run build: passed
 
 Not claimed:
-- Live Claude Vision provider success
-- Live Google Speech-to-Text provider success
-- Browser Playwright runtime success in this container
-- Cloudflare deployed smoke-test success
+- Deployed Cloudflare browser OAuth success after upload
+- Live Google Sheets maintenance execution after upload
+- Live provider smoke tests
 
-Those require deployed Cloudflare secrets, enabled provider APIs/billing, Google auth session, and real test media.
+Those require pushing this artifact and reconnecting Gmail on `https://network.joinwestpeek.com` after Cloudflare deploy finishes.

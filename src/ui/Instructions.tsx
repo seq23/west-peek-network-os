@@ -78,7 +78,7 @@ Met Sarah Lee at dinner. Horizon Capital. Strong LP conversation. Follow up next
     happens: 'The Thank-You Card Studio drafts a WP-branded virtual card and saves a pending relationship touch. Nothing sends automatically.',
     steps: ['Open Thank-You Cards.', 'Enter recipient and reason.', 'Preview/copy the WP-branded card.', 'Open an email draft or save the touch for approval.'],
     exampleTitle: 'Thank-you reason',
-    example: `Mike MacCombie helped West Peek with a valuable intro. Send a thoughtful thank-you this week.`
+    example: `Jordan Miles helped West Peek with a valuable intro. Send a thoughtful thank-you this week.`
   }
 ];
 
@@ -100,15 +100,15 @@ Met at the conference. Interested in secondaries.`
     title: 'Fast actionable — enough context to act',
     use: 'Use when you know the next move.',
     body: `#wpnetwork
-Mike MacCombie — helped us with an intro. Scooter owns. Send thank-you card this week.`
+Jordan Miles — helped us with an intro. Scooter owns. Send thank-you card this week.`
   },
   {
     title: 'Structured — cleanest for review',
     use: 'Use when you have details and want the cleanest Intake Queue item.',
     body: `#wpnetwork
-Name: Mike MacCombie
-Company: MacCombie Group
-Email: mike@example.com
+Name: Jordan Miles
+Company: Apex Family Office
+Email: jordan@example.com
 Context: Helped us with an intro.
 Owner: Scooter
 Needs Touch: Yes

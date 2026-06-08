@@ -41,6 +41,8 @@ type OAuthStatus = {
   token_captured_at?: string;
   token_updated_at?: string;
   source?: string;
+  cache_ttl_seconds?: number;
+  warning?: string;
   error?: string;
 };
 
@@ -81,7 +83,7 @@ export function App() {
 
   async function loadSession() {
     try {
-      const response = await fetch('/api/session');
+      const response = await fetch('/api/session', { credentials: 'same-origin' });
       const payload = await response.json().catch(() => ({})) as { authenticated?: boolean; user?: { email?: string }; error?: string };
       setSession({ authenticated: Boolean(payload.authenticated), email: payload.user?.email, message: payload.authenticated ? `Signed in as ${payload.user?.email || 'approved user'}` : (payload.error || 'No signed browser session in this browser.') });
     } catch (error) {
@@ -91,11 +93,14 @@ export function App() {
 
   async function loadOAuthStatus() {
     try {
-      const response = await fetch('/api/oauth/status');
+      const response = await fetch('/api/oauth/status', { credentials: 'same-origin' });
       const payload = await response.json().catch(() => ({})) as OAuthStatus;
       setOauthStatus(payload);
       if (payload.gmail_oauth_connected) {
-        setOauthMessage(`Gmail OAuth token captured for ${payload.connected_email || payload.browser_session_email || 'approved user'}${payload.token_captured_at ? ` at ${payload.token_captured_at}` : ''}.`);
+        const suffix = payload.warning ? ` ${payload.warning}` : '';
+        setOauthMessage(`Gmail OAuth token captured for ${payload.connected_email || payload.browser_session_email || 'approved user'}${payload.token_captured_at ? ` at ${payload.token_captured_at}` : ''}.${suffix}`);
+      } else if (payload.status === 'temporarily_rate_limited') {
+        setOauthMessage(payload.error || 'Google Sheets quota cooldown. Wait 60 seconds before refreshing connection status again.');
       } else if (payload.error) {
         setOauthMessage(payload.error);
       } else {
@@ -383,6 +388,7 @@ function AiReview() {
     setResult('Calling /api/ai/suggestions/create...');
     try {
       const response = await fetch('/api/ai/suggestions/create', {
+        credentials: 'same-origin',
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
@@ -428,31 +434,48 @@ function SettingsPanel({
   onSessionRefresh: () => void;
   onMaintenanceComplete: () => void;
 }) {
-  const [seedStatus, setSeedStatus] = useState<string | null>(null);
   const [maintenanceStatus, setMaintenanceStatus] = useState<string | null>(null);
+  const [maintenanceBusy, setMaintenanceBusy] = useState(false);
+  const [refreshBusy, setRefreshBusy] = useState(false);
 
-  async function seedMikeFixture() {
-    setSeedStatus('Sending Mike fixture to Google Sheets...');
+  async function guardedSessionRefresh() {
+    if (refreshBusy) return;
+    setRefreshBusy(true);
     try {
-      const response = await fetch('/api/admin/seed-mike', { method: 'POST' });
-      const payload = await response.json() as { ok?: boolean; status?: string; error?: string; seeded?: boolean };
-      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Could not seed Mike fixture.');
-      setSeedStatus(payload.seeded ? 'Mike fixture added to Google Sheets.' : 'Mike fixture already exists in Google Sheets.');
-    } catch (error) {
-      setSeedStatus(error instanceof Error ? error.message : 'Could not seed Mike fixture.');
+      await onSessionRefresh();
+    } finally {
+      setTimeout(() => setRefreshBusy(false), 1500);
+    }
+  }
+
+  async function guardedSheetRefresh() {
+    if (refreshBusy) return;
+    setRefreshBusy(true);
+    try {
+      await onRefresh();
+    } finally {
+      setTimeout(() => setRefreshBusy(false), 1500);
     }
   }
 
   async function runSheetMaintenance() {
+    if (maintenanceBusy) return;
+    if (!session.authenticated) {
+      setMaintenanceStatus('Authentication required. Connect / reconnect Gmail on this same production domain, then retry.');
+      return;
+    }
+    setMaintenanceBusy(true);
     setMaintenanceStatus('Running non-destructive Sheet maintenance...');
     try {
-      const response = await fetch('/api/admin/sheets/maintain', { method: 'POST' });
+      const response = await fetch('/api/admin/sheets/maintain', { method: 'POST', credentials: 'same-origin' });
       const payload = await response.json() as { ok?: boolean; run_id?: string; report_rows_written?: number; error?: string };
       if (!response.ok || !payload.ok) throw new Error(payload.error || 'Sheet maintenance failed.');
       setMaintenanceStatus(`Maintenance complete. Run ${payload.run_id}; report rows written: ${payload.report_rows_written ?? 0}.`);
       onMaintenanceComplete();
     } catch (error) {
       setMaintenanceStatus(error instanceof Error ? error.message : 'Sheet maintenance failed.');
+    } finally {
+      setMaintenanceBusy(false);
     }
   }
 
@@ -464,23 +487,16 @@ function SettingsPanel({
         <p><strong>{oauthStatus.gmail_oauth_connected ? 'Connected' : 'Not connected / unknown'}</strong></p>
         <p className="muted">{oauthMessage}</p>
         <p className="muted">Browser session: {session.authenticated ? `signed in as ${session.email}` : session.message}</p>
-        <div className="actions"><a className="btn primary" href="/auth/google">Connect / reconnect Gmail</a><button className="btn" type="button" onClick={onSessionRefresh}>Refresh connection status</button></div>
+        <div className="actions"><a className="btn primary" href="/auth/google">Connect / reconnect Gmail</a><button className="btn" type="button" disabled={refreshBusy} onClick={guardedSessionRefresh}>{refreshBusy ? 'Refreshing...' : 'Refresh connection status'}</button></div>
       </div>
       <div className="card"><h3>Canonical trigger</h3><p><strong>#wpnetwork</strong></p><p className="muted">Accepted aliases: #addtowestpeek, #westpeeknetwork</p></div>
       <div className="card"><h3>Initial users</h3><p>sequoia@westpeek.ventures<br />scooter@westpeek.ventures</p></div>
-      <div className="card"><h3>Spreadsheet sync</h3><p>{sheetStatus}</p><p className="muted">The app reads from Google Sheets on load and after write actions. If someone edits the spreadsheet directly, click refresh to pull the latest rows into the app.</p><div className="actions"><button className="btn" type="button" onClick={onRefresh}>Refresh from Google Sheets</button><button className="btn primary" type="button" onClick={runSheetMaintenance}>Run Sheet Maintenance</button></div>{maintenanceStatus && <p className="muted">{maintenanceStatus}</p>}</div>
+      <div className="card"><h3>Spreadsheet sync</h3><p>{sheetStatus}</p><p className="muted">The app reads from Google Sheets on load and after write actions. If someone edits the spreadsheet directly, click refresh to pull the latest rows into the app.</p><div className="actions"><button className="btn" type="button" disabled={refreshBusy || !session.authenticated} onClick={guardedSheetRefresh}>{refreshBusy ? 'Refreshing...' : 'Refresh from Google Sheets'}</button><button className="btn primary" type="button" disabled={maintenanceBusy || !session.authenticated} onClick={runSheetMaintenance}>{maintenanceBusy ? 'Running...' : 'Run Sheet Maintenance'}</button></div>{maintenanceStatus && <p className="muted">{maintenanceStatus}</p>}</div>
       <div className="card"><h3>Operator Login launchpads</h3><p>joinwestpeek.com/operator<br />westpeek.ventures/operator</p><p className="muted">Shared password gate: 3021WPeek. Links open Network OS and Venture Deals Calculator.</p></div>
       <div className="card">
         <h3>Google Sheets</h3>
         <p>Google Sheets is the v1 persistence layer for contacts, intake, touches, approvals, notifications, AI suggestions, OAuth tokens, and provider-backed capture rows.</p>
         <p><a className="btn primary" href="https://docs.google.com/spreadsheets/d/1g2Tyeb8u1sYYQB5dhMEFgIMd5SlZR1h1FxHWUhbG1G8/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Open live spreadsheet →</a></p>
-      </div>
-      <div className="card">
-        <h3>Fixture migration</h3>
-        <p>Mike may appear as a local fixture in fresh browser sessions. Use this once if the live spreadsheet needs the same starter record.</p>
-        <p className="muted">This is why Mike can appear in the app before he appears in the spreadsheet.</p>
-        <button className="btn" type="button" onClick={seedMikeFixture}>Seed Mike demo record to Google Sheets</button>
-        {seedStatus && <p className="muted">{seedStatus}</p>}
       </div>
       <div className="card"><h3>Handwritten note vendors</h3><p className="muted">Preferred starting point: Handwrytten for API/logo automation later. Backup: Simply Noted for real-ink note service. Simple fallback: Postable. Always include “I’ll do it myself” when no third party should be used.</p><div className="actions"><a className="btn" href="https://www.handwrytten.com/" target="_blank" rel="noopener noreferrer">Handwrytten</a><a className="btn" href="https://simplynoted.com/" target="_blank" rel="noopener noreferrer">Simply Noted</a><a className="btn" href="https://www.postable.com/business" target="_blank" rel="noopener noreferrer">Postable</a></div></div><div className="card"><h3>Cloudflare secrets</h3><p>Use scripts/secrets/push-cloudflare-secrets.sh after decrypting .env.local.</p></div>
     </div>

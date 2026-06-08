@@ -20,6 +20,10 @@ export const TAB_HEADERS = {
 
 export type SheetTab = keyof typeof TAB_HEADERS;
 
+type TokenCache = { token: string; expiresAt: number; cacheKey: string };
+let serviceAccountTokenCache: TokenCache | null = null;
+const recentlyEnsuredHeaders = new Map<string, number>();
+
 export function assertSheetsConfigured(env: RuntimeEnv) {
   const missing = ['GOOGLE_SHEET_ID', 'GOOGLE_SERVICE_ACCOUNT_EMAIL', 'GOOGLE_PRIVATE_KEY'].filter((key) => !env[key as keyof RuntimeEnv]);
   if (missing.length) throw new Error(`Google Sheets runtime is not configured. Missing: ${missing.join(', ')}`);
@@ -32,57 +36,78 @@ export async function appendRecord(env: RuntimeEnv, tab: SheetTab, record: Recor
   const headers = TAB_HEADERS[tab];
   const row = headers.map((header) => serializeCell(record[header]));
   const range = encodeURIComponent(`${tab}!A:ZZ`);
-  const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
+  const response = await sheetsFetch(env, token, `values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ values: [row] })
   });
   if (!response.ok) throw new Error(`Google Sheets append failed for ${tab}: ${response.status} ${await response.text()}`);
   return response.json();
 }
 
-export async function readTab(env: RuntimeEnv, tab: SheetTab) {
+export async function readTab(env: RuntimeEnv, tab: SheetTab, options: { ensureHeaders?: boolean } = {}) {
   assertSheetsConfigured(env);
   const token = await getServiceAccountToken(env);
-  await ensureTabHeaders(env, token, tab);
+  if (options.ensureHeaders !== false) await ensureTabHeaders(env, token, tab);
   const range = encodeURIComponent(`${tab}!A:ZZ`);
-  const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values/${range}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await sheetsFetch(env, token, `values/${range}`);
   if (!response.ok) throw new Error(`Google Sheets read failed for ${tab}: ${response.status} ${await response.text()}`);
   const payload = await response.json() as { values?: string[][] };
-  const [header = [], ...rows] = payload.values || [];
-  return rows.map((row: string[]) => Object.fromEntries(header.map((key: string, index: number) => [key, row[index] || ''])));
+  return rowsToObjects(payload.values || []);
 }
 
+export async function batchReadTabs(env: RuntimeEnv, tabs: SheetTab[]) {
+  assertSheetsConfigured(env);
+  const token = await getServiceAccountToken(env);
+  const params = new URLSearchParams();
+  for (const tab of tabs) params.append('ranges', `${tab}!A:ZZ`);
+  const response = await sheetsFetch(env, token, `values:batchGet?${params.toString()}`);
+  if (!response.ok) throw new Error(`Google Sheets batch read failed: ${response.status} ${await response.text()}`);
+  const payload = await response.json() as { valueRanges?: Array<{ range?: string; values?: string[][] }> };
+  const out: Partial<Record<SheetTab, Array<Record<string, unknown>>>> = {};
+  for (let index = 0; index < tabs.length; index += 1) {
+    out[tabs[index]] = rowsToObjects(payload.valueRanges?.[index]?.values || []);
+  }
+  return out as Record<SheetTab, Array<Record<string, unknown>>>;
+}
 
 async function ensureTabHeaders(env: RuntimeEnv, token: string, tab: SheetTab) {
+  const cacheKey = `${env.GOOGLE_SHEET_ID}:${tab}`;
+  const cachedAt = recentlyEnsuredHeaders.get(cacheKey) || 0;
+  if (Date.now() - cachedAt < 5 * 60 * 1000) return;
+
   const headers = TAB_HEADERS[tab];
   const headerRange = encodeURIComponent(`${tab}!A1:ZZ1`);
-  const read = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values/${headerRange}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const read = await sheetsFetch(env, token, `values/${headerRange}`);
   if (!read.ok) throw new Error(`Google Sheets header read failed for ${tab}: ${read.status} ${await read.text()}`);
   const payload = await read.json() as { values?: string[][] };
   const existing = payload.values?.[0] || [];
   const missingRequired = headers.some((header) => !existing.includes(header));
   const wrongOrder = headers.some((header, index) => existing[index] !== header);
   if (!existing.length || missingRequired || wrongOrder) {
-    const update = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values/${headerRange}?valueInputOption=RAW`, {
+    const update = await sheetsFetch(env, token, `values/${headerRange}?valueInputOption=RAW`, {
       method: 'PUT',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ values: [headers] })
     });
     if (!update.ok) throw new Error(`Google Sheets header repair failed for ${tab}: ${update.status} ${await update.text()}`);
   }
+  recentlyEnsuredHeaders.set(cacheKey, Date.now());
 }
 
 export function sheetsUnavailable(error: unknown) {
-  return json({ ok: false, error: error instanceof Error ? error.message : 'Google Sheets persistence unavailable.' }, { status: 503 });
+  const detail = error instanceof Error ? error.message : 'Google Sheets persistence unavailable.';
+  const status = detail.includes('429') || detail.includes('RATE_LIMIT') || detail.includes('RESOURCE_EXHAUSTED') ? 429 : 503;
+  return json({ ok: false, error: detail, retry_hint: status === 429 ? 'Google Sheets quota is temporarily exhausted. Wait about 60 seconds before retrying.' : undefined }, { status });
 }
 
 async function getServiceAccountToken(env: RuntimeEnv): Promise<string> {
   assertSheetsConfigured(env);
+  const cacheKey = `${env.GOOGLE_SERVICE_ACCOUNT_EMAIL}:${env.GOOGLE_PRIVATE_KEY?.slice(-40) || ''}`;
+  if (serviceAccountTokenCache && serviceAccountTokenCache.cacheKey === cacheKey && Date.now() < serviceAccountTokenCache.expiresAt - 60_000) {
+    return serviceAccountTokenCache.token;
+  }
+
   const now = Math.floor(Date.now() / 1000);
   const claim = {
     iss: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -98,9 +123,22 @@ async function getServiceAccountToken(env: RuntimeEnv): Promise<string> {
     body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: jwt })
   });
   if (!response.ok) throw new Error(`Google token exchange failed: ${response.status} ${await response.text()}`);
-  const payload = await response.json() as { access_token?: string };
+  const payload = await response.json() as { access_token?: string; expires_in?: number };
   if (!payload.access_token) throw new Error('Google token exchange did not return access_token.');
+  serviceAccountTokenCache = { token: payload.access_token, expiresAt: Date.now() + Math.max(60, payload.expires_in || 3600) * 1000, cacheKey };
   return payload.access_token;
+}
+
+async function sheetsFetch(env: RuntimeEnv, token: string, path: string, init: RequestInit = {}) {
+  return fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/${path}`, {
+    ...init,
+    headers: { Authorization: `Bearer ${token}`, ...(init.headers || {}) }
+  });
+}
+
+function rowsToObjects(values: string[][]) {
+  const [header = [], ...rows] = values;
+  return rows.map((row: string[]) => Object.fromEntries(header.map((key: string, index: number) => [key, row[index] || ''])));
 }
 
 async function signJwt(claim: Record<string, unknown>, pem: string): Promise<string> {

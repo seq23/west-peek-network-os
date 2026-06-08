@@ -32,8 +32,8 @@ Use when the person is already clear enough to enter directly.
 Example:
 
 ```text
-Name: Mike MacCombie
-Company: MacCombie Group
+Name: Jordan Miles
+Company: Apex Family Office
 Context: Helped West Peek with a valuable intro and should receive a thoughtful thank-you.
 Owner: Scooter
 Needs Touch: Yes
@@ -136,7 +136,7 @@ Short but actionable. Includes enough context to act.
 
 ```text
 #wpnetwork
-Mike MacCombie — helped us with an intro. Scooter owns. Send handwritten thank-you this week.
+Jordan Miles — helped us with an intro. Scooter owns. Send handwritten thank-you this week.
 ```
 
 ### Minimal capture
@@ -154,8 +154,8 @@ Best quality for Intake Queue review.
 
 ```text
 #wpnetwork
-Name: Mike MacCombie
-Company: MacCombie Group
+Name: Jordan Miles
+Company: Apex Family Office
 Context: Helped us with an intro.
 Owner: Scooter
 Needs Touch: Yes
@@ -178,8 +178,8 @@ Example structured capture:
 
 ```text
 #wpnetwork
-Name: Mike MacCombie
-Company: MacCombie Group
+Name: Jordan Miles
+Company: Apex Family Office
 Context: Helped us with an intro.
 Owner: Scooter
 Touch: Handwritten note

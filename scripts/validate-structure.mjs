@@ -10,9 +10,9 @@ const required = [
   'scripts/secrets/push-cloudflare-secrets.sh', 'secrets/network-os.local.env.gpg', 'src/domain/workflows.ts', 'tests/domain/workflows.mjs', 'functions/api/health.ts', 'functions/api/session.ts', 'functions/auth/google.ts', 'functions/auth/callback/google.ts', 'functions/_shared/auth.ts', 'functions/_shared/tokens.ts', 'functions/api/intake/create.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/triggers/check.ts', 'functions/api/ai/suggestions/create.ts',
   'functions/api/intake/media/create.ts',
   'functions/api/intake/review.ts', 'functions/api/sheets/snapshot.ts',
-  'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/admin/seed-mike.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
+  'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
   'functions/_shared/googleSpeech.ts',
-  'functions/_shared/media.ts', 'functions/api/intake/media/create.ts', 'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/admin/seed-mike.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx', 'functions/_shared/anthropic.ts', 'functions/_shared/googleSpeech.ts', 'functions/_shared/media.ts', 'functions/_shared/sheets.ts'
+  'functions/_shared/media.ts', 'functions/api/intake/media/create.ts', 'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx', 'functions/_shared/anthropic.ts', 'functions/_shared/googleSpeech.ts', 'functions/_shared/media.ts', 'functions/_shared/sheets.ts'
 ];
 const missing = required.filter((file) => !fs.existsSync(path.join(root, file)));
 if (missing.length) {
@@ -28,7 +28,7 @@ if (missingFragments.length) {
   process.exit(1);
 }
 const cumulative = fs.readFileSync(path.join(root, 'docs/cumulative-build-spec.md'), 'utf8');
-const requiredRuntimeFragments = ['createSheetContact', 'createSheetIntake', 'reviewSheetIntake', 'fetchSheetSnapshot', 'decideSheetApproval', 'markSheetNotificationRead', 'findDuplicateContact', 'createNotificationForApproval', 'wpn_session', 'oauth_tokens', '/v1/messages', 'ai_suggestions', 'relationship_touches', 'google_speech_to_text', 'extractIntakeFromImage', 'virtual_thank_you_card', 'execution_allowed: false', 'Open live spreadsheet', 'Seed Mike demo record to Google Sheets', 'Event form link', 'public form link'];
+const requiredRuntimeFragments = ['createSheetContact', 'createSheetIntake', 'reviewSheetIntake', 'fetchSheetSnapshot', 'decideSheetApproval', 'markSheetNotificationRead', 'findDuplicateContact', 'createNotificationForApproval', 'wpn_session', 'oauth_tokens', '/v1/messages', 'ai_suggestions', 'relationship_touches', 'google_speech_to_text', 'extractIntakeFromImage', 'virtual_thank_you_card', 'execution_allowed: false', 'Open live spreadsheet', 'Event form link', 'public form link'];
 const appRuntime = [
   'src/ui/App.tsx',
   'src/domain/workflows.ts',
@@ -41,9 +41,9 @@ const appRuntime = [
   'functions/api/ai/suggestions/create.ts',
   'functions/api/intake/media/create.ts',
   'functions/api/intake/review.ts', 'functions/api/sheets/snapshot.ts',
-  'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/admin/seed-mike.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
+  'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
   'functions/_shared/googleSpeech.ts',
-  'functions/_shared/media.ts', 'functions/api/admin/seed-mike.ts', 'src/services/sheetsClient.ts', 'src/ui/Instructions.tsx'
+  'functions/_shared/media.ts', 'src/services/sheetsClient.ts', 'src/ui/Instructions.tsx'
 ].map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
 const missingRuntime = requiredRuntimeFragments.filter((fragment) => !appRuntime.includes(fragment));
 if (missingRuntime.length) {
@@ -60,10 +60,10 @@ if (missingSpec.length) {
 const functionsSource = ['functions/api/intake/create.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/ai/suggestions/create.ts',
   'functions/api/intake/media/create.ts',
   'functions/api/intake/review.ts', 'functions/api/sheets/snapshot.ts',
-  'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/admin/seed-mike.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
+  'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
   'functions/_shared/googleSpeech.ts',
-  'functions/_shared/media.ts', 'functions/api/intake/media/create.ts', 'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/admin/seed-mike.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx', 'functions/_shared/anthropic.ts', 'functions/_shared/googleSpeech.ts', 'functions/_shared/media.ts', 'functions/_shared/sheets.ts', 'src/services/sheetsClient.ts', 'src/domain/handwrittenVendors.ts', 'src/ui/App.tsx', 'src/ui/Instructions.tsx'].map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
-for (const fragment of ['appendRecord', 'readTab', 'google_sheets', 'GOOGLE_SERVICE_ACCOUNT_EMAIL', 'GOOGLE_PRIVATE_KEY', 'ai_suggestions', '/v1/messages', 'execution_allowed: false', 'requireAuthenticatedUser', 'MAX_RAW_TEXT_CHARS', 'internal_data_trace', 'requireAuthenticatedUser', 'MAX_RAW_TEXT_CHARS', 'internal_data_trace', 'Google Speech-to-Text', 'HEIC/HEIF', 'pending_approval', 'seed_mike_fixture', 'fetchSheetSnapshot', 'reviewed_by', 'converted_contact_id', 'event_attendees', 'event_public_form', 'public_form_enabled', 'pending_human_review', 'parsed_owner', 'parsed_touch', 'parsed_priority', 'parsed_due', 'parsed_needs_touch', 'structured_intake_touch', 'updateSheetTouchFulfillment', 'Handwrytten', 'Simply Noted', 'Postable', "I'll do it myself", 'fulfillment_status']) {
+  'functions/_shared/media.ts', 'functions/api/intake/media/create.ts', 'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx', 'functions/_shared/anthropic.ts', 'functions/_shared/googleSpeech.ts', 'functions/_shared/media.ts', 'functions/_shared/sheets.ts', 'src/services/sheetsClient.ts', 'src/domain/handwrittenVendors.ts', 'src/ui/App.tsx', 'src/ui/Instructions.tsx'].map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
+for (const fragment of ['appendRecord', 'readTab', 'google_sheets', 'GOOGLE_SERVICE_ACCOUNT_EMAIL', 'GOOGLE_PRIVATE_KEY', 'ai_suggestions', '/v1/messages', 'execution_allowed: false', 'requireAuthenticatedUser', 'MAX_RAW_TEXT_CHARS', 'internal_data_trace', 'requireAuthenticatedUser', 'MAX_RAW_TEXT_CHARS', 'internal_data_trace', 'Google Speech-to-Text', 'HEIC/HEIF', 'pending_approval', 'fetchSheetSnapshot', 'reviewed_by', 'converted_contact_id', 'event_attendees', 'event_public_form', 'public_form_enabled', 'pending_human_review', 'parsed_owner', 'parsed_touch', 'parsed_priority', 'parsed_due', 'parsed_needs_touch', 'structured_intake_touch', 'updateSheetTouchFulfillment', 'Handwrytten', 'Simply Noted', 'Postable', "I'll do it myself", 'fulfillment_status']) {
   if (!functionsSource.includes(fragment)) {
     console.error(`Runtime persistence fragment missing: ${fragment}`);
     process.exit(1);
@@ -79,6 +79,20 @@ for (const fragment of [
 ]) {
   if (!e2eSource.includes(fragment)) {
     console.error(`Persistence E2E fragment missing: ${fragment}`);
+    process.exit(1);
+  }
+}
+
+
+const fixtureSource = fs.readFileSync(path.join(root, 'src/data/fixtures.ts'), 'utf8');
+const oauthStatusSource = fs.readFileSync(path.join(root, 'functions/api/oauth/status.ts'), 'utf8');
+if (fixtureSource.includes('Mike MacCombie') || appRuntime.includes('Seed Mike demo record') || functionsSource.includes('seed_mike_fixture')) {
+  console.error('Brittle Mike seed/demo fixture must not ship in runtime or fresh browser fallback.');
+  process.exit(1);
+}
+for (const fragment of ['CACHE_TTL_MS = 75_000', "readTab(env, 'oauth_tokens', { ensureHeaders: false })", "status: rateLimited ? 200 : 503"]) {
+  if (!oauthStatusSource.includes(fragment)) {
+    console.error(`OAuth status rate-limit guard missing: ${fragment}`);
     process.exit(1);
   }
 }

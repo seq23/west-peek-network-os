@@ -1,6 +1,6 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json } from '../../_shared/json';
-import { readTab, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
+import { batchReadTabs, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
 
 type Env = RuntimeEnv & AuthEnv;
 type Context = { request: Request; env: Env };
@@ -17,11 +17,22 @@ const IDS: Record<string, string> = {
   event_attendees: 'event_attendee_id'
 };
 
+let snapshotCache: { userEmail: string; payload: unknown; expiresAt: number } | null = null;
+const SNAPSHOT_CACHE_TTL_MS = 45_000;
+
 export async function onRequestGet({ request, env }: Context) {
   try {
     const user = await requireAuthenticatedUser(request, env);
-    const entries = await Promise.all(TABS.map(async (tab) => [tab, latestById(await readTab(env, tab), IDS[tab])] as const));
-    return json({ ok: true, persistence: 'google_sheets', refreshed_at: new Date().toISOString(), user_email: user.email, data: Object.fromEntries(entries) });
+    if (snapshotCache && snapshotCache.userEmail === user.email && Date.now() < snapshotCache.expiresAt) {
+      return json({ ...(snapshotCache.payload as Record<string, unknown>), source: 'google_sheets_batch_cache' }, { headers: { 'cache-control': 'private, max-age=30' } });
+    }
+
+    // One batchGet request replaces eight tab reads and avoids per-tab header reads.
+    const raw = await batchReadTabs(env, TABS);
+    const data = Object.fromEntries(TABS.map((tab) => [tab, latestById(raw[tab] || [], IDS[tab])]));
+    const payload = { ok: true, persistence: 'google_sheets', source: 'google_sheets_batch', refreshed_at: new Date().toISOString(), user_email: user.email, data };
+    snapshotCache = { userEmail: user.email, payload, expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS };
+    return json(payload, { headers: { 'cache-control': 'private, max-age=30' } });
   } catch (error) {
     const detail = error instanceof Error ? error.message : 'Google Sheets snapshot unavailable.';
     if (detail.includes('Google Sheets')) return sheetsUnavailable(error);

@@ -92,7 +92,7 @@ export async function markSheetNotificationRead(notificationId: string, recipien
 }
 
 async function requestJson<T = Record<string, unknown>>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await fetch(url, { credentials: 'same-origin', ...(init || {}) });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload?.ok === false) throw new Error(payload?.error || `${url} failed with ${response.status}`);
   return payload as T;

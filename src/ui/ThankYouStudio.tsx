@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Header } from './App';
 
 export function ThankYouStudio({ onSaved }: { onSaved?: () => void }) {
-  const [recipient, setRecipient] = useState('Mike MacCombie');
+  const [recipient, setRecipient] = useState('Jordan Miles');
   const [reason, setReason] = useState('Thank you for helping West Peek with a valuable intro.');
   const [fromName, setFromName] = useState('West Peek');
   const [message, setMessage] = useState('Thank you for the time, insight, and support you shared with West Peek. Relationships like this matter to us, and we wanted to send a small note of gratitude.');
@@ -44,8 +44,8 @@ export function ThankYouStudio({ onSaved }: { onSaved?: () => void }) {
       <form className="card form" onSubmit={createDraft}>
         <h2>Create thank-you touch</h2>
         <Field label="Recipient name"><input name="recipient_name" value={recipient} onChange={(event) => setRecipient(event.target.value)} required /></Field>
-        <Field label="Recipient email, if known"><input name="recipient_email" type="email" placeholder="mike@example.com" /></Field>
-        <Field label="Company"><input name="company" placeholder="MacCombie Group" /></Field>
+        <Field label="Recipient email, if known"><input name="recipient_email" type="email" placeholder="jordan@example.com" /></Field>
+        <Field label="Company"><input name="company" placeholder="Apex Family Office" /></Field>
         <Field label="Reason"><textarea name="reason" value={reason} onChange={(event) => setReason(event.target.value)} required /></Field>
         <div className="grid cols-2">
           <Field label="From"><select name="from_name" value={fromName} onChange={(event) => setFromName(event.target.value)}><option>West Peek</option><option>Sequoia</option><option>Scooter</option></select></Field>

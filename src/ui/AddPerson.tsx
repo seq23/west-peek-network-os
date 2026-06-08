@@ -55,9 +55,9 @@ export function AddPerson({ onAdded }: { onAdded: (record: ContactRecord, touchM
     <form className="card form" onSubmit={submit}>
       {error && <div className="notice">{error}</div>}
       <div className="grid cols-2">
-        <Field label="Name, if known"><input name="full_name" placeholder="Mike MacCombie" /></Field>
-        <Field label="Email, if known"><input name="email" type="email" placeholder="mike@example.com" /></Field>
-        <Field label="Company, if known"><input name="company" placeholder="MacCombie Group" /></Field>
+        <Field label="Name, if known"><input name="full_name" placeholder="Jordan Miles" /></Field>
+        <Field label="Email, if known"><input name="email" type="email" placeholder="jordan@example.com" /></Field>
+        <Field label="Company, if known"><input name="company" placeholder="Apex Family Office" /></Field>
         <Field label="Owner"><select name="relationship_owner" defaultValue="Unassigned"><option>Sequoia</option><option>Scooter</option><option>Unassigned</option></select></Field>
       </div>
       <Field label="Context, if known"><textarea name="context_summary" placeholder="Optional: helped West Peek with an intro and should receive a thoughtful thank-you." /></Field>
