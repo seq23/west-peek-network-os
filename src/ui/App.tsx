@@ -30,6 +30,19 @@ const navItems: Array<{ page: Page; label: string; icon: React.ReactNode }> = [
 ];
 
 type SessionState = { authenticated: boolean; email?: string; message: string };
+type OAuthStatus = {
+  ok?: boolean;
+  browser_session_connected?: boolean;
+  browser_session_email?: string;
+  gmail_oauth_connected?: boolean;
+  connected_email?: string;
+  provider?: string;
+  status?: string;
+  token_captured_at?: string;
+  token_updated_at?: string;
+  source?: string;
+  error?: string;
+};
 
 
 export function App() {
@@ -39,6 +52,8 @@ export function App() {
   const [sheetData, setSheetData] = useState<SheetSnapshot | null>(null);
   const [sheetStatus, setSheetStatus] = useState('Loading Google Sheets snapshot...');
   const [session, setSession] = useState<SessionState>({ authenticated: false, message: 'Checking Google OAuth session...' });
+  const [oauthStatus, setOauthStatus] = useState<OAuthStatus>({ gmail_oauth_connected: false, status: 'unknown' });
+  const [oauthMessage, setOauthMessage] = useState('Checking Gmail OAuth token status...');
   const localData = useMemo(() => ({
     contacts: store.contacts(),
     intake: store.intake(),
@@ -68,13 +83,35 @@ export function App() {
     try {
       const response = await fetch('/api/session');
       const payload = await response.json().catch(() => ({})) as { authenticated?: boolean; user?: { email?: string }; error?: string };
-      setSession({ authenticated: Boolean(payload.authenticated), email: payload.user?.email, message: payload.authenticated ? `Connected as ${payload.user?.email || 'approved user'}` : (payload.error || 'No Google OAuth session in this browser.') });
+      setSession({ authenticated: Boolean(payload.authenticated), email: payload.user?.email, message: payload.authenticated ? `Signed in as ${payload.user?.email || 'approved user'}` : (payload.error || 'No signed browser session in this browser.') });
     } catch (error) {
-      setSession({ authenticated: false, message: error instanceof Error ? error.message : 'Could not check Google OAuth session.' });
+      setSession({ authenticated: false, message: error instanceof Error ? error.message : 'Could not check browser session.' });
     }
   }
 
-  useEffect(() => { void reloadSheetsSnapshot(); void loadSession(); }, []);
+  async function loadOAuthStatus() {
+    try {
+      const response = await fetch('/api/oauth/status');
+      const payload = await response.json().catch(() => ({})) as OAuthStatus;
+      setOauthStatus(payload);
+      if (payload.gmail_oauth_connected) {
+        setOauthMessage(`Gmail OAuth token captured for ${payload.connected_email || payload.browser_session_email || 'approved user'}${payload.token_captured_at ? ` at ${payload.token_captured_at}` : ''}.`);
+      } else if (payload.error) {
+        setOauthMessage(payload.error);
+      } else {
+        setOauthMessage('No active Gmail OAuth token found in oauth_tokens.');
+      }
+    } catch (error) {
+      setOauthStatus({ gmail_oauth_connected: false, status: 'unknown' });
+      setOauthMessage(error instanceof Error ? error.message : 'Could not check Gmail OAuth token status.');
+    }
+  }
+
+  async function refreshConnectionStatus() {
+    await Promise.all([loadSession(), loadOAuthStatus()]);
+  }
+
+  useEffect(() => { void reloadSheetsSnapshot(); void refreshConnectionStatus(); }, []);
 
   function refresh(nextMessage?: string) {
     setRefreshToken((value) => value + 1);
@@ -173,7 +210,15 @@ export function App() {
       </aside>
       <main className="main">
         {message && <div className="notice" style={{ marginBottom: 16 }}>{message}</div>}
-        {page === 'dashboard' && <Dashboard data={data} go={setPage} runtime={{ sheetStatus, sessionAuthenticated: session.authenticated, sessionEmail: session.email, usingLiveSheets: Boolean(sheetData) }} />}
+        {page === 'dashboard' && <Dashboard data={data} go={setPage} runtime={{
+          sheetStatus,
+          sessionAuthenticated: session.authenticated,
+          sessionEmail: session.email,
+          usingLiveSheets: Boolean(sheetData),
+          gmailOauthConnected: Boolean(oauthStatus.gmail_oauth_connected),
+          gmailOauthEmail: oauthStatus.connected_email,
+          gmailOauthCapturedAt: oauthStatus.token_captured_at
+        }} />}
         {page === 'instructions' && <Instructions />}
         {page === 'events' && <EventsPage events={data.events} attendees={data.eventAttendees} onSaved={(nextMessage) => void reloadSheetsSnapshot(nextMessage || 'Event data saved to Google Sheets.')} />}
         {page === 'add' && <AddPerson onAdded={handleAdded} />}
@@ -185,7 +230,15 @@ export function App() {
         {page === 'approvals' && <ApprovalsPage rows={data.approvals} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
         {page === 'notifications' && <NotificationsPage rows={data.notifications} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
         {page === 'ai' && <AiReview />}
-        {page === 'settings' && <SettingsPanel sheetStatus={sheetStatus} session={session} onRefresh={() => void reloadSheetsSnapshot('Refreshed from Google Sheets.')} onSessionRefresh={() => void loadSession()} />}
+        {page === 'settings' && <SettingsPanel
+          sheetStatus={sheetStatus}
+          session={session}
+          oauthStatus={oauthStatus}
+          oauthMessage={oauthMessage}
+          onRefresh={() => void reloadSheetsSnapshot('Refreshed from Google Sheets.')}
+          onSessionRefresh={() => void refreshConnectionStatus()}
+          onMaintenanceComplete={() => void reloadSheetsSnapshot('Sheet maintenance finished and snapshot refreshed.')}
+        />}
       </main>
     </div>
   );
@@ -358,8 +411,25 @@ function AiReview() {
   </>;
 }
 
-function SettingsPanel({ sheetStatus, session, onRefresh, onSessionRefresh }: { sheetStatus: string; session: SessionState; onRefresh: () => void; onSessionRefresh: () => void }) {
+function SettingsPanel({
+  sheetStatus,
+  session,
+  oauthStatus,
+  oauthMessage,
+  onRefresh,
+  onSessionRefresh,
+  onMaintenanceComplete
+}: {
+  sheetStatus: string;
+  session: SessionState;
+  oauthStatus: OAuthStatus;
+  oauthMessage: string;
+  onRefresh: () => void;
+  onSessionRefresh: () => void;
+  onMaintenanceComplete: () => void;
+}) {
   const [seedStatus, setSeedStatus] = useState<string | null>(null);
+  const [maintenanceStatus, setMaintenanceStatus] = useState<string | null>(null);
 
   async function seedMikeFixture() {
     setSeedStatus('Sending Mike fixture to Google Sheets...');
@@ -373,13 +443,32 @@ function SettingsPanel({ sheetStatus, session, onRefresh, onSessionRefresh }: { 
     }
   }
 
+  async function runSheetMaintenance() {
+    setMaintenanceStatus('Running non-destructive Sheet maintenance...');
+    try {
+      const response = await fetch('/api/admin/sheets/maintain', { method: 'POST' });
+      const payload = await response.json() as { ok?: boolean; run_id?: string; report_rows_written?: number; error?: string };
+      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Sheet maintenance failed.');
+      setMaintenanceStatus(`Maintenance complete. Run ${payload.run_id}; report rows written: ${payload.report_rows_written ?? 0}.`);
+      onMaintenanceComplete();
+    } catch (error) {
+      setMaintenanceStatus(error instanceof Error ? error.message : 'Sheet maintenance failed.');
+    }
+  }
+
   return <>
     <Header eyebrow="Settings" title="Connections and operator settings" subtitle="Check OAuth, open the live spreadsheet, refresh data, and manage external handoff links." />
     <div className="grid cols-2">
-      <div className="card"><h3>Google Gmail OAuth</h3><p><strong>{session.authenticated ? 'Connected' : 'Not connected / unknown'}</strong></p><p className="muted">{session.message}</p><div className="actions"><a className="btn primary" href="/auth/google">Connect / reconnect Gmail</a><button className="btn" type="button" onClick={onSessionRefresh}>Check session</button></div></div>
+      <div className="card">
+        <h3>Google Gmail OAuth</h3>
+        <p><strong>{oauthStatus.gmail_oauth_connected ? 'Connected' : 'Not connected / unknown'}</strong></p>
+        <p className="muted">{oauthMessage}</p>
+        <p className="muted">Browser session: {session.authenticated ? `signed in as ${session.email}` : session.message}</p>
+        <div className="actions"><a className="btn primary" href="/auth/google">Connect / reconnect Gmail</a><button className="btn" type="button" onClick={onSessionRefresh}>Refresh connection status</button></div>
+      </div>
       <div className="card"><h3>Canonical trigger</h3><p><strong>#wpnetwork</strong></p><p className="muted">Accepted aliases: #addtowestpeek, #westpeeknetwork</p></div>
       <div className="card"><h3>Initial users</h3><p>sequoia@westpeek.ventures<br />scooter@westpeek.ventures</p></div>
-      <div className="card"><h3>Spreadsheet sync</h3><p>{sheetStatus}</p><p className="muted">The app reads from Google Sheets on load and after write actions. If someone edits the spreadsheet directly, click refresh to pull the latest rows into the app. The server also repairs required tab headers before reads/writes to reduce schema drift.</p><button className="btn" type="button" onClick={onRefresh}>Refresh from Google Sheets</button></div>
+      <div className="card"><h3>Spreadsheet sync</h3><p>{sheetStatus}</p><p className="muted">The app reads from Google Sheets on load and after write actions. If someone edits the spreadsheet directly, click refresh to pull the latest rows into the app.</p><div className="actions"><button className="btn" type="button" onClick={onRefresh}>Refresh from Google Sheets</button><button className="btn primary" type="button" onClick={runSheetMaintenance}>Run Sheet Maintenance</button></div>{maintenanceStatus && <p className="muted">{maintenanceStatus}</p>}</div>
       <div className="card"><h3>Operator Login launchpads</h3><p>joinwestpeek.com/operator<br />westpeek.ventures/operator</p><p className="muted">Shared password gate: 3021WPeek. Links open Network OS and Venture Deals Calculator.</p></div>
       <div className="card">
         <h3>Google Sheets</h3>

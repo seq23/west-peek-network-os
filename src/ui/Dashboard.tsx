@@ -18,6 +18,9 @@ type RuntimeStatus = {
   sessionAuthenticated: boolean;
   sessionEmail?: string;
   usingLiveSheets: boolean;
+  gmailOauthConnected: boolean;
+  gmailOauthEmail?: string;
+  gmailOauthCapturedAt?: string;
 };
 
 const openStatus = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'needs_more_info']);
@@ -49,7 +52,16 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
       </div>
       <div className="status-card">
         <div className="kicker">Live system status</div>
-        <StatusLine label="Google OAuth" value={runtime.sessionAuthenticated ? `Connected: ${runtime.sessionEmail}` : 'Not connected in this browser'} good={runtime.sessionAuthenticated} />
+        <StatusLine
+          label="Gmail OAuth"
+          value={runtime.gmailOauthConnected ? `Connected: ${runtime.gmailOauthEmail || runtime.sessionEmail || 'approved user'}` : 'Not connected / token not found'}
+          good={runtime.gmailOauthConnected}
+        />
+        <StatusLine
+          label="Browser session"
+          value={runtime.sessionAuthenticated ? `Signed in: ${runtime.sessionEmail}` : 'Not signed in on this browser'}
+          good={runtime.sessionAuthenticated}
+        />
         <StatusLine label="Google Sheets" value={runtime.usingLiveSheets ? 'Live snapshot loaded' : runtime.sheetStatus} good={runtime.usingLiveSheets} />
         <StatusLine label="Claude / Vision" value="Configured route available; run provider smoke test before claiming live OCR." />
         <StatusLine label="Speech-to-Text" value="Configured route available; real audio test required." />
