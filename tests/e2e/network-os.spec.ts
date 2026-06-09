@@ -514,6 +514,22 @@ test('transaction: accepted Gmail trigger aliases create intake records', async 
 });
 
 test('transaction+persistence: intake can attach to existing person', async ({ page }) => { await nav(page, 'Intake Queue'); await page.getByLabel('Gmail trigger text').fill(`#wpnetwork\nName: Existing Investor\nEmail: existing@example.com\nCompany: Apex Family Office\nContext: Attach to existing person.`); await page.getByRole('main').getByRole('button', { name: /Capture to Intake Queue/i }).click(); page.once('dialog', (dialog) => dialog.accept('contact_existing')); await page.getByTestId(/intake-/).first().getByRole('button', { name: /^Attach to Existing Person$/i }).click(); await mainText(page, /Intake attach recorded/i); });
+test('transaction: deal-flow founder trigger creates classified intake', async ({ page }) => {
+  await nav(page, 'Intake Queue');
+  await page.getByLabel('Gmail trigger text').fill(`#wpdealflow\nName: Andrey Botnev\nEmail: ab@wizium.ai\nCompany: Wizium\nContext: Wizium is building AI orchestration for marketplace sellers. Traction: $144K ARR (+70% MoM), 200 customers. Raise: $1.5M Pre-Seed, $900K committed. Deck: https://docsend.com/view/59xjm85vfwqayes5`);
+  await page.getByRole('main').getByRole('button', { name: /Capture to Intake Queue/i }).click();
+  await expect(page.getByRole('main').getByRole('heading', { name: 'Andrey Botnev' })).toBeVisible();
+  await mainText(page, /Deal-flow prospect|founder|Wizium|Founder \/ prospective deal flow/i);
+});
+
+test('transaction: #dealflow alias creates classified founder intake', async ({ page }) => {
+  await nav(page, 'Intake Queue');
+  await page.getByLabel('Gmail trigger text').fill(`#dealflow\nName: Alias Founder\nEmail: alias-founder@example.com\nCompany: AliasCo\nContext: Founder referred by Scooter.`);
+  await page.getByRole('main').getByRole('button', { name: /Capture to Intake Queue/i }).click();
+  await expect(page.getByRole('main').getByRole('heading', { name: 'Alias Founder' })).toBeVisible();
+  await mainText(page, /Deal-flow prospect|founder/i);
+});
+
 test('transaction: intake can be dismissed', async ({ page }) => { await nav(page, 'Intake Queue'); await page.getByLabel('Gmail trigger text').fill(`#wpnetwork\nName: Dismiss Candidate\nContext: Dismiss this intake.`); await page.getByRole('main').getByRole('button', { name: /Capture to Intake Queue/i }).click(); await page.getByTestId(/intake-/).first().getByRole('button', { name: /^Dismiss$/i }).click(); await mainText(page, /Intake dismiss recorded/i); });
 
 test('events: create event public form link', async ({ page }) => { await nav(page, 'Events'); await page.getByRole('textbox', { name: /^GP Wine Night$/i }).fill('E2E LP Dinner'); await page.getByPlaceholder('Tonight / 2026-06-07').fill('2026-06-07'); await page.getByPlaceholder('Memphis / NYC / Tech Week').fill('Memphis'); await page.getByPlaceholder('scooter@westpeek.ventures').fill('sequoia@westpeek.ventures'); await page.getByPlaceholder('Who is in the room? What is the goal?').fill('Relationship room for LPs.'); await page.getByRole('main').getByRole('button', { name: /^Create event \+ form link$/i }).click(); await mainText(page, /Created E2E LP Dinner|\/e\/e2e-lp-dinner/i); });
@@ -530,7 +546,7 @@ test('settings: refresh connection status shows OAuth and browser session state'
 test('settings: refresh from Google Sheets loads snapshot', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Refresh from Google Sheets$/i }).click(); await mainText(page, /Refreshed from Google Sheets|Live Google Sheets snapshot loaded/i); });
 test('settings: Run Sheet Maintenance uses authenticated route', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Run Sheet Maintenance$/i }).click(); await mainText(page, /Maintenance complete|report_rows_written|run_id/i); });
 
-test('instructions: canonical triggers and capture route examples are present', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /#wpnetwork/i); await mainText(page, /#addtowestpeek/i); await mainText(page, /#westpeeknetwork/i); await mainText(page, /business card|screenshot/i); await mainText(page, /voice note/i); });
+test('instructions: canonical triggers and capture route examples are present', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /#wpnetwork/i); await mainText(page, /#addtowestpeek/i); await mainText(page, /#westpeeknetwork/i); await mainText(page, /#wpdealflow/i); await mainText(page, /#dealflow/i); await mainText(page, /business card|screenshot/i); await mainText(page, /voice note/i); });
 test('instructions: no automatic execution guardrails are visible', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /Human approval is required before|does not silently send|Nothing sends automatically/i); });
 
 test('surface: mobile viewport keeps primary actions reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await expect(page.getByRole('navigation', { name: /Primary/i })).toBeVisible(); await nav(page, 'Dashboard'); await nav(page, 'Add Person'); await nav(page, 'Intake Queue'); await nav(page, 'How to Add People'); });

@@ -1,10 +1,15 @@
 import type { ApprovalRecord, ContactRecord, IntakeRecord, NotificationRecord, Owner, Priority, RelationshipTouch, TouchMethod } from './types';
-import { ALL_GMAIL_TRIGGERS, containsWestPeekTrigger } from './triggers';
+import { ALL_GMAIL_TRIGGERS, containsWestPeekTrigger, detectSourceTrigger, detectTriggerIntent } from './triggers';
 import { createStableId } from './ids';
 
 export interface ParsedCapture {
   hasTrigger: boolean;
   trigger?: string;
+  sourceTrigger?: string;
+  triggerIntent: 'network' | 'deal_flow';
+  personType: 'investor' | 'founder' | 'operator' | 'lawyer' | 'service_provider' | 'media' | 'general' | 'unknown';
+  dealFlowProspect: 'yes' | 'no' | 'unknown';
+  dealContext?: string;
   name?: string;
   company?: string;
   context?: string;
@@ -43,8 +48,12 @@ const touchMap: Record<string, TouchMethod> = {
 };
 
 export function parseWestPeekCapture(rawText: string): ParsedCapture {
-  const trigger = ALL_GMAIL_TRIGGERS.find((item) => rawText.toLowerCase().includes(item));
+  const trigger = detectSourceTrigger(rawText);
   const fields = parseKeyValueLines(rawText);
+  const triggerIntent = detectTriggerIntent(rawText);
+  const personType = classifyPersonType(rawText, triggerIntent);
+  const dealFlowProspect = triggerIntent === 'deal_flow' ? 'yes' : 'unknown';
+  const dealContext = triggerIntent === 'deal_flow' ? buildDealContext(rawText) : '';
   const context = fields.context || fields.notes || fields.note || inferContext(rawText);
   const owner = ownerMap[(fields.owner || '').trim().toLowerCase()] || inferOwner(rawText);
   const touchValue = (fields.touch || fields['type of touch'] || fields.method || '').trim().toLowerCase();
@@ -52,6 +61,11 @@ export function parseWestPeekCapture(rawText: string): ParsedCapture {
   return {
     hasTrigger: containsWestPeekTrigger(rawText),
     trigger,
+    sourceTrigger: trigger,
+    triggerIntent,
+    personType,
+    dealFlowProspect,
+    dealContext,
     name: fields.name || inferName(rawText),
     company: fields.company,
     context,
@@ -76,10 +90,15 @@ export function buildIntakeFromCapture(rawText: string, capturedBy: string): Int
     source_user_email: capturedBy,
     raw_text: rawText,
     parsed_name: parsed.name,
-    parsed_company: parsed.company,
+    parsed_company: parsed.company || inferCompanyFromDeal(rawText),
     parsed_email: extractEmail(rawText),
-    parsed_notes: parsed.context,
-    ai_summary: parsed.context || 'Captured for West Peek Network review.',
+    parsed_notes: parsed.triggerIntent === 'deal_flow' ? `Founder / prospective deal flow. ${parsed.context || 'Review founder and company context.'}` : parsed.context,
+    ai_summary: parsed.triggerIntent === 'deal_flow' ? `Founder / prospective deal flow. ${parsed.context || ''}${parsed.dealContext ? ` Deal context: ${parsed.dealContext}` : ''}`.trim() : parsed.context || 'Captured for West Peek Network review.',
+    source_trigger: parsed.sourceTrigger,
+    trigger_intent: parsed.triggerIntent,
+    person_type: parsed.personType,
+    deal_flow_prospect: parsed.dealFlowProspect,
+    deal_context: parsed.dealContext,
     ai_confidence: parsed.name || parsed.context ? 'medium' : 'low',
     review_status: 'ai_reviewed'
   };
@@ -96,10 +115,15 @@ export function convertIntakeToContact(intake: IntakeRecord, owner: Owner = 'Una
     full_name: intake.parsed_name || parsed.name || 'Unparsed Contact',
     email: intake.parsed_email,
     company: intake.parsed_company || parsed.company,
+    person_type: intake.person_type || parsed.personType,
+    deal_flow_prospect: intake.deal_flow_prospect || parsed.dealFlowProspect,
+    relationship_type: (intake.person_type || parsed.personType) === 'founder' ? 'Founder' : undefined,
     relationship_owner: parsed.owner === 'Unassigned' ? owner : parsed.owner,
     priority: parsed.priority,
-    tags: parsed.needsTouch ? ['Needs touch'] : [],
-    context_summary: intake.ai_summary || intake.parsed_notes || parsed.context || 'Captured for West Peek Network review.',
+    tags: buildTags(intake, parsed),
+    context_summary: buildContactSummary(intake, parsed),
+    dealflow_relevance: (intake.deal_flow_prospect || parsed.dealFlowProspect) === 'yes' ? String(intake.deal_context || intake.ai_summary || 'Prospective deal flow') : undefined,
+    founder_relevance: (intake.person_type || parsed.personType) === 'founder' ? String(intake.deal_context || intake.ai_summary || 'Founder relationship') : undefined,
     touch_needed: parsed.needsTouch,
     touch_status: parsed.needsTouch ? 'needed' : undefined,
     created_by: intake.captured_by,
@@ -239,4 +263,56 @@ function normalize(value: string): string {
 
 function extractEmail(text: string): string | undefined {
   return text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
+}
+
+
+function classifyPersonType(text: string, triggerIntent: 'network' | 'deal_flow') {
+  if (triggerIntent === 'deal_flow') return 'founder';
+  const lower = text.toLowerCase();
+  if (/\b(founder|co-founder|ceo|startup|building)\b/.test(lower)) return 'founder';
+  if (/\b(investor|fund|family office|lp|gp|capital)\b/.test(lower)) return 'investor';
+  if (/\b(lawyer|attorney|counsel|legal)\b/.test(lower)) return 'lawyer';
+  if (/\b(operator|operations|chief of staff)\b/.test(lower)) return 'operator';
+  if (/\b(service provider|vendor|agency|consultant)\b/.test(lower)) return 'service_provider';
+  if (/\b(media|journalist|press|podcast)\b/.test(lower)) return 'media';
+  return 'unknown';
+}
+
+function buildDealContext(text: string) {
+  const parts = [
+    text.match(/\b[A-Z][A-Za-z0-9]+ is building[^\n]+/i)?.[0],
+    text.match(/Traction:\s*([^\n]+)/i)?.[0],
+    text.match(/Team:\s*([^\n]+)/i)?.[0],
+    text.match(/Raise:\s*([^\n]+)/i)?.[0],
+    text.match(/Deck:\s*(https?:\/\/[^\s)]+)/i)?.[0],
+    text.match(/(?:coffee|video call|quick call|meeting)[^.?\n]*(?:[.?\n]|$)/i)?.[0]?.trim(),
+    text.match(/\bPitch\s*&\s*Drink\b/i)?.[0],
+    text.match(/\bNY Tech Week\b/i)?.[0]
+  ].filter(Boolean).map((item) => String(item).trim());
+  return Array.from(new Set(parts)).join(' | ');
+}
+
+function inferCompanyFromDeal(text: string) {
+  const blurb = text.match(/\b([A-Z][A-Za-z0-9]+)\s+is\s+building\b/);
+  if (blurb?.[1]) return blurb[1].trim();
+  const email = extractEmail(text);
+  const domain = email?.split('@')[1] || '';
+  if (domain && !/gmail|yahoo|outlook|icloud|hotmail/i.test(domain)) return domain.split('.')[0].replace(/\b\w/g, (char) => char.toUpperCase());
+  return undefined;
+}
+
+function buildTags(intake: IntakeRecord, parsed: ParsedCapture) {
+  const tags = new Set<string>();
+  if (parsed.needsTouch) tags.add('Needs touch');
+  if ((intake.person_type || parsed.personType) === 'founder') tags.add('Founder');
+  if ((intake.deal_flow_prospect || parsed.dealFlowProspect) === 'yes') tags.add('Prospective Deal Flow');
+  return Array.from(tags);
+}
+
+function buildContactSummary(intake: IntakeRecord, parsed: ParsedCapture) {
+  return [
+    (intake.deal_flow_prospect || parsed.dealFlowProspect) === 'yes' ? 'Founder / prospective deal flow.' : '',
+    intake.ai_summary || intake.parsed_notes || parsed.context || 'Captured for West Peek Network review.',
+    intake.deal_context ? `Deal context: ${intake.deal_context}` : ''
+  ].filter(Boolean).join(' ');
 }

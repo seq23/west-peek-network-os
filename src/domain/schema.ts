@@ -9,6 +9,9 @@ export const intakeReviewStatusSchema = z.enum(['new', 'ai_reviewed', 'pending_h
 export const approvalStatusSchema = z.enum(['pending', 'approved', 'edited', 'rejected', 'executed', 'failed', 'cancelled']);
 export const approvalRiskSchema = z.enum(['low', 'medium', 'high']);
 export const notificationStatusSchema = z.enum(['unread', 'read', 'dismissed', 'resolved', 'failed']);
+export const personTypeSchema = z.enum(['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general', 'unknown']);
+export const dealFlowProspectSchema = z.enum(['yes', 'no', 'unknown']);
+export const triggerIntentSchema = z.enum(['network', 'deal_flow']);
 
 export const quickAddSchema = z.object({
   full_name: z.string().optional().or(z.literal('')),
@@ -31,6 +34,8 @@ export const contactSchema = z.object({
   full_name: z.string().min(1),
   email: z.string().email().optional(),
   company: z.string().optional(),
+  person_type: personTypeSchema.optional(),
+  deal_flow_prospect: dealFlowProspectSchema.optional(),
   relationship_owner: ownerSchema,
   priority: prioritySchema,
   tags: z.array(z.string()),
@@ -48,6 +53,11 @@ export const intakeSchema = z.object({
   source: intakeSourceSchema,
   captured_by: z.string(),
   raw_text: z.string(),
+  source_trigger: z.string().optional(),
+  trigger_intent: triggerIntentSchema.optional(),
+  person_type: personTypeSchema.optional(),
+  deal_flow_prospect: dealFlowProspectSchema.optional(),
+  deal_context: z.string().optional(),
   review_status: intakeReviewStatusSchema
 });
 

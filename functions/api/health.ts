@@ -7,6 +7,7 @@ export async function onRequest() {
     status: 'baseline-runtime-surfaces-present',
     canonicalTrigger: '#wpnetwork',
     acceptedAliases: ['#addtowestpeek', '#westpeeknetwork'],
+    dealFlowTriggers: ['#wpdealflow', '#dealflow'],
     providerRuntime: 'External Google/Gmail/Sheets/Claude/vendor execution requires configured secrets.'
   });
 }

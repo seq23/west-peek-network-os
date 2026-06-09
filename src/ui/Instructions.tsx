@@ -103,6 +103,11 @@ Met at the conference. Interested in secondaries.`
 Jordan Miles — helped us with an intro. Scooter owns. Send thank-you card this week.`
   },
   {
+    title: 'Founder / prospective deal flow',
+    use: 'Use when Scooter or Sequoia receives founder outreach that should become lightweight deal flow.',
+    body: `#wpdealflow\nName: Andrey Botnev\nEmail: ab@wizium.ai\nCompany: Wizium\nContext: Building AI orchestration for marketplace sellers. $144K ARR, +70% MoM, 200 customers. Raising $1.5M Pre-Seed with $900K committed. Deck included.`
+  },
+  {
     title: 'Structured — cleanest for review',
     use: 'Use when you have details and want the cleanest Intake Queue item.',
     body: `#wpnetwork
@@ -126,8 +131,8 @@ export function Instructions() {
       <div className="card">
         <h2>Canonical trigger</h2>
         <p className="metric">#wpnetwork</p>
-        <p>Put <strong>#wpnetwork</strong> anywhere in a Gmail message or note when you want the relationship context captured.</p>
-        <p className="muted">Accepted aliases: #addtowestpeek, #westpeeknetwork.</p>
+        <p>Put <strong>#wpnetwork</strong> anywhere in a Gmail message or note when you want relationship context captured. Use <strong>#wpdealflow</strong> or <strong>#dealflow</strong> when a founder should be classified as prospective deal flow.</p>
+        <p className="muted">Relationship aliases: #addtowestpeek, #westpeeknetwork. Deal-flow alias: #dealflow.</p>
       </div>
       <div className="card">
         <h2>Capture first, complete later</h2>
@@ -145,6 +150,7 @@ export function Instructions() {
       <div className="table-like">
         <div><strong>Hosting or attending an event?</strong><span>Create an Event, copy the public form link, and let attendees enter their own details.</span></div>
         <div><strong>Standing with the person?</strong><span>Email them normally and add #wpnetwork. Minimal is fine.</span></div>
+        <div><strong>Founder deal flow?</strong><span>Forward or tag the email with #wpdealflow or #dealflow. The system marks founder + Deal-flow prospect for review.</span></div>
         <div><strong>Want the outside email clean?</strong><span>Send clean first, then forward the thread to yourself with #wpnetwork.</span></div>
         <div><strong>Have a business card?</strong><span>Upload the card/screenshot for OCR.</span></div>
         <div><strong>Have a Notes screenshot?</strong><span>Upload it as a notes_screenshot capture.</span></div>

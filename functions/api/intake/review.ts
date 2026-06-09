@@ -59,10 +59,15 @@ function buildContactFromIntake(intake: Record<string, unknown>, actor: string, 
     full_name: fullName,
     email: String(intake.parsed_email || '').trim(),
     company: String(intake.parsed_company || '').trim(),
+    person_type: normalizePersonType(intake.person_type),
+    deal_flow_prospect: normalizeDealFlowProspect(intake.deal_flow_prospect),
+    relationship_type: normalizePersonType(intake.person_type) === 'founder' ? 'Founder' : '',
     relationship_owner: normalizeOwner(intake.parsed_owner || intake.captured_by),
     priority: normalizePriority(intake.parsed_priority || intake.suggested_priority || intake.priority),
-    tags: String(intake.capture_type || intake.source || 'intake'),
-    context_summary: String(intake.parsed_notes || intake.ai_summary || raw || 'Captured through West Peek intake queue.'),
+    tags: buildContactTags(intake),
+    context_summary: buildContactContext(intake, raw),
+    dealflow_relevance: normalizeDealFlowProspect(intake.deal_flow_prospect) === 'yes' ? String(intake.deal_context || intake.ai_summary || 'Prospective deal flow').trim() : '',
+    founder_relevance: normalizePersonType(intake.person_type) === 'founder' ? String(intake.deal_context || intake.ai_summary || 'Founder relationship').trim() : '',
     touch_needed: shouldCreateTouch(intake) ? 'true' : 'false',
     touch_status: shouldCreateTouch(intake) ? 'needed' : '',
     created_by: actor,
@@ -155,4 +160,34 @@ function latestById(rows: Array<Record<string, unknown>>, idKey: string) {
 function timestamp(value: unknown) {
   const parsed = Date.parse(String(value || ''));
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+
+function normalizePersonType(value: unknown) {
+  const text = String(value || '').toLowerCase();
+  if (['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general', 'unknown'].includes(text)) return text;
+  return '';
+}
+
+function normalizeDealFlowProspect(value: unknown) {
+  const text = String(value || '').toLowerCase();
+  if (['yes', 'no', 'unknown'].includes(text)) return text;
+  return '';
+}
+
+function buildContactTags(intake: Record<string, unknown>) {
+  const tags = new Set<string>();
+  for (const tag of String(intake.tags || intake.capture_type || intake.source || 'intake').split(',').map((item) => item.trim()).filter(Boolean)) tags.add(tag);
+  if (normalizePersonType(intake.person_type) === 'founder') tags.add('Founder');
+  if (normalizeDealFlowProspect(intake.deal_flow_prospect) === 'yes') tags.add('Prospective Deal Flow');
+  return Array.from(tags).join(', ');
+}
+
+function buildContactContext(intake: Record<string, unknown>, raw: string) {
+  const isDealFlow = normalizeDealFlowProspect(intake.deal_flow_prospect) === 'yes';
+  return [
+    isDealFlow ? 'Founder / prospective deal flow.' : '',
+    String(intake.parsed_notes || intake.ai_summary || raw || 'Captured through West Peek intake queue.'),
+    intake.deal_context ? `Deal context: ${intake.deal_context}` : ''
+  ].filter(Boolean).join(' ');
 }

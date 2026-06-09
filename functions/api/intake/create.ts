@@ -1,6 +1,6 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json, readJson } from '../../_shared/json';
-import { containsTrigger, inferNeedsTouch, normalizeOwner, normalizePriority, normalizeTouch, parseFields } from '../../_shared/triggers';
+import { classifyTrigger, containsTrigger, inferNeedsTouch, normalizeOwner, normalizePriority, normalizeTouch, parseFields } from '../../_shared/triggers';
 import { appendRecord, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
@@ -28,11 +28,13 @@ export async function onRequestPost({ request, env }: Context) {
   const rawText = String(body.raw_text || '').slice(0, 6000);
   if (!containsTrigger(rawText)) return json({ ok: false, error: 'No accepted West Peek Network trigger found.' }, { status: 422 });
   const fields = parseFields(rawText);
+  const classification = classifyTrigger(rawText);
   const inferred = inferFromEmailEnvelope(body);
   const now = new Date().toISOString();
   const parsedName = fields.name || inferred.name || '';
   const parsedEmail = fields.email || inferred.email || '';
-  const parsedNotes = fields.context || fields.notes || fields.raw_unstructured_context || stripTrigger(rawText) || 'Minimal #wpnetwork capture. Review email thread for context.';
+  const baseNotes = fields.context || fields.notes || fields.raw_unstructured_context || stripTrigger(rawText) || 'Minimal #wpnetwork capture. Review email thread for context.';
+  const parsedNotes = classification.trigger_intent === 'deal_flow' ? `Founder / prospective deal flow. ${baseNotes}` : baseNotes;
   const parsedOwner = normalizeOwner(fields.owner) || inferOwnerFromText(rawText) || inferOwnerFromEmail(user.email);
   const parsedTouch = normalizeTouch(fields.touch) || inferTouchFromText(rawText);
   const parsedPriority = normalizePriority(fields.priority) || inferPriorityFromText(rawText);
@@ -50,6 +52,11 @@ export async function onRequestPost({ request, env }: Context) {
     source_file_type: '',
     gmail_message_id: body.gmail_message_id || '',
     gmail_thread_id: body.gmail_thread_id || '',
+    source_trigger: classification.source_trigger,
+    trigger_intent: classification.trigger_intent,
+    person_type: classification.person_type,
+    deal_flow_prospect: classification.deal_flow_prospect,
+    deal_context: classification.deal_context,
     raw_text: rawText,
     email_subject: body.email_subject || '',
     email_from: body.email_from || '',
@@ -58,7 +65,7 @@ export async function onRequestPost({ request, env }: Context) {
     parsed_name: parsedName,
     parsed_email: parsedEmail,
     parsed_phone: fields.phone || '',
-    parsed_company: fields.company || '',
+    parsed_company: fields.company || inferCompanyFromText(rawText) || '',
     parsed_title: fields.title || '',
     parsed_website: fields.website || '',
     parsed_notes: parsedNotes,
@@ -70,10 +77,11 @@ export async function onRequestPost({ request, env }: Context) {
     extracted_text: '',
     transcript_text: '',
     missing_fields: missingFields(parsedName, parsedEmail, fields.company).join(', '),
-    ai_summary: parsedNotes,
+    ai_summary: classification.trigger_intent === 'deal_flow' ? buildDealSummary(parsedName, parsedEmail, fields.company || inferCompanyFromText(rawText) || '', parsedNotes, classification.deal_context) : parsedNotes,
     ai_confidence: parsedName || parsedEmail || parsedNotes ? 'medium' : 'low',
     internal_data_trace: JSON.stringify([
-      { stage: 'trigger_detected', status: 'passed', detail: 'accepted West Peek trigger found' },
+      { stage: 'trigger_detected', status: 'passed', detail: `accepted West Peek trigger found: ${classification.source_trigger || 'unknown'}` },
+      { stage: 'classification', status: 'passed', detail: `${classification.trigger_intent}; ${classification.person_type}; deal_flow_prospect=${classification.deal_flow_prospect}` },
       { stage: 'partial_capture', status: 'passed', detail: 'minimal, freeform, and structured captures are allowed; missing fields go to human review' },
       { stage: 'execution_guardrail', status: 'passed', detail: 'no contact added automatically' }
     ]),
@@ -142,7 +150,7 @@ function inferDueFromText(text: string) {
 }
 
 function stripTrigger(text: string) {
-  return text.replace(/#wpnetwork|#addtowestpeek|#westpeeknetwork/gi, '').trim();
+  return text.replace(/#wpnetwork|#addtowestpeek|#westpeeknetwork|#wpdealflow|#dealflow/gi, '').trim();
 }
 
 function missingFields(name: string, email: string, company: string | undefined) {
@@ -151,4 +159,23 @@ function missingFields(name: string, email: string, company: string | undefined)
   if (!email) missing.push('email');
   if (!company) missing.push('company');
   return missing;
+}
+
+
+function inferCompanyFromText(text: string) {
+  const blurb = text.match(/\b([A-Z][A-Za-z0-9]+)\s+is\s+building\b/);
+  if (blurb?.[1]) return blurb[1].trim();
+  const emailDomain = text.match(/[A-Z0-9._%+-]+@([A-Z0-9.-]+\.[A-Z]{2,})/i)?.[1] || '';
+  if (emailDomain && !/gmail|yahoo|outlook|icloud|hotmail/i.test(emailDomain)) {
+    return emailDomain.split('.')[0].replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+  return '';
+}
+
+function buildDealSummary(name: string, email: string, company: string, notes: string, dealContext: string) {
+  return [
+    `Founder / prospective deal flow${company ? `: ${company}` : name ? `: ${name}` : email ? `: ${email}` : ''}.`,
+    notes,
+    dealContext ? `Deal context: ${dealContext}` : ''
+  ].filter(Boolean).join(' ');
 }

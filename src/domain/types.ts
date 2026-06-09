@@ -12,6 +12,9 @@ export type IntakeSource = 'gmail_trigger' | 'manual_note' | 'pasted_notes' | 'b
 export type CaptureType = 'email_thread' | 'self_email_note' | 'forwarded_email' | 'manual_add' | 'business_card' | 'notes_screenshot' | 'voice_note' | 'thank_you_card' | 'event_public_form' | 'event_private_note' | 'other';
 export type IntakeReviewStatus = 'new' | 'ai_reviewed' | 'pending_human_review' | 'needs_human_review' | 'converted' | 'attached' | 'dismissed' | 'needs_more_info';
 export type InteractionType = 'email' | 'call' | 'meeting' | 'intro' | 'event' | 'note' | 'touch' | 'gift' | 'handwritten_note' | 'other';
+export type PersonType = 'investor' | 'founder' | 'operator' | 'lawyer' | 'service_provider' | 'media' | 'general' | 'unknown';
+export type DealFlowProspect = 'yes' | 'no' | 'unknown';
+export type TriggerIntent = 'network' | 'deal_flow';
 
 
 export interface EventRecord {
@@ -75,6 +78,8 @@ export interface ContactRecord {
   source_event?: string;
   source_detail?: string;
   relationship_type?: string;
+  person_type?: PersonType;
+  deal_flow_prospect?: DealFlowProspect;
   priority: Priority;
   tags: string[];
   notes_summary?: string;
@@ -114,6 +119,11 @@ export interface IntakeRecord {
   source_user_email?: string;
   gmail_message_id?: string;
   gmail_thread_id?: string;
+  source_trigger?: string;
+  trigger_intent?: TriggerIntent;
+  person_type?: PersonType;
+  deal_flow_prospect?: DealFlowProspect;
+  deal_context?: string;
   raw_text: string;
   email_subject?: string;
   email_from?: string;

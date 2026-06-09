@@ -11,6 +11,8 @@ const authSource = readFileSync('functions/_shared/auth.ts', 'utf8') + readFileS
 assert.match(triggerSource, /CANONICAL_GMAIL_TRIGGER = '#wpnetwork'/);
 assert.match(triggerSource, /#addtowestpeek/);
 assert.match(triggerSource, /#westpeeknetwork/);
+assert.match(triggerSource, /#wpdealflow/);
+assert.match(triggerSource, /#dealflow/);
 assert.match(sharedTriggerSource, /FIELD_ALIASES/);
 assert.match(sharedTriggerSource, /normalizeTouch/);
 assert.match(sharedTriggerSource, /inferNeedsTouch/);
@@ -106,4 +108,256 @@ for (const fragment of [
   assert.ok(e2eSource.includes(fragment), `e2e persistence coverage missing ${fragment}`);
 }
 
-console.log('DOMAIN WORKFLOW CHECK OK — locked triggers, live local workflows, Sheets persistence surfaces, AI suggestion route, event public form route, persistence E2E coverage, approvals, notifications, and instructions are present.');
+
+for (const fragment of [
+  'source_trigger: parsed.sourceTrigger',
+  'trigger_intent: parsed.triggerIntent',
+  'person_type: parsed.personType',
+  'deal_flow_prospect: parsed.dealFlowProspect',
+  'deal_context: parsed.dealContext',
+  "relationship_type: (intake.person_type || parsed.personType) === 'founder' ? 'Founder' : undefined",
+  "tags.add('Founder')",
+  "tags.add('Prospective Deal Flow')",
+  "Founder / prospective deal flow.",
+  'dealflow_relevance',
+  'founder_relevance',
+  'buildDealContext',
+  'classifyPersonType',
+  'detectSourceTrigger',
+  'detectTriggerIntent'
+]) {
+  assert.ok(workflowSource.includes(fragment), `dealflow workflow source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "CANONICAL_DEALFLOW_TRIGGER = '#wpdealflow'",
+  "ACCEPTED_DEALFLOW_TRIGGER_ALIASES = ['#dealflow']",
+  'ALL_DEALFLOW_GMAIL_TRIGGERS',
+  'detectSourceTrigger',
+  'detectTriggerIntent'
+]) {
+  assert.ok(triggerSource.includes(fragment), `dealflow trigger source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "canonicalDealFlowTrigger = '#wpdealflow'",
+  "acceptedDealFlowAliases = ['#dealflow']",
+  'classifyTrigger',
+  'source_trigger',
+  'trigger_intent',
+  'person_type',
+  'deal_flow_prospect',
+  'deal_context',
+  'buildDealContext'
+]) {
+  assert.ok(sharedTriggerSource.includes(fragment), `shared trigger source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "source_trigger', 'trigger_intent', 'person_type', 'deal_flow_prospect', 'deal_context'",
+  "person_type', 'deal_flow_prospect', 'relationship_type'",
+  'dealflow_relevance',
+  'founder_relevance'
+]) {
+  assert.ok(functionsSource.includes(fragment), `Sheets/API persistence missing ${fragment}`);
+}
+
+for (const fragment of [
+  '#wpdealflow',
+  '#dealflow',
+  'Deal-flow prospect'
+]) {
+  assert.ok(instructionsSource.includes(fragment), `instructions missing dealflow fragment ${fragment}`);
+  assert.ok(e2eSource.includes(fragment), `e2e missing dealflow fragment ${fragment}`);
+}
+
+
+for (const fragment of [
+  'source_trigger: parsed.sourceTrigger',
+  'trigger_intent: parsed.triggerIntent',
+  'person_type: parsed.personType',
+  'deal_flow_prospect: parsed.dealFlowProspect',
+  'deal_context: parsed.dealContext',
+  "relationship_type: (intake.person_type || parsed.personType) === 'founder' ? 'Founder' : undefined",
+  "tags.add('Founder')",
+  "tags.add('Prospective Deal Flow')",
+  "Founder / prospective deal flow.",
+  'dealflow_relevance',
+  'founder_relevance',
+  'buildDealContext',
+  'classifyPersonType',
+  'detectSourceTrigger',
+  'detectTriggerIntent'
+]) {
+  assert.ok(workflowSource.includes(fragment), `dealflow workflow source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "CANONICAL_DEALFLOW_TRIGGER = '#wpdealflow'",
+  "ACCEPTED_DEALFLOW_TRIGGER_ALIASES = ['#dealflow']",
+  'ALL_DEALFLOW_GMAIL_TRIGGERS',
+  'detectSourceTrigger',
+  'detectTriggerIntent'
+]) {
+  assert.ok(triggerSource.includes(fragment), `dealflow trigger source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "canonicalDealFlowTrigger = '#wpdealflow'",
+  "acceptedDealFlowAliases = ['#dealflow']",
+  'classifyTrigger',
+  'source_trigger',
+  'trigger_intent',
+  'person_type',
+  'deal_flow_prospect',
+  'deal_context',
+  'buildDealContext'
+]) {
+  assert.ok(sharedTriggerSource.includes(fragment), `shared trigger source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "source_trigger', 'trigger_intent', 'person_type', 'deal_flow_prospect', 'deal_context'",
+  "person_type', 'deal_flow_prospect', 'relationship_type'",
+  'dealflow_relevance',
+  'founder_relevance'
+]) {
+  assert.ok(functionsSource.includes(fragment), `Sheets/API persistence missing ${fragment}`);
+}
+
+for (const fragment of [
+  '#wpdealflow',
+  '#dealflow',
+  'Deal-flow prospect'
+]) {
+  assert.ok(instructionsSource.includes(fragment), `instructions missing dealflow fragment ${fragment}`);
+  assert.ok(e2eSource.includes(fragment), `e2e missing dealflow fragment ${fragment}`);
+}
+
+
+for (const fragment of [
+  'source_trigger: parsed.sourceTrigger',
+  'trigger_intent: parsed.triggerIntent',
+  'person_type: parsed.personType',
+  'deal_flow_prospect: parsed.dealFlowProspect',
+  'deal_context: parsed.dealContext',
+  "relationship_type: (intake.person_type || parsed.personType) === 'founder' ? 'Founder' : undefined",
+  "tags.add('Founder')",
+  "tags.add('Prospective Deal Flow')",
+  "Founder / prospective deal flow.",
+  'dealflow_relevance',
+  'founder_relevance',
+  'buildDealContext',
+  'classifyPersonType',
+  'detectSourceTrigger',
+  'detectTriggerIntent'
+]) {
+  assert.ok(workflowSource.includes(fragment), `dealflow workflow source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "CANONICAL_DEALFLOW_TRIGGER = '#wpdealflow'",
+  "ACCEPTED_DEALFLOW_TRIGGER_ALIASES = ['#dealflow']",
+  'ALL_DEALFLOW_GMAIL_TRIGGERS',
+  'detectSourceTrigger',
+  'detectTriggerIntent'
+]) {
+  assert.ok(triggerSource.includes(fragment), `dealflow trigger source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "canonicalDealFlowTrigger = '#wpdealflow'",
+  "acceptedDealFlowAliases = ['#dealflow']",
+  'classifyTrigger',
+  'source_trigger',
+  'trigger_intent',
+  'person_type',
+  'deal_flow_prospect',
+  'deal_context',
+  'buildDealContext'
+]) {
+  assert.ok(sharedTriggerSource.includes(fragment), `shared trigger source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "source_trigger', 'trigger_intent', 'person_type', 'deal_flow_prospect', 'deal_context'",
+  "person_type', 'deal_flow_prospect', 'relationship_type'",
+  'dealflow_relevance',
+  'founder_relevance'
+]) {
+  assert.ok(functionsSource.includes(fragment), `Sheets/API persistence missing ${fragment}`);
+}
+
+for (const fragment of [
+  '#wpdealflow',
+  '#dealflow',
+  'Deal-flow prospect'
+]) {
+  assert.ok(instructionsSource.includes(fragment), `instructions missing dealflow fragment ${fragment}`);
+  assert.ok(e2eSource.includes(fragment), `e2e missing dealflow fragment ${fragment}`);
+}
+
+
+for (const fragment of [
+  'source_trigger: parsed.sourceTrigger',
+  'trigger_intent: parsed.triggerIntent',
+  'person_type: parsed.personType',
+  'deal_flow_prospect: parsed.dealFlowProspect',
+  'deal_context: parsed.dealContext',
+  "relationship_type: (intake.person_type || parsed.personType) === 'founder' ? 'Founder' : undefined",
+  "tags.add('Founder')",
+  "tags.add('Prospective Deal Flow')",
+  "Founder / prospective deal flow.",
+  'dealflow_relevance',
+  'founder_relevance',
+  'buildDealContext',
+  'classifyPersonType',
+  'detectSourceTrigger',
+  'detectTriggerIntent'
+]) {
+  assert.ok(workflowSource.includes(fragment), `dealflow workflow source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "CANONICAL_DEALFLOW_TRIGGER = '#wpdealflow'",
+  "ACCEPTED_DEALFLOW_TRIGGER_ALIASES = ['#dealflow']",
+  'ALL_DEALFLOW_GMAIL_TRIGGERS',
+  'detectSourceTrigger',
+  'detectTriggerIntent'
+]) {
+  assert.ok(triggerSource.includes(fragment), `dealflow trigger source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "canonicalDealFlowTrigger = '#wpdealflow'",
+  "acceptedDealFlowAliases = ['#dealflow']",
+  'classifyTrigger',
+  'source_trigger',
+  'trigger_intent',
+  'person_type',
+  'deal_flow_prospect',
+  'deal_context',
+  'buildDealContext'
+]) {
+  assert.ok(sharedTriggerSource.includes(fragment), `shared trigger source missing ${fragment}`);
+}
+
+for (const fragment of [
+  "source_trigger', 'trigger_intent', 'person_type', 'deal_flow_prospect', 'deal_context'",
+  "person_type', 'deal_flow_prospect', 'relationship_type'",
+  'dealflow_relevance',
+  'founder_relevance'
+]) {
+  assert.ok(functionsSource.includes(fragment), `Sheets/API persistence missing ${fragment}`);
+}
+
+for (const fragment of [
+  '#wpdealflow',
+  '#dealflow',
+  'Deal-flow prospect'
+]) {
+  assert.ok(instructionsSource.includes(fragment), `instructions missing dealflow fragment ${fragment}`);
+  assert.ok(e2eSource.includes(fragment), `e2e missing dealflow fragment ${fragment}`);
+}
+
+console.log('DOMAIN WORKFLOW CHECK OK — locked triggers, live local workflows, Sheets persistence surfaces, AI suggestion route, event public form route, persistence E2E coverage, approvals, notifications, instructions, and dealflow founder capture surfaces are present.');
