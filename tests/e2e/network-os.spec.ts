@@ -514,6 +514,33 @@ test('transaction: accepted Gmail trigger aliases create intake records', async 
 });
 
 test('transaction+persistence: intake can attach to existing person', async ({ page }) => { await nav(page, 'Intake Queue'); await page.getByLabel('Gmail trigger text').fill(`#wpnetwork\nName: Existing Investor\nEmail: existing@example.com\nCompany: Apex Family Office\nContext: Attach to existing person.`); await page.getByRole('main').getByRole('button', { name: /Capture to Intake Queue/i }).click(); page.once('dialog', (dialog) => dialog.accept('contact_existing')); await page.getByTestId(/intake-/).first().getByRole('button', { name: /^Attach to Existing Person$/i }).click(); await mainText(page, /Intake attach recorded/i); });
+
+test('transaction+persistence: manual Add Person can create founder deal-flow contact', async ({ page }) => {
+  await nav(page, 'Add Person');
+  await page.locator('input[name="full_name"]').fill('Manual Founder Dealflow');
+  await page.locator('input[name="email"]').fill('manual-founder-dealflow@example.com');
+  await page.locator('input[name="company"]').fill('ManualDealCo');
+  await page.locator('select[name="relationship_owner"]').selectOption('Scooter');
+  await page.locator('select[name="person_type"]').selectOption('founder');
+  await page.locator('select[name="deal_flow_prospect"]').selectOption('yes');
+  await page.locator('input[name="relationship_type"]').fill('Founder');
+  await page.locator('textarea[name="context_summary"]').fill('Manual Add Person founder prospect with lightweight deal-flow context.');
+  await page.locator('input[name="dealflow_relevance"]').fill('Raising Pre-Seed; prospective deal flow.');
+  await page.locator('input[name="founder_relevance"]').fill('Founder relationship from direct manual entry.');
+  await page.locator('input[name="tags"]').fill('NY Tech Week');
+  await page.getByRole('button', { name: /Save person/i }).click();
+
+  await expect(page.getByRole('main').getByRole('heading', { name: 'Manual Founder Dealflow' })).toBeVisible();
+  await mainText(page, /ManualDealCo/i);
+  await mainText(page, /founder/i);
+  await mainText(page, /Deal-flow prospect/i);
+
+  await page.reload();
+  await nav(page, 'West Peek Network');
+  await expect(page.getByRole('main').getByRole('heading', { name: 'Manual Founder Dealflow' })).toBeVisible();
+  await mainText(page, /Deal-flow prospect/i);
+});
+
 test('transaction: deal-flow founder trigger creates classified intake', async ({ page }) => {
   await nav(page, 'Intake Queue');
   await page.getByLabel('Gmail trigger text').fill(`#wpdealflow\nName: Andrey Botnev\nEmail: ab@wizium.ai\nCompany: Wizium\nContext: Wizium is building AI orchestration for marketplace sellers. Traction: $144K ARR (+70% MoM), 200 customers. Raise: $1.5M Pre-Seed, $900K committed. Deck: https://docsend.com/view/59xjm85vfwqayes5`);

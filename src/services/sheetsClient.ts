@@ -102,10 +102,26 @@ function rows(value: unknown) { return Array.isArray(value) ? value as Array<Rec
 
 function normalizeContact(row: Record<string, unknown>): ContactRecord {
   return {
-    contact_id: str(row.contact_id), created_at: str(row.created_at), updated_at: str(row.updated_at), status: str(row.status, 'active') as 'active' | 'archived',
-    full_name: str(row.full_name, 'Unnamed contact'), email: emptyToUndefined(row.email), company: emptyToUndefined(row.company), relationship_owner: owner(row.relationship_owner),
-    priority: priority(row.priority), tags: split(row.tags), context_summary: str(row.context_summary, 'No context yet.'), touch_needed: bool(row.touch_needed), touch_status: emptyToUndefined(row.touch_status) as ContactRecord['touch_status'],
-    created_by: str(row.created_by, 'google_sheets'), updated_by: str(row.updated_by, 'google_sheets')
+    contact_id: str(row.contact_id),
+    created_at: str(row.created_at),
+    updated_at: str(row.updated_at),
+    status: str(row.status, 'active') as 'active' | 'archived',
+    full_name: str(row.full_name, 'Unnamed contact'),
+    email: emptyToUndefined(row.email),
+    company: emptyToUndefined(row.company),
+    person_type: emptyToUndefined(row.person_type) as ContactRecord['person_type'],
+    deal_flow_prospect: emptyToUndefined(row.deal_flow_prospect) as ContactRecord['deal_flow_prospect'],
+    relationship_type: emptyToUndefined(row.relationship_type),
+    relationship_owner: owner(row.relationship_owner),
+    priority: priority(row.priority),
+    tags: split(row.tags),
+    context_summary: str(row.context_summary, 'No context yet.'),
+    dealflow_relevance: emptyToUndefined(row.dealflow_relevance),
+    founder_relevance: emptyToUndefined(row.founder_relevance),
+    touch_needed: bool(row.touch_needed),
+    touch_status: emptyToUndefined(row.touch_status) as ContactRecord['touch_status'],
+    created_by: str(row.created_by, 'google_sheets'),
+    updated_by: str(row.updated_by, 'google_sheets')
   };
 }
 

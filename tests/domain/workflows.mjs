@@ -53,6 +53,15 @@ for (const fragment of [
 }
 
 for (const fragment of [
+  'Person Type',
+  'Deal-flow Prospect',
+  'Dealflow Relevance',
+  'Founder Relevance'
+]) {
+  assert.ok(appSource.includes(fragment), `Add Person missing founder/dealflow UI ${fragment}`);
+}
+
+for (const fragment of [
   'Email them on the spot',
   'Forward an email to yourself',
   'Upload a business card or screenshot',
@@ -67,6 +76,9 @@ assert.ok(instructionsSource.includes('Touch: Handwritten note'), 'instructions 
 assert.ok(instructionsSource.includes('Any field can be missing'), 'instructions must state structured fields are nonblocking');
 
 const functionsSource = readFileSync('functions/api/sheets/snapshot.ts', 'utf8') + readFileSync('functions/api/intake/review.ts', 'utf8') + readFileSync('functions/api/intake/create.ts', 'utf8') + readFileSync('functions/api/intake/media/create.ts', 'utf8') + readFileSync('functions/api/contacts/create.ts', 'utf8') + readFileSync('functions/api/ai/suggestions/create.ts', 'utf8') + readFileSync('functions/api/touches/thank-you/create.ts', 'utf8') + readFileSync('functions/api/touches/fulfillment/update.ts', 'utf8') + readFileSync('functions/api/events/create.ts', 'utf8') + readFileSync('functions/api/events/context/create.ts', 'utf8') + readFileSync('functions/e/[slug].ts', 'utf8') + readFileSync('functions/_shared/anthropic.ts', 'utf8') + readFileSync('functions/_shared/googleSpeech.ts', 'utf8') + readFileSync('functions/_shared/media.ts', 'utf8') + readFileSync('functions/_shared/sheets.ts', 'utf8') + readFileSync('src/domain/handwrittenVendors.ts', 'utf8') + readFileSync('src/ui/App.tsx', 'utf8');
+assert.ok(functionsSource.includes('normalizePersonType(body.person_type)'), 'Contact create API must preserve person_type.');
+assert.ok(functionsSource.includes('normalizeDealFlowProspect(body.deal_flow_prospect)'), 'Contact create API must preserve deal_flow_prospect.');
+
 for (const fragment of ['appendRecord', 'readTab', "persistence: \'google_sheets\'", 'GOOGLE_PRIVATE_KEY', 'ai_suggestions', '/v1/messages', 'execution_allowed: false', 'requireAuthenticatedUser', 'MAX_RAW_TEXT_CHARS', 'internal_data_trace', 'google_speech_to_text', 'extractIntakeFromImage', 'virtual_thank_you_card', 'relationship_touches', 'latestById', 'converted_contact_id', 'event_attendees', 'event_public_form', 'public_form_enabled', 'pending_human_review', 'parsed_owner', 'parsed_touch', 'parsed_priority', 'parsed_due', 'parsed_needs_touch', 'structured_intake_touch', 'fulfillment_status', 'opened_vendor', 'will_do_myself', 'sent_externally']) {
   assert.ok(functionsSource.includes(fragment), `runtime persistence missing ${fragment}`);
 }
@@ -87,6 +99,8 @@ assert.ok(appSource.includes("fetch('/api/session', { credentials: 'same-origin'
 assert.ok(appSource.includes("fetch('/api/oauth/status', { credentials: 'same-origin' })"), 'OAuth status refresh must explicitly include same-origin credentials.');
 assert.ok(appSource.includes("fetch('/api/admin/sheets/maintain', { method: 'POST', credentials: 'same-origin' })"), 'Sheet maintenance must explicitly include same-origin credentials.');
 assert.ok(sheetsClientSource.includes("credentials: 'same-origin'"), 'Google Sheets API client must include same-origin credentials for all app writes/reads.');
+assert.ok(sheetsClientSource.includes('person_type: emptyToUndefined(row.person_type)'), 'Sheet snapshot contact normalization must preserve person_type.');
+assert.ok(sheetsClientSource.includes('deal_flow_prospect: emptyToUndefined(row.deal_flow_prospect)'), 'Sheet snapshot contact normalization must preserve deal_flow_prospect.');
 
 const fixtureSource = readFileSync('src/data/fixtures.ts', 'utf8');
 assert.ok(!fixtureSource.includes('Mike MacCombie'), 'Fresh browser fixtures must not include Mike before Google Sheets has the row.');

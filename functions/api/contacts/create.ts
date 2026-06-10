@@ -23,10 +23,15 @@ export async function onRequestPost({ request, env }: Context) {
     full_name: fullName,
     email: String(body.email || ''),
     company: String(body.company || ''),
+    person_type: normalizePersonType(body.person_type),
+    deal_flow_prospect: normalizeDealFlowProspect(body.deal_flow_prospect),
+    relationship_type: String(body.relationship_type || ''),
     relationship_owner: String(body.relationship_owner || 'Unassigned'),
     priority: String(body.priority || 'Normal'),
-    tags: Array.isArray(body.tags) ? body.tags.join(', ') : String(body.tags || ''),
+    tags: buildTags(body),
     context_summary: String(body.context_summary || 'Captured with minimal name/email context. Enrich later.'),
+    dealflow_relevance: String(body.dealflow_relevance || ''),
+    founder_relevance: String(body.founder_relevance || ''),
     touch_needed: String(Boolean(body.touch_needed)),
     touch_status: body.touch_needed ? 'needed' : '',
     created_by: user.email || String(body.created_by || 'unknown'),
@@ -41,4 +46,24 @@ export async function onRequestPost({ request, env }: Context) {
     return sheetsUnavailable(error);
   }
   return json({ ok: true, contact, persistence: 'google_sheets' });
+}
+
+
+function normalizePersonType(value: unknown) {
+  const text = String(value || '').toLowerCase();
+  return ['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general', 'unknown'].includes(text) ? text : '';
+}
+
+function normalizeDealFlowProspect(value: unknown) {
+  const text = String(value || '').toLowerCase();
+  return ['yes', 'no', 'unknown'].includes(text) ? text : '';
+}
+
+function buildTags(body: Record<string, unknown>) {
+  const tags = new Set<string>();
+  const rawTags = Array.isArray(body.tags) ? body.tags.join(', ') : String(body.tags || '');
+  for (const tag of rawTags.split(',').map((item) => item.trim()).filter(Boolean)) tags.add(tag);
+  if (normalizePersonType(body.person_type) === 'founder') tags.add('Founder');
+  if (normalizeDealFlowProspect(body.deal_flow_prospect) === 'yes') tags.add('Prospective Deal Flow');
+  return Array.from(tags).join(', ');
 }

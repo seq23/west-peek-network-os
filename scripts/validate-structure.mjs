@@ -21,7 +21,7 @@ if (missing.length) {
   process.exit(1);
 }
 const instructions = fs.readFileSync(path.join(root, 'src/ui/Instructions.tsx'), 'utf8');
-const requiredInstructionFragments = ['#wpnetwork', '#addtowestpeek', '#westpeeknetwork', '#wpdealflow', '#dealflow', 'Deal-flow prospect', 'Email them on the spot', 'Forward an email to yourself', 'Upload a business card or screenshot', 'Upload a voice note', 'Thank-You Card Studio', '<strong>Minimal</strong> is the on-the-spot default'];
+const requiredInstructionFragments = ['#wpnetwork', '#addtowestpeek', '#westpeeknetwork', '#wpdealflow', '#dealflow', 'Deal-flow prospect', 'Founder Relevance', 'Dealflow Relevance', 'Deal-flow Prospect', 'Person Type', 'Email them on the spot', 'Forward an email to yourself', 'Upload a business card or screenshot', 'Upload a voice note', 'Thank-You Card Studio', '<strong>Minimal</strong> is the on-the-spot default'];
 const missingFragments = requiredInstructionFragments.filter((fragment) => !instructions.includes(fragment));
 if (missingFragments.length) {
   console.error('Instructions page missing fragments:', missingFragments);

@@ -83,6 +83,17 @@ Met Sarah Lee at dinner. Horizon Capital. Strong LP conversation. Follow up next
 ];
 
 const examples = [
+
+  {
+    title: 'Manual Add Person founder / deal-flow fields',
+    use: 'Use Add Person when you are manually entering a founder, operator, investor, or prospective deal-flow contact without using an email hashtag.',
+    body: `Add Person fields to use:
+Person Type: Founder
+Deal-flow Prospect: Yes
+Relationship Type: Founder
+Dealflow Relevance: Raising, traction, deck, company signal, or deal context.
+Founder Relevance: How West Peek knows the founder and what the next human review step should be.`
+  },
   {
     title: 'Minimal — on the spot',
     use: 'Use when speed matters. The system should still capture name/email from Gmail if available.',
