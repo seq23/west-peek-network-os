@@ -7,7 +7,7 @@ const required = [
   'ENVIRONMENT_VARIABLES.md', '.env.example', '.env.local.example', 'wrangler.toml', 'src/main.tsx',
   'src/ui/App.tsx', 'src/ui/Instructions.tsx', 'src/ui/AddPerson.tsx', 'docs/instructions-page-content.md', 'docs/cumulative-build-spec.md', 'docs/data-schemas.md', 'docs/provider-contracts.md', 'docs/HOSTILE_FLEXIBLE_INTAKE_REVIEW_06-07-26.md',
   'docs/secrets-and-cloudflare.md', 'docs/playwright-local-testing.md', 'scripts/secrets/decrypt-local-env.sh', 'scripts/secrets/check-secrets.sh',
-  'scripts/secrets/push-cloudflare-secrets.sh', 'secrets/network-os.local.env.gpg', 'src/domain/workflows.ts', 'tests/domain/workflows.mjs', 'functions/api/health.ts', 'functions/api/session.ts', 'functions/auth/google.ts', 'functions/auth/callback/google.ts', 'functions/_shared/auth.ts', 'functions/_shared/tokens.ts', 'functions/api/intake/create.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/triggers/check.ts', 'functions/api/ai/suggestions/create.ts',
+  'scripts/secrets/push-cloudflare-secrets.sh', 'secrets/network-os.local.env.gpg', 'src/domain/workflows.ts', 'tests/domain/workflows.mjs', 'functions/api/health.ts', 'functions/api/session.ts', 'functions/auth/google.ts', 'functions/auth/callback/google.ts', 'functions/_shared/auth.ts', 'functions/_shared/tokens.ts', 'functions/api/intake/create.ts', 'functions/api/intake/pitch-lab.ts', 'functions/_shared/pitchLabIntake.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/triggers/check.ts', 'functions/api/ai/suggestions/create.ts',
   'functions/api/intake/media/create.ts',
   'functions/api/intake/review.ts', 'functions/api/sheets/snapshot.ts',
   'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
@@ -57,7 +57,7 @@ if (missingSpec.length) {
   process.exit(1);
 }
 
-const functionsSource = ['functions/api/intake/create.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/ai/suggestions/create.ts',
+const functionsSource = ['functions/api/intake/create.ts', 'functions/api/intake/pitch-lab.ts', 'functions/_shared/pitchLabIntake.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/ai/suggestions/create.ts',
   'functions/api/intake/media/create.ts',
   'functions/api/intake/review.ts', 'functions/api/sheets/snapshot.ts',
   'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',

@@ -75,7 +75,7 @@ for (const fragment of [
 assert.ok(instructionsSource.includes('Touch: Handwritten note'), 'instructions must show handwritten note structured example');
 assert.ok(instructionsSource.includes('Any field can be missing'), 'instructions must state structured fields are nonblocking');
 
-const functionsSource = readFileSync('functions/api/sheets/snapshot.ts', 'utf8') + readFileSync('functions/api/intake/review.ts', 'utf8') + readFileSync('functions/api/intake/create.ts', 'utf8') + readFileSync('functions/api/intake/media/create.ts', 'utf8') + readFileSync('functions/api/contacts/create.ts', 'utf8') + readFileSync('functions/api/ai/suggestions/create.ts', 'utf8') + readFileSync('functions/api/touches/thank-you/create.ts', 'utf8') + readFileSync('functions/api/touches/fulfillment/update.ts', 'utf8') + readFileSync('functions/api/events/create.ts', 'utf8') + readFileSync('functions/api/events/context/create.ts', 'utf8') + readFileSync('functions/e/[slug].ts', 'utf8') + readFileSync('functions/_shared/anthropic.ts', 'utf8') + readFileSync('functions/_shared/googleSpeech.ts', 'utf8') + readFileSync('functions/_shared/media.ts', 'utf8') + readFileSync('functions/_shared/sheets.ts', 'utf8') + readFileSync('src/domain/handwrittenVendors.ts', 'utf8') + readFileSync('src/ui/App.tsx', 'utf8');
+const functionsSource = readFileSync('functions/api/sheets/snapshot.ts', 'utf8') + readFileSync('functions/api/intake/review.ts', 'utf8') + readFileSync('functions/api/intake/create.ts', 'utf8') + readFileSync('functions/api/intake/pitch-lab.ts', 'utf8') + readFileSync('functions/_shared/pitchLabIntake.ts', 'utf8') + readFileSync('functions/api/intake/media/create.ts', 'utf8') + readFileSync('functions/api/contacts/create.ts', 'utf8') + readFileSync('functions/api/ai/suggestions/create.ts', 'utf8') + readFileSync('functions/api/touches/thank-you/create.ts', 'utf8') + readFileSync('functions/api/touches/fulfillment/update.ts', 'utf8') + readFileSync('functions/api/events/create.ts', 'utf8') + readFileSync('functions/api/events/context/create.ts', 'utf8') + readFileSync('functions/e/[slug].ts', 'utf8') + readFileSync('functions/_shared/anthropic.ts', 'utf8') + readFileSync('functions/_shared/googleSpeech.ts', 'utf8') + readFileSync('functions/_shared/media.ts', 'utf8') + readFileSync('functions/_shared/sheets.ts', 'utf8') + readFileSync('src/domain/handwrittenVendors.ts', 'utf8') + readFileSync('src/ui/App.tsx', 'utf8');
 assert.ok(functionsSource.includes('normalizePersonType(body.person_type)'), 'Contact create API must preserve person_type.');
 assert.ok(functionsSource.includes('normalizeDealFlowProspect(body.deal_flow_prospect)'), 'Contact create API must preserve deal_flow_prospect.');
 
@@ -375,3 +375,10 @@ for (const fragment of [
 }
 
 console.log('DOMAIN WORKFLOW CHECK OK — locked triggers, live local workflows, Sheets persistence surfaces, AI suggestion route, event public form route, persistence E2E coverage, approvals, notifications, instructions, and dealflow founder capture surfaces are present.');
+
+
+const pitchLabSource = readFileSync('functions/api/intake/pitch-lab.ts', 'utf8') + readFileSync('functions/_shared/pitchLabIntake.ts', 'utf8') + readFileSync('src/domain/schema.ts', 'utf8') + readFileSync('src/domain/types.ts', 'utf8');
+for (const fragment of ['pitch_lab', 'pitch_practice', 'PITCH_LAB_SHARED_SECRET', 'x-pitch-lab-signature', 'share_with_west_peek', 'pending_human_review', 'contact_created: false', "execution_allowed: 'false'", "human_review_required: 'true'", "person_type: 'founder'", "trigger_intent: 'deal_flow'"]) {
+  assert.ok(pitchLabSource.includes(fragment), `Pitch Lab intake handoff missing ${fragment}`);
+}
+assert.ok(!pitchLabSource.includes('createContact'), 'Pitch Lab intake endpoint must not create contacts automatically.');

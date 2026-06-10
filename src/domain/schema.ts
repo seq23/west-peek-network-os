@@ -4,7 +4,8 @@ export const ownerSchema = z.enum(['Sequoia', 'Scooter', 'Unassigned']);
 export const touchMethodSchema = z.enum(['undecided', 'email', 'handwritten_note', 'virtual_thank_you_card', 'gift', 'intro', 'call', 'meeting', 'event_invite', 'other']);
 export const touchStatusSchema = z.enum(['needed', 'planned', 'drafted', 'pending_approval', 'approved', 'sent', 'skipped', 'cancelled', 'failed']);
 export const prioritySchema = z.enum(['Low', 'Normal', 'High']);
-export const intakeSourceSchema = z.enum(['gmail_trigger', 'manual_note', 'pasted_notes', 'business_card', 'notes_screenshot', 'voice_note', 'business_card_later', 'voice_note_later', 'event_public_form', 'event_private_note', 'event_card_upload', 'event_screenshot', 'event_voice_note']);
+export const intakeSourceSchema = z.enum(['gmail_trigger', 'manual_note', 'pasted_notes', 'business_card', 'notes_screenshot', 'voice_note', 'business_card_later', 'voice_note_later', 'event_public_form', 'event_private_note', 'event_card_upload', 'event_screenshot', 'event_voice_note', 'pitch_lab']);
+export const captureTypeSchema = z.enum(['email_thread', 'self_email_note', 'forwarded_email', 'manual_add', 'business_card', 'notes_screenshot', 'voice_note', 'thank_you_card', 'event_public_form', 'event_private_note', 'pitch_practice', 'other']);
 export const intakeReviewStatusSchema = z.enum(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'converted', 'attached', 'dismissed', 'needs_more_info']);
 export const approvalStatusSchema = z.enum(['pending', 'approved', 'edited', 'rejected', 'executed', 'failed', 'cancelled']);
 export const approvalRiskSchema = z.enum(['low', 'medium', 'high']);
@@ -56,6 +57,7 @@ export const intakeSchema = z.object({
   created_at: z.string(),
   updated_at: z.string(),
   source: intakeSourceSchema,
+  capture_type: captureTypeSchema.optional(),
   captured_by: z.string(),
   raw_text: z.string(),
   source_trigger: z.string().optional(),

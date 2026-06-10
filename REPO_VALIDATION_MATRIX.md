@@ -62,3 +62,31 @@
 ## Current baseline proof label
 
 STRUCTURALLY CHECKED target. Production provider workflows are not proven until secrets and provider credentials are configured and local/deployed validation runs.
+
+
+## Phase 7 Pitch Lab handoff
+
+Added signed `/api/intake/pitch-lab` receiver. It creates pending intake rows only and never auto-creates contacts. See `docs/PITCH_LAB_HANDOFF_CONTRACT.md`.
+
+
+## Phase 9C Network OS handoff review
+
+### Hard fail
+
+- `/api/intake/pitch-lab` accepts unsigned or badly signed requests.
+- Pitch Lab request timestamp is not checked against a replay window.
+- Consentless Pitch Lab payload is accepted.
+- Network OS preserves client-supplied `execution_allowed` or `human_review_required` values instead of overwriting them server-side.
+- Pitch Lab intake creates a contact automatically.
+- Pitch Lab intake returns success before persistence succeeds.
+- Pitch Lab shared secret is exposed outside server env/secrets.
+
+### Strong warning
+
+- Duplicate detection for repeated founder submission is not implemented.
+- Optional website is missing.
+- No live Google Sheets proof without local credentials.
+
+### Current 9C proof
+
+`npm run test:pitchlab-handoff` statically verifies the receiver contract, replay guard, pending-intake mapping, no-auto-contact posture, and Phase 9C data-trace documentation.

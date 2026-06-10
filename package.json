@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "West Peek Network OS \u2014 private internal relationship intelligence app for adding people to the West Peek Network.",
+  "description": "West Peek Network OS — private internal relationship intelligence app for adding people to the West Peek Network.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -11,13 +11,15 @@
     "typecheck": "tsc --noEmit",
     "validate:structure": "node scripts/validate-structure.mjs",
     "validate:secrets": "node scripts/check-no-plaintext-secrets.mjs",
-    "validate:all": "npm run validate:structure && npm run validate:secrets && npm run test:domain && npm run validate:playwright:maxdepth",
+    "validate:all": "npm run validate:structure && npm run validate:secrets && npm run test:domain && npm run test:pitchlab-handoff && npm run validate:playwright:maxdepth",
     "test:e2e": "playwright test",
     "test:domain": "node tests/domain/workflows.mjs",
     "sheets:maintain": "node scripts/sheets/maintain-google-sheet.mjs",
     "test:e2e:maxdepth": "playwright test tests/e2e/network-os.spec.ts --trace on --workers=1",
     "test:e2e:live": "playwright test tests/e2e/network-os.live.spec.ts --trace on --workers=1",
-    "validate:playwright:maxdepth": "node scripts/validate-playwright-max-depth.mjs"
+    "validate:playwright:maxdepth": "node scripts/validate-playwright-max-depth.mjs",
+    "test:pitchlab-handoff": "node tests/domain/pitch-lab-handoff.mjs",
+    "validate:9c": "npm run test:pitchlab-handoff"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

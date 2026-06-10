@@ -36,7 +36,7 @@ Trigger emails create Intake Queue records first. They do not create final conta
 npm run dev
 ```
 
-The locked secrets password is `3021WPeek`, but the password is not embedded in repo scripts.
+Use the approved West Peek vault passphrase for the encrypted secrets bundle. The vault passphrase value is not embedded in repo scripts or docs.
 
 ## Cloudflare secret push
 
@@ -57,3 +57,8 @@ npm run test:e2e
 ```
 
 This baseline artifact is structurally checked by default. External provider execution requires configured secrets and provider setup.
+
+
+## Phase 7 Pitch Lab handoff
+
+Added signed `/api/intake/pitch-lab` receiver. It creates pending intake rows only and never auto-creates contacts. See `docs/PITCH_LAB_HANDOFF_CONTRACT.md`.

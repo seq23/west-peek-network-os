@@ -34,7 +34,7 @@ Notification links must open authenticated app pages. No one-click email approva
 
 ## ADR-009 — Secrets simplicity
 
-Use one encrypted local secrets bundle: `secrets/network-os.local.env.gpg`. Password/passphrase: `3021WPeek`. The password is not embedded in scripts. Production secrets are stored in Cloudflare secret/environment settings and can be pushed by script.
+Use one encrypted local secrets bundle: `secrets/network-os.local.env.gpg`. Operators use the approved West Peek vault passphrase; the passphrase value is not stored in repo docs, scripts, or examples. Production secrets are stored in Cloudflare secret/environment settings and can be pushed by script.
 
 ## ADR-010 — Internal Team launchpad
 
