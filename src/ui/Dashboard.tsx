@@ -88,7 +88,7 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
         <div className="action-grid">
           <Action icon={<CalendarDays size={18} />} title="Event link" body="Let people fill out their own details." onClick={() => go('events')} />
           <Action icon={<Inbox size={18} />} title="#wpnetwork" body="Capture relationship context." onClick={() => go('instructions')} />
-          <Action icon={<Inbox size={18} />} title="#wpdealflow" body="Capture founder / prospective deal flow." onClick={() => go('instructions')} />
+          <Action icon={<Inbox size={18} />} title="#wpdealflow / #dealflow" body="Capture founder / prospective deal flow into human review." onClick={() => go('instructions')} />
           <Action icon={<Mic size={18} />} title="Voice note" body="Upload audio and turn it into intake." onClick={() => go('capture')} />
           <Action icon={<MailCheck size={18} />} title="Thank-you" body="Draft a card or touchpoint." onClick={() => go('thankyou')} />
         </div>

@@ -428,7 +428,7 @@ test('surface: dashboard exposes primary West Peek Network actions', async ({ pa
 test('surface: all major views are reachable', async ({ page }) => { for (const label of sidebar) { await nav(page, label); await mainText(page, contentBySidebar[label]); } });
 test('dashboard action: Add Person card opens Add Person', async ({ page }) => { await nav(page, 'Dashboard'); await page.getByRole('main').getByRole('button', { name: /Add Person/i }).first().click(); await mainText(page, /Add to West Peek Network/i); });
 test('dashboard journey: voice note path reaches Capture Studio', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /voice notes|Capture/i); await nav(page, 'Capture Studio'); await mainText(page, /Voice note transcription|cards, screenshots, and voice notes/i); });
-test('dashboard journey: #wpnetwork path reaches How to Add People', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /#wpnetwork|canonical trigger|Intake/i); await nav(page, 'How to Add People'); await mainText(page, /Canonical trigger|#wpnetwork/i); });
+test('dashboard journey: #wpnetwork path reaches How to Add People', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /#wpnetwork|#wpdealflow|#dealflow|canonical trigger|Intake/i); await nav(page, 'How to Add People'); await mainText(page, /Canonical trigger|#wpnetwork|#wpdealflow|#dealflow/i); });
 
 test('transaction+persistence: manual add persists after reload and duplicate email is blocked', async ({ page }) => {
   await nav(page, 'Add Person');
@@ -572,6 +572,24 @@ test('AI smoke test: creates pending human-review suggestion without auto execut
 test('settings: refresh connection status shows OAuth and browser session state', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Refresh connection status$/i }).click(); await mainText(page, /Gmail OAuth|Browser session|Connected|signed in/i); });
 test('settings: refresh from Google Sheets loads snapshot', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Refresh from Google Sheets$/i }).click(); await mainText(page, /Refreshed from Google Sheets|Live Google Sheets snapshot loaded/i); });
 test('settings: Run Sheet Maintenance uses authenticated route', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Run Sheet Maintenance$/i }).click(); await mainText(page, /Maintenance complete|report_rows_written|run_id/i); });
+
+
+test('surface: deal-flow guidance appears across Dashboard Add Person Intake Instructions and Settings', async ({ page }) => {
+  await nav(page, 'Dashboard');
+  await mainText(page, /#wpdealflow\s*\/\s*#dealflow|prospective deal flow into human review/i);
+
+  await nav(page, 'Add Person');
+  await mainText(page, /Person Type|Deal-flow Prospect|#wpdealflow|#dealflow|Prospective Deal Flow/i);
+
+  await nav(page, 'Intake Queue');
+  await mainText(page, /#wpdealflow\s*\/\s*#dealflow|founder-deal-flow|prospective deal flow/i);
+
+  await nav(page, 'How to Add People');
+  await mainText(page, /Deal-flow email trigger rule|#wpdealflow|#dealflow|Human Review Required|Execution Allowed/i);
+
+  await nav(page, 'Settings');
+  await mainText(page, /#wpdealflow|#dealflow|founder \/ prospective deal flow/i);
+});
 
 test('instructions: canonical triggers and capture route examples are present', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /#wpnetwork/i); await mainText(page, /#addtowestpeek/i); await mainText(page, /#westpeeknetwork/i); await mainText(page, /#wpdealflow/i); await mainText(page, /#dealflow/i); await mainText(page, /business card|screenshot/i); await mainText(page, /voice note/i); });
 test('instructions: no automatic execution guardrails are visible', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /Human approval is required before|does not silently send|Nothing sends automatically/i); });

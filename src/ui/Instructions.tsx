@@ -85,6 +85,26 @@ Met Sarah Lee at dinner. Horizon Capital. Strong LP conversation. Follow up next
 const examples = [
 
   {
+    title: 'Deal-flow email trigger rule',
+    use: 'Use #wpdealflow or #dealflow in Gmail when Scooter or Sequoia receives a founder/deal-flow email that should land in review instead of becoming an automatic contact.',
+    body: `#wpdealflow and #dealflow both mean:
+Person Type: Founder
+Deal-flow Prospect: Yes
+Trigger Intent: deal_flow
+Human Review Required: true
+Execution Allowed: false
+
+Best fields to include when present:
+Name
+Email
+Company
+Raise
+Traction
+Deck
+Ask
+Owner`
+  },
+  {
     title: 'Manual Add Person founder / deal-flow fields',
     use: 'Use Add Person when you are manually entering a founder, operator, investor, or prospective deal-flow contact without using an email hashtag.',
     body: `Add Person fields to use:
@@ -142,7 +162,7 @@ export function Instructions() {
       <div className="card">
         <h2>Canonical trigger</h2>
         <p className="metric">#wpnetwork</p>
-        <p>Put <strong>#wpnetwork</strong> anywhere in a Gmail message or note when you want relationship context captured. Use <strong>#wpdealflow</strong> or <strong>#dealflow</strong> when a founder should be classified as prospective deal flow.</p>
+        <p>Put <strong>#wpnetwork</strong> anywhere in a Gmail message or note when you want relationship context captured. Use <strong>#wpdealflow</strong> or <strong>#dealflow</strong> when a founder should be classified as prospective deal flow. This keeps the record pending human review and prevents automatic execution.</p>
         <p className="muted">Relationship aliases: #addtowestpeek, #westpeeknetwork. Deal-flow alias: #dealflow.</p>
       </div>
       <div className="card">

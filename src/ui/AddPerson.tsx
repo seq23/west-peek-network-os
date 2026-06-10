@@ -80,7 +80,7 @@ export function AddPerson({ onAdded }: { onAdded: (record: ContactRecord, touchM
   }
 
   return <>
-    <Header eyebrow="Manual add" title="Add to West Peek Network" subtitle="Flexible capture for someone West Peek should remember. Name, email, company, or a context note is enough." />
+    <Header eyebrow="Manual add" title="Add to West Peek Network" subtitle="Flexible capture for someone West Peek should remember. For founders or prospective deal flow, mark Person Type and Deal-flow Prospect directly here." />
     <form className="card form" onSubmit={submit}>
       {error && <div className="notice">{error}</div>}
       <div className="grid cols-2">
@@ -90,8 +90,8 @@ export function AddPerson({ onAdded }: { onAdded: (record: ContactRecord, touchM
         <Field label="Owner"><select name="relationship_owner" defaultValue="Unassigned"><option>Sequoia</option><option>Scooter</option><option>Unassigned</option></select></Field>
       </div>
       <div className="grid cols-3">
-        <Field label="Person Type"><select name="person_type" defaultValue="unknown"><option value="unknown">Unknown</option><option value="investor">Investor</option><option value="founder">Founder</option><option value="operator">Operator</option><option value="lawyer">Lawyer</option><option value="service_provider">Service Provider</option><option value="media">Media</option><option value="general">General</option></select></Field>
-        <Field label="Deal-flow Prospect"><select name="deal_flow_prospect" defaultValue="unknown"><option value="unknown">Unknown</option><option value="yes">Yes</option><option value="no">No</option></select></Field>
+        <Field label="Person Type"><p className="muted">Use Founder for people who may send, raise, or represent deal flow.</p><select name="person_type" defaultValue="unknown"><option value="unknown">Unknown</option><option value="investor">Investor</option><option value="founder">Founder</option><option value="operator">Operator</option><option value="lawyer">Lawyer</option><option value="service_provider">Service Provider</option><option value="media">Media</option><option value="general">General</option></select></Field>
+        <Field label="Deal-flow Prospect"><p className="muted">Use Yes when this person should be tracked as prospective deal flow.</p><select name="deal_flow_prospect" defaultValue="unknown"><option value="unknown">Unknown</option><option value="yes">Yes</option><option value="no">No</option></select></Field>
         <Field label="Relationship Type"><input name="relationship_type" placeholder="Founder / LP / Operator / Friend of firm" /></Field>
       </div>
       <Field label="Context, if known"><textarea name="context_summary" placeholder="Optional: helped West Peek with an intro and should receive a thoughtful thank-you." /></Field>
@@ -108,7 +108,7 @@ export function AddPerson({ onAdded }: { onAdded: (record: ContactRecord, touchM
         <Field label="Due"><input name="due_date" placeholder="This week / Next week / Pick date" /></Field>
         <Field label="Tags"><input name="tags" placeholder="Warm intro, Friend of firm" /></Field>
       </div>
-      <p className="muted">Founder + Deal-flow Prospect automatically adds Founder and Prospective Deal Flow tags.</p>
+      <p className="muted">Founder + Deal-flow Prospect automatically adds Founder and Prospective Deal Flow tags. Email trigger equivalent: #wpdealflow or #dealflow.</p>
       <button className="btn primary" type="submit">Save person</button>
     </form>
   </>;
