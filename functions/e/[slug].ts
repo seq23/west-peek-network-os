@@ -1,4 +1,5 @@
 import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv } from '../_shared/sheets';
+import { ensureSelfSubmittedNetworkProfile } from '../_shared/profileStore';
 
 type Context = { request: Request; env: RuntimeEnv; params: { slug: string } };
 
@@ -42,12 +43,13 @@ export async function onRequestPost({ request, env, params }: Context) {
       private_context: '', private_voice_transcript: '', ai_summary: publicInterest || 'Public event form submission.', review_status: 'pending_human_review', confidence: 'medium', missing_fields: missingFields(publicName, publicEmail, publicCompany).join(', '),
       source_type: 'event_public_form', created_by: 'public_event_form', source_intake_id: intakeId, consent_follow_up: 'true'
     };
+    const profile = await ensureSelfSubmittedNetworkProfile(env, { name: publicName, email: publicEmail, company: publicCompany, website: publicLinkedin, personType: 'general', source: 'event_public_form', captureType: 'event_registration', contextSummary: publicInterest || `Event form submission for ${event.event_name}` });
     const intake = {
-      intake_id: intakeId, created_at: now, updated_at: now, source: 'event_public_form', capture_type: 'event_public_form', captured_by: 'public_event_form', source_user_email: publicEmail,
+      intake_id: intakeId, created_at: now, updated_at: now, source: 'event_public_form', capture_type: 'event_registration', captured_by: 'public_event_form', source_user_email: publicEmail,
       source_file_name: '', source_file_type: '', gmail_message_id: '', gmail_thread_id: '',
       raw_text: [`Event: ${event.event_name}`, `Name: ${publicName}`, `Email: ${publicEmail}`, publicCompany ? `Company: ${publicCompany}` : '', publicTitle ? `Title: ${publicTitle}` : '', publicLinkedin ? `LinkedIn: ${publicLinkedin}` : '', publicInterest ? `Interest: ${publicInterest}` : ''].filter(Boolean).join('\n'),
       email_subject: '', email_from: publicEmail, email_to: '', email_date: '', parsed_name: publicName, parsed_email: publicEmail, parsed_phone: publicPhone, parsed_company: publicCompany, parsed_title: publicTitle, parsed_website: publicLinkedin, parsed_notes: publicInterest,
-      extracted_text: '', transcript_text: '', missing_fields: attendee.missing_fields, ai_summary: attendee.ai_summary, ai_confidence: attendee.confidence, internal_data_trace: JSON.stringify([{ stage: 'public_event_form', status: 'passed', detail: 'attendee self-submitted details through public event link' }, { stage: 'execution_guardrail', status: 'passed', detail: 'pending human review; no automatic contact creation' }]), human_review_required: 'true', execution_allowed: 'false', review_status: 'pending_human_review', reviewed_by: '', reviewed_at: '', converted_contact_id: '', attached_contact_id: '', dismiss_reason: '', event_id: attendee.event_id, event_name: attendee.event_name, event_slug: attendee.event_slug
+      extracted_text: '', transcript_text: '', missing_fields: attendee.missing_fields, ai_summary: attendee.ai_summary, ai_confidence: attendee.confidence, internal_data_trace: JSON.stringify([{ stage: 'public_event_form', status: 'passed', detail: 'attendee self-submitted details through public event link' }, { stage: 'database_write', status: 'passed', detail: profile.database_write_status }, { stage: 'execution_guardrail', status: 'passed', detail: 'database intake only; no automatic outreach' }]), human_review_required: 'false', execution_allowed: 'false', review_status: 'event_intake_received', profile_id: profile.profile_id, database_write_status: profile.database_write_status, reviewed_by: '', reviewed_at: '', converted_contact_id: '', attached_contact_id: '', dismiss_reason: '', event_id: attendee.event_id, event_name: attendee.event_name, event_slug: attendee.event_slug
     };
     await appendRecord(env, 'event_attendees', attendee);
     await appendRecord(env, 'intake_queue', intake);

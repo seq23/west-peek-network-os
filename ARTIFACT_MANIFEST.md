@@ -52,3 +52,26 @@ Source ZIP: `west-peek-network-os-main_BASELINE_06-09-26_0000002.zip`.
 - Build and validation passed after dependency install.
 
 Not proven: deployed Cloudflare secret presence, live deployed Pitch Lab → Network OS handoff, GitHub Actions status.
+
+## Network Database Intake Semantics Patch — 06-10-26
+
+- Updated validation matrix to current locked rule: self-submitted details auto-write/upsert into Network OS; approval gates downstream action only.
+- Added `docs/NETWORK_DATABASE_INTAKE_MODEL.md`.
+- Updated Pitch Lab profile/packet responses with `profile_created` semantics while preserving `contact_created: false` as no outreach/conversion claim.
+- Patched `ensureSelfSubmittedNetworkProfile()` so existing emails append an updated profile row with the same profile/contact ID and `database_write_status: updated_existing`.
+- Patched public event form intake to use `capture_type: event_registration`, upsert/link a profile by email, append intake, and keep `execution_allowed=false`.
+- Added `tests/domain/event-database-intake.mjs` and wired it into `npm run validate:all`.
+- Wired `npm run build` into `npm run validate:all` and added `npm run validate:release` alias.
+- Updated architecture decision memory with the approved intake/database-upsert decision.
+
+Validation run before package:
+
+- `npm ci --ignore-scripts` — PASSED
+- `npm run validate:all` — PASSED, including build
+
+Not proven:
+
+- Browser Playwright execution.
+- Live Google Sheets/provider write.
+- Deployed Cloudflare runtime.
+- GitHub Actions after updater push.

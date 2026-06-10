@@ -378,7 +378,9 @@ console.log('DOMAIN WORKFLOW CHECK OK — locked triggers, live local workflows,
 
 
 const pitchLabSource = readFileSync('functions/api/intake/pitch-lab.ts', 'utf8') + readFileSync('functions/_shared/pitchLabIntake.ts', 'utf8') + readFileSync('src/domain/schema.ts', 'utf8') + readFileSync('src/domain/types.ts', 'utf8');
-for (const fragment of ['pitch_lab', 'pitch_practice', 'PITCH_LAB_SHARED_SECRET', 'x-pitch-lab-signature', 'share_with_west_peek', 'pending_human_review', 'contact_created: false', "execution_allowed: 'false'", "human_review_required: 'true'", "person_type: 'founder'", "trigger_intent: 'deal_flow'"]) {
+for (const fragment of ['pitch_lab', 'founder_profile_lead', 'founder_story_packet', 'PITCH_LAB_SHARED_SECRET', 'x-pitch-lab-signature', 'founder_story_packet_shared', 'pending_network_review', 'lead_captured', 'contact_created: false', "execution_allowed: 'false'", "person_type: 'founder'", "trigger_intent: 'relationship_routing'"]) {
   assert.ok(pitchLabSource.includes(fragment), `Pitch Lab intake handoff missing ${fragment}`);
 }
-assert.ok(!pitchLabSource.includes('createContact'), 'Pitch Lab intake endpoint must not create contacts automatically.');
+assert.ok(pitchLabSource.includes('database_write_status'), 'Pitch Lab intake must report Network OS database write status.');
+assert.ok(!pitchLabSource.includes("trigger_intent: 'deal_flow'"), 'Pitch Lab intake must not use old deal_flow trigger intent.');
+assert.ok(!pitchLabSource.includes("capture_type: 'pitch_practice'"), 'Pitch Lab intake must not use old pitch_practice capture type.');

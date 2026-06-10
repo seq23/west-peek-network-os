@@ -18,3 +18,13 @@ Every production API route must enforce authenticated session, approved email al
 ## Secrets
 
 Real plaintext secrets are not committed. Local/operator secrets are stored in encrypted `secrets/network-os.local.env.gpg`. Production secrets live in Cloudflare.
+
+
+## Current Pitch Lab contract update
+
+Pitch Lab now sends two signed payloads:
+
+1. `founder_profile_lead` at the profile gate. This auto-writes a Network OS profile/intake event and contains no pitch answers.
+2. `founder_story_packet` after explicit share consent. This appends/enriches Network OS with the packet for network review and relationship routing.
+
+Deprecated Pitch Lab payloads using `capture_type: pitch_practice`, `trigger_intent: deal_flow`, or `pitch_story_card` are rejected unless a future documented compatibility mode is added. No email notification is required in this build; Network OS is the source of truth.

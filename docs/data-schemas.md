@@ -135,3 +135,17 @@ Actions include: `login`, `logout`, `gmail_connected`, `gmail_disconnected`, `gm
 - consent_follow_up
 
 Event rows are wrappers over Intake Queue. Public form submissions also append an `intake_queue` row with `source=event_public_form`. Internal event notes append `source=event_private_note`. Event-linked card/screenshot/voice uploads append event-linked intake rows and event_attendees rows.
+
+
+## Current Pitch Lab contract update
+
+Pitch Lab now sends two signed payloads:
+
+1. `founder_profile_lead` at the profile gate. This auto-writes a Network OS profile/intake event and contains no pitch answers.
+2. `founder_story_packet` after explicit share consent. This appends/enriches Network OS with the packet for network review and relationship routing.
+
+Deprecated Pitch Lab payloads using `capture_type: pitch_practice`, `trigger_intent: deal_flow`, or `pitch_story_card` are rejected unless a future documented compatibility mode is added. No email notification is required in this build; Network OS is the source of truth.
+
+## Current Network Database Intake Rule — 2026-06-10
+
+Self-submitted user details auto-write to Network OS. Public event forms use `capture_type=event_registration`, upsert/link a profile by email, append an `intake_queue` event, and set `execution_allowed=false`. Pitch Lab profile leads use `founder_profile_lead`; Pitch Lab packets use `founder_story_packet`; both use `trigger_intent=relationship_routing`. Approval gates downstream action only; approval must not gate intake persistence.

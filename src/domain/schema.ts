@@ -5,14 +5,14 @@ export const touchMethodSchema = z.enum(['undecided', 'email', 'handwritten_note
 export const touchStatusSchema = z.enum(['needed', 'planned', 'drafted', 'pending_approval', 'approved', 'sent', 'skipped', 'cancelled', 'failed']);
 export const prioritySchema = z.enum(['Low', 'Normal', 'High']);
 export const intakeSourceSchema = z.enum(['gmail_trigger', 'manual_note', 'pasted_notes', 'business_card', 'notes_screenshot', 'voice_note', 'business_card_later', 'voice_note_later', 'event_public_form', 'event_private_note', 'event_card_upload', 'event_screenshot', 'event_voice_note', 'pitch_lab']);
-export const captureTypeSchema = z.enum(['email_thread', 'self_email_note', 'forwarded_email', 'manual_add', 'business_card', 'notes_screenshot', 'voice_note', 'thank_you_card', 'event_public_form', 'event_private_note', 'pitch_practice', 'other']);
-export const intakeReviewStatusSchema = z.enum(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'converted', 'attached', 'dismissed', 'needs_more_info']);
+export const captureTypeSchema = z.enum(['email_thread', 'self_email_note', 'forwarded_email', 'manual_add', 'business_card', 'notes_screenshot', 'voice_note', 'thank_you_card', 'event_public_form', 'event_private_note', 'pitch_practice', 'founder_profile_lead', 'founder_story_packet', 'network_profile_self_submission', 'event_registration', 'event_interest', 'other']);
+export const intakeReviewStatusSchema = z.enum(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'converted', 'attached', 'dismissed', 'needs_more_info', 'lead_captured', 'pending_network_review', 'profile_updated', 'event_intake_received', 'archived']);
 export const approvalStatusSchema = z.enum(['pending', 'approved', 'edited', 'rejected', 'executed', 'failed', 'cancelled']);
 export const approvalRiskSchema = z.enum(['low', 'medium', 'high']);
 export const notificationStatusSchema = z.enum(['unread', 'read', 'dismissed', 'resolved', 'failed']);
 export const personTypeSchema = z.enum(['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general', 'unknown']);
 export const dealFlowProspectSchema = z.enum(['yes', 'no', 'unknown']);
-export const triggerIntentSchema = z.enum(['network', 'deal_flow']);
+export const triggerIntentSchema = z.enum(['network', 'deal_flow', 'relationship_routing', 'event_participation', 'network_membership']);
 
 export const quickAddSchema = z.object({
   full_name: z.string().optional().or(z.literal('')),

@@ -39,3 +39,33 @@ Use one encrypted local secrets bundle: `secrets/network-os.local.env.gpg`. Oper
 ## ADR-010 — Internal Team launchpad
 
 `joinwestpeek.com/team` uses a simple shared password gate: `3021WPeek`. Anyone with the password can access tools behind that Team page.
+
+## Decision ID: ADM-2026-06-10-INTAKE-DATABASE-UPsert
+Date: 2026-06-10
+Status: Accepted
+
+Context:
+Pitch Lab, event forms, founder forms, and future Network OS forms need one source of truth for self-submitted relationship data. The prior language around “no contact auto-creation” conflicted with the requirement that self-submitted people enter the Network OS database immediately.
+
+Decision:
+Self-submitted intake automatically upserts or links a database-backed profile by email and appends an intake event. Human review applies only to downstream actions, routing, outreach, invitations, intros, publishing, or external communication.
+
+Alternatives Considered:
+1. Store only in intake queue until review.
+2. Send email notifications.
+3. Create profiles immediately but block all actions.
+
+Reasoning:
+Network OS is the database of record. Intake persistence should be durable and automatic, while operator action remains review-gated.
+
+Tradeoffs:
+The profile table may contain self-submitted people before any human has reviewed quality or fit. This is acceptable because `execution_allowed=false` and review status separates storage from action.
+
+Risks Accepted:
+Duplicate or low-quality profiles may be created from self-submission. Email-based upsert and linked intake events reduce this risk.
+
+Validation Impact:
+`test:pitchlab-profile-lead`, `test:pitchlab-handoff`, and `test:event-database-intake` are hard-fail validation lanes. `npm run validate:all` now includes `npm run build`.
+
+Future Reversal Conditions:
+Only reverse if Network OS gains a stronger canonical person table with explicit pending-profile state that still counts as database-backed persistence and does not require approval before storage.

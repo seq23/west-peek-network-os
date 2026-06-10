@@ -28,7 +28,7 @@ Network OS validates the request, maps it to an `intake_queue` row, and returns 
 10. Network OS validates payload source, capture type, consent, founder identity, and Pitch Story Card fields.
 11. Network OS overwrites sensitive routing/status fields server-side.
 12. Network OS appends a single `intake_queue` row.
-13. Network OS returns `{ ok: true, review_status: "pending_human_review", contact_created: false, human_review_required: true, execution_allowed: false }` only after persistence succeeds.
+13. Network OS returns `{ ok: true, review_status: "pending_network_review", database_write_status: "stored", profile_created: false, profile_created: false, contact_created: false, human_review_required: true, execution_allowed: false }` only after persistence succeeds.
 14. A human reviewer decides later whether to convert, attach, dismiss, or request more info.
 
 ## Hostile review verdict
@@ -87,3 +87,13 @@ The reviewer should not be forced through a special Pitch Lab dashboard. Existin
 ## 9C decision
 
 No additional Network OS product surface is needed now. Keep the receiver boring, signed, and pending-review-only.
+
+
+## Current Pitch Lab contract update
+
+Pitch Lab now sends two signed payloads:
+
+1. `founder_profile_lead` at the profile gate. This auto-writes a Network OS profile/intake event and contains no pitch answers.
+2. `founder_story_packet` after explicit share consent. This appends/enriches Network OS with the packet for network review and relationship routing.
+
+Deprecated Pitch Lab payloads using `capture_type: pitch_practice`, `trigger_intent: deal_flow`, or `pitch_story_card` are rejected unless a future documented compatibility mode is added. No email notification is required in this build; Network OS is the source of truth.
