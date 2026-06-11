@@ -1,0 +1,88 @@
+{
+  "repo": "west-peek-network-os",
+  "expectedFiles": [
+    "REPO_PRODUCT_PROMISE_LEDGER.md",
+    "E2E_REQUIRED_TEST_MATRIX.md",
+    "KNOWN_EDGE_CASE_INVENTORY.md",
+    "_repo_validation_matrix.json",
+    "_env_contract.json",
+    "ENVIRONMENT_VARIABLES.md",
+    "PLACEHOLDER_LEDGER.md",
+    "COMPLEXITY_LEDGER.md",
+    "HOSTILE_REVIEW_AND_MASTER_ADDENDUM_CROSSCHECK.md",
+    "docs/runbooks/validation-operations.md",
+    "docs/runbooks/environment-setup.md",
+    "docs/runbooks/deployment-cloudflare.md",
+    "docs/runbooks/postdeploy.md",
+    "scripts/validate-everything.mjs",
+    "scripts/validate-env.mjs",
+    "scripts/env-parity-trace.mjs",
+    "scripts/env-restore.mjs",
+    "scripts/env-remove.mjs",
+    "scripts/cloudflare-secret-sync.mjs",
+    "scripts/cloudflare-secret-audit.mjs",
+    "scripts/validate-e2e-coverage-matrix.mjs",
+    "tests/e2e/master-gauntlet.spec.ts",
+    "tests/e2e/public-event-and-pitchlab.spec.ts",
+    "tests/e2e/provider-failure-auth-mobile-edge.spec.ts",
+    "tests/e2e/live-gmail-trigger-ingestion.spec.ts",
+    "tests/e2e/network-os.live.spec.ts"
+  ],
+  "expectedScripts": [
+    "validate:everything",
+    "test:everything",
+    "validate:e2e-coverage",
+    "test:e2e:master-gauntlet",
+    "test:e2e:coverage-required",
+    "test:e2e:live-gmail",
+    "test:e2e:live",
+    "postdeploy:smoke",
+    "env:trace",
+    "env:restore",
+    "env:remove",
+    "cf:secrets:sync",
+    "cf:secrets:audit"
+  ],
+  "requiredTokens": [
+    [
+      "REPO_PRODUCT_PROMISE_LEDGER.md",
+      "#wpnetwork"
+    ],
+    [
+      "REPO_PRODUCT_PROMISE_LEDGER.md",
+      "#wpdealflow"
+    ],
+    [
+      "REPO_PRODUCT_PROMISE_LEDGER.md",
+      "#dealflow"
+    ],
+    [
+      "E2E_REQUIRED_TEST_MATRIX.md",
+      "LIVE GMAIL TRIGGER INGESTION"
+    ],
+    [
+      "E2E_REQUIRED_TEST_MATRIX.md",
+      "PITCH LAB DEPLOYED SECRET PARITY"
+    ],
+    [
+      "KNOWN_EDGE_CASE_INVENTORY.md",
+      "duplicate"
+    ],
+    [
+      "tests/e2e/master-gauntlet.spec.ts",
+      "#wpnetwork"
+    ],
+    [
+      "tests/e2e/master-gauntlet.spec.ts",
+      "#wpdealflow"
+    ],
+    [
+      "tests/e2e/provider-failure-auth-mobile-edge.spec.ts",
+      "malformed"
+    ],
+    [
+      "tests/e2e/live-gmail-trigger-ingestion.spec.ts",
+      "LIVE_GMAIL_TRIGGER_E2E"
+    ]
+  ]
+}

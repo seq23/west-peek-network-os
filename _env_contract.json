@@ -1,0 +1,99 @@
+{
+  "repo": "west-peek-network-os",
+  "cloudflareTarget": "pages",
+  "cloudflareProjectName": "west-peek-network-os",
+  "encryptedVault": "secrets/west-peek-network-os.env.local.gpg",
+  "legacyEncryptedVault": "secrets/network-os.local.env.gpg",
+  "requiredRuntimeEnv": [
+    "APP_SESSION_SECRET",
+    "ADMIN_EMAIL_ALLOWLIST",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REDIRECT_URI",
+    "GOOGLE_SHEET_ID",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+    "GOOGLE_PRIVATE_KEY",
+    "GOOGLE_PRIVATE_KEY_ID",
+    "GOOGLE_CLOUD_PROJECT_ID",
+    "TOKEN_ENCRYPTION_SECRET",
+    "ANTHROPIC_API_KEY",
+    "AI_PROVIDER",
+    "APP_BASE_URL",
+    "PITCH_LAB_SHARED_SECRET",
+    "PITCH_LAB_ALLOWED_ORIGIN"
+  ],
+  "optionalRuntimeEnv": [
+    "GOOGLE_SPEECH_LOCATION",
+    "ANTHROPIC_VISION_MODEL",
+    "GMAIL_TRIGGER_PHRASE",
+    "ACCEPTED_TRIGGER_ALIASES",
+    "CLOUDFLARE_PROJECT_NAME"
+  ],
+  "localOnlyEnv": [
+    "POSTDEPLOY_BASE_URL",
+    "PLAYWRIGHT_BASE_URL",
+    "SMOKE_BASE_URL",
+    "PLAYWRIGHT_SKIP_WEBSERVER",
+    "PLAYWRIGHT_DEPLOYED",
+    "NODE_OPTIONS"
+  ],
+  "cloudflareSecretEnv": [
+    "APP_SESSION_SECRET",
+    "ADMIN_EMAIL_ALLOWLIST",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REDIRECT_URI",
+    "GOOGLE_SHEET_ID",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+    "GOOGLE_PRIVATE_KEY",
+    "GOOGLE_PRIVATE_KEY_ID",
+    "GOOGLE_CLOUD_PROJECT_ID",
+    "GOOGLE_SPEECH_LOCATION",
+    "TOKEN_ENCRYPTION_SECRET",
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_VISION_MODEL",
+    "AI_PROVIDER",
+    "APP_BASE_URL",
+    "PITCH_LAB_SHARED_SECRET",
+    "PITCH_LAB_ALLOWED_ORIGIN"
+  ],
+  "productCriticalEnv": [
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_SHEET_ID",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+    "GOOGLE_PRIVATE_KEY",
+    "TOKEN_ENCRYPTION_SECRET",
+    "APP_SESSION_SECRET"
+  ],
+  "forbiddenClientExposure": [
+    "APP_SESSION_SECRET",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_PRIVATE_KEY",
+    "TOKEN_ENCRYPTION_SECRET",
+    "ANTHROPIC_API_KEY",
+    "PITCH_LAB_SHARED_SECRET"
+  ],
+  "providerContracts": [
+    {
+      "provider": "Google Gmail/OAuth",
+      "usage": "Detect #wpnetwork/#addtowestpeek/#westpeeknetwork and #wpdealflow/#dealflow emails, authenticate operator, ingest to Intake Queue only.",
+      "proof": "live Gmail trigger ingestion or UNPROVEN"
+    },
+    {
+      "provider": "Google Sheets",
+      "usage": "Runtime persistence for contacts, intake_queue, touches, approvals, notifications.",
+      "proof": "local API/domain tests plus live Sheets proof or UNPROVEN"
+    },
+    {
+      "provider": "Anthropic",
+      "usage": "AI summary/OCR/draft assistance only, never external execution.",
+      "proof": "provider route smoke or UNPROVEN"
+    },
+    {
+      "provider": "Cloudflare Pages",
+      "usage": "deployed browser/API runtime",
+      "proof": "deploy smoke/postdeploy E2E or UNPROVEN"
+    }
+  ]
+}

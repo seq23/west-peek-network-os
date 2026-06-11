@@ -69,3 +69,24 @@ Validation Impact:
 
 Future Reversal Conditions:
 Only reverse if Network OS gains a stronger canonical person table with explicit pending-profile state that still counts as database-backed persistence and does not require approval before storage.
+
+
+## Decision ID: ADM-2026-06-11-TRIGGER-PROOF
+Date: 2026-06-11  
+Status: Accepted
+
+Context: The app's core value depends on `#wpnetwork`, `#addtowestpeek`, `#westpeeknetwork`, `#wpdealflow`, and `#dealflow` trigger ingestion. Generic intake validation can miss these product promises.
+
+Decision: Trigger behavior is now governed by `REPO_PRODUCT_PROMISE_LEDGER.md`, `_repo_validation_matrix.json`, and `npm run validate:triggers`. Live Gmail ingestion remains a separate provider proof lane and must be labeled UNPROVEN when not run.
+
+Alternatives Considered: Keep trigger proof inside broad Playwright tests only.
+
+Reasoning: Broad E2E names are too easy to miss during future rework. Product-critical promises need their own proof row.
+
+Tradeoffs: More explicit validation surface.
+
+Risks Accepted: Live Gmail proof still requires real provider credentials and cannot be inferred from local tests.
+
+Validation Impact: `validate:everything` now includes trigger product promise proof.
+
+Future Reversal Conditions: If Gmail ingestion is replaced by another provider, this decision must be superseded with an equivalent provider-specific trigger proof ledger.

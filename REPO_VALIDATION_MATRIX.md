@@ -82,3 +82,25 @@ No email notification is required in this build.
 - Execution remains false unless a future operator workflow explicitly changes it.
 - No email notification is required.
 - No direct contact/outreach/follow-up claim is made by intake persistence.
+
+---
+
+## Master Addendum Validation Overlay — 2026-06-11
+
+Machine-readable matrix: `_repo_validation_matrix.json`.
+
+Canonical orchestrator:
+
+```bash
+npm run validate:everything
+```
+
+Tier 1 CI/static path:
+
+```bash
+npm run validate:everything -- --tier=1
+```
+
+Current container proof: Tier 1 validate:everything PASS in container; build/Playwright/postdeploy/live Gmail not run.
+
+Postdeploy and live provider lanes are separate proof layers and must not be implied by local/static validation.

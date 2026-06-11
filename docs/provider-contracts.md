@@ -12,7 +12,7 @@ Required behavior: least-privilege scopes, server-side token handling, disconnec
 
 Purpose: search for canonical triggers and ingest matching messages into Intake Queue.
 
-Recognized triggers: `#wpnetwork`, `#addtowestpeek`, `#westpeeknetwork`.
+Recognized relationship triggers: `#wpnetwork`, `#addtowestpeek`, `#westpeeknetwork`. Recognized deal-flow triggers: `#wpdealflow`, `#dealflow`. Deal-flow triggers must create founder/prospective deal-flow intake with human review required and execution blocked until approval.
 
 Supported capture situations: sent email to contact, received thread, forwarded email, self-email/internal note, reply-to-self after sending external email.
 

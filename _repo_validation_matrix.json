@@ -1,0 +1,255 @@
+{
+  "repo": "west-peek-network-os",
+  "complexityLevel": 5,
+  "status": "CURRENT",
+  "validation": [
+    {
+      "name": "Validator admission control",
+      "command": "npm run validate:validator-admission",
+      "category": "governance",
+      "severity": "HARD FAIL",
+      "tier": "tier1",
+      "proofLayer": "static governance validation",
+      "productionRisk": "Validation sprawl, unclassified hard fails/warnings, and validators bypassing the matrix.",
+      "whatItProves": "Every validation/test/smoke/audit/deploy package script is admitted, classified, severity-labeled, and routed through matrix/orchestrator authority.",
+      "whatItDoesNotProve": "Does not prove every admitted validator passed; validate:everything or specific proof lanes must run.",
+      "failureHandling": "HARD FAIL blocks delivery because repo governance cannot prove docs/validators are controlled.",
+      "ownerDecisionNeeded": "YES if failing or if a validator/doc needs retirement/reclassification."
+    },
+    {
+      "name": "Docs consolidation admission",
+      "command": "npm run validate:docs-consolidation",
+      "category": "governance",
+      "severity": "HARD FAIL",
+      "tier": "tier1",
+      "proofLayer": "static governance validation",
+      "productionRisk": "Doc sprawl, conflicting runbooks, stale instructions, and hidden operating authority.",
+      "whatItProves": "Every active Markdown document is mapped and every archived document is indexed with an active replacement.",
+      "whatItDoesNotProve": "Does not prove the archived content is still semantically useful or that human readers reviewed all active docs.",
+      "failureHandling": "HARD FAIL blocks delivery because repo governance cannot prove docs/validators are controlled.",
+      "ownerDecisionNeeded": "YES if failing or if a validator/doc needs retirement/reclassification."
+    },
+    {
+      "name": "structure contract",
+      "command": "npm run validate:structure",
+      "tier": "tier1",
+      "category": "static contract",
+      "severity": "HARD FAIL",
+      "productionRisk": "wrong repo/missing runtime surfaces",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "browser, provider, deployment"
+    },
+    {
+      "name": "no plaintext secrets",
+      "command": "npm run validate:secrets",
+      "tier": "tier1",
+      "category": "security",
+      "severity": "HARD FAIL",
+      "productionRisk": "secret exposure",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "Cloudflare secret presence"
+    },
+    {
+      "name": "env contract",
+      "command": "npm run validate:env",
+      "tier": "tier1",
+      "category": "environment",
+      "severity": "HARD FAIL",
+      "productionRisk": "missing env names/client secret exposure",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "secret correctness"
+    },
+    {
+      "name": "env parity trace",
+      "command": "npm run env:trace",
+      "tier": "tier1",
+      "category": "environment",
+      "severity": "STRONG WARNING",
+      "productionRisk": "env docs/platform drift",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "Cloudflare secret values"
+    },
+    {
+      "name": "trigger product promises",
+      "command": "npm run validate:triggers",
+      "tier": "tier1",
+      "category": "product promise",
+      "severity": "HARD FAIL",
+      "productionRisk": "#wpnetwork/#wpdealflow missing or unsafe",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "live Gmail provider ingestion"
+    },
+    {
+      "name": "domain workflows",
+      "command": "npm run test:domain",
+      "tier": "tier1",
+      "category": "unit/domain",
+      "severity": "HARD FAIL",
+      "productionRisk": "conversion/tags/guardrail regression",
+      "proofLayer": "UNIT TESTS PASSED",
+      "doesNotProve": "browser/provider/deployment"
+    },
+    {
+      "name": "pitch lab handoff",
+      "command": "npm run test:pitchlab-handoff",
+      "tier": "tier1",
+      "category": "integration contract",
+      "severity": "HARD FAIL",
+      "productionRisk": "signed source handoff regression",
+      "proofLayer": "INTEGRATION TESTS PASSED",
+      "doesNotProve": "deployed origin/secret correctness"
+    },
+    {
+      "name": "pitch lab profile lead",
+      "command": "npm run test:pitchlab-profile-lead",
+      "tier": "tier1",
+      "category": "integration contract",
+      "severity": "HARD FAIL",
+      "productionRisk": "profile lead capture regression",
+      "proofLayer": "INTEGRATION TESTS PASSED",
+      "doesNotProve": "deployed origin/secret correctness"
+    },
+    {
+      "name": "event database intake",
+      "command": "npm run test:event-database-intake",
+      "tier": "tier1",
+      "category": "integration contract",
+      "severity": "HARD FAIL",
+      "productionRisk": "event intake persistence regression",
+      "proofLayer": "INTEGRATION TESTS PASSED",
+      "doesNotProve": "live Google Sheets"
+    },
+    {
+      "name": "typecheck",
+      "command": "npm run typecheck",
+      "tier": "tier2",
+      "category": "build",
+      "severity": "HARD FAIL",
+      "productionRisk": "TS/runtime compile break",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "browser/provider/deploy"
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "tier": "tier2",
+      "category": "build",
+      "severity": "HARD FAIL",
+      "productionRisk": "app cannot deploy",
+      "proofLayer": "LOCAL BUILD PASSED",
+      "doesNotProve": "Cloudflare runtime"
+    },
+    {
+      "name": "max-depth Playwright static guard",
+      "command": "npm run validate:playwright:maxdepth",
+      "tier": "tier2",
+      "category": "e2e contract",
+      "severity": "HARD FAIL",
+      "productionRisk": "browser journey proof missing",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "browser actually ran"
+    },
+    {
+      "name": "local max-depth E2E",
+      "command": "npm run test:e2e:maxdepth",
+      "tier": "tier2",
+      "category": "browser e2e",
+      "severity": "HARD FAIL",
+      "productionRisk": "critical journeys broken locally",
+      "proofLayer": "LOCAL BROWSER E2E PASSED",
+      "doesNotProve": "deployed runtime/live providers"
+    },
+    {
+      "name": "live smoke E2E",
+      "command": "npm run test:e2e:live",
+      "tier": "tier3",
+      "category": "postdeploy e2e",
+      "severity": "HARD FAIL",
+      "productionRisk": "deployed runtime crash/provider route failure",
+      "proofLayer": "POSTDEPLOY E2E PASSED",
+      "doesNotProve": "real Gmail trigger ingestion"
+    },
+    {
+      "name": "live Gmail trigger ingestion",
+      "command": "manual_provider_proof",
+      "tier": "tier3",
+      "category": "provider proof",
+      "severity": "HARD FAIL",
+      "productionRisk": "core trigger system unproven",
+      "proofLayer": "NOT PROVEN until real Gmail/Sheets evidence",
+      "doesNotProve": "none until run"
+    },
+    {
+      "name": "E2E required coverage matrix",
+      "command": "npm run validate:e2e-coverage",
+      "tier": "tier1",
+      "category": "e2e contract",
+      "severity": "HARD FAIL",
+      "productionRisk": "required E2E lanes missing from repo",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "browser actually ran"
+    },
+    {
+      "name": "West master gauntlet",
+      "command": "npm run test:e2e:master-gauntlet",
+      "tier": "tier2",
+      "category": "browser e2e",
+      "severity": "HARD FAIL",
+      "productionRisk": "core trigger/product lifecycle broken locally",
+      "proofLayer": "LOCAL BROWSER E2E PASSED",
+      "doesNotProve": "live Gmail/deployed runtime"
+    },
+    {
+      "name": "West coverage-required E2E",
+      "command": "npm run test:e2e:coverage-required",
+      "tier": "tier2",
+      "category": "browser e2e",
+      "severity": "HARD FAIL",
+      "productionRisk": "public/PitchLab/provider/auth/mobile edge lanes broken locally",
+      "proofLayer": "LOCAL BROWSER E2E PASSED",
+      "doesNotProve": "live providers/deploy"
+    },
+    {
+      "name": "West headed visual gauntlet",
+      "command": "npm run test:e2e:local-headed",
+      "tier": "tier2",
+      "category": "visual e2e",
+      "severity": "STRONG WARNING",
+      "productionRisk": "critical browser states not human-visible reviewed",
+      "proofLayer": "VISUAL ARTIFACTS GENERATED \u2014 HUMAN REVIEW NOT PROVEN",
+      "doesNotProve": "human approval unless reviewed"
+    },
+    {
+      "name": "live Gmail trigger E2E",
+      "command": "npm run test:e2e:live-gmail",
+      "tier": "tier3",
+      "category": "real provider proof",
+      "severity": "HARD FAIL",
+      "productionRisk": "core Gmail trigger ingestion unproven",
+      "proofLayer": "POSTDEPLOY E2E PASSED + provider evidence",
+      "doesNotProve": "future provider availability"
+    },
+    {
+      "name": "hostile review and Master Addendum crosscheck",
+      "command": "npm run validate:hostile-master-addendum",
+      "tier": "tier1",
+      "category": "coverage authority",
+      "severity": "HARD FAIL",
+      "productionRisk": "delivering test-completion ZIP with gaps against hostile review or Master Addendum obligations",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "browser execution, live provider proof, deployment, human visual approval"
+    },
+    {
+      "name": "postdeploy smoke command presence",
+      "command": "npm run postdeploy:smoke",
+      "tier": "tier3",
+      "category": "postdeploy runtime",
+      "severity": "HARD FAIL",
+      "productionRisk": "deployed runtime smoke missing or defaulting to local context",
+      "proofLayer": "POSTDEPLOY E2E PASSED",
+      "doesNotProve": "full role/provider journey unless postdeploy critical lanes also pass"
+    }
+  ],
+  "validatorAdmissionRegister": "_validator_admission_register.json",
+  "docsConsolidationMap": "docs/DOCS_CONSOLIDATION_MAP.md"
+}
