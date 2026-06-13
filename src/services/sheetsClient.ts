@@ -1,6 +1,10 @@
 import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch, TouchMethod } from '../domain/types';
 
 export type SheetSnapshot = {
+  source?: string;
+  refreshedAt?: string;
+  freshnessRequested?: boolean;
+  cacheAgeMs?: number;
   contacts: ContactRecord[];
   intake: IntakeRecord[];
   touches: RelationshipTouch[];
@@ -13,10 +17,15 @@ export type SheetSnapshot = {
 export type CreateEventInput = { event_name: string; event_date?: string; location?: string; notes?: string; owner_email?: string; public_form_enabled?: boolean };
 export type AddEventContextInput = { event_id: string; public_name?: string; public_email?: string; public_company?: string; public_title?: string; private_context?: string; source_type?: string };
 
-export async function fetchSheetSnapshot(): Promise<SheetSnapshot> {
-  const payload = await requestJson<{ data?: Record<string, unknown[]> }>('/api/sheets/snapshot');
+export async function fetchSheetSnapshot(options: { fresh?: boolean } = {}): Promise<SheetSnapshot> {
+  const url = options.fresh ? '/api/sheets/snapshot?fresh=1' : '/api/sheets/snapshot';
+  const payload = await requestJson<{ data?: Record<string, unknown[]>; source?: string; refreshed_at?: string; freshness_requested?: boolean; cache_age_ms?: number }>(url);
   const data = payload.data || {};
   return {
+    source: payload.source,
+    refreshedAt: payload.refreshed_at,
+    freshnessRequested: payload.freshness_requested,
+    cacheAgeMs: payload.cache_age_ms,
     contacts: rows(data.contacts).map(normalizeContact),
     intake: rows(data.intake_queue).map(normalizeIntake),
     touches: rows(data.relationship_touches).map(normalizeTouch),
@@ -91,6 +100,18 @@ export async function markSheetNotificationRead(notificationId: string, recipien
   });
 }
 
+export async function updateSheetContactStatus(contactId: string, status: 'active' | 'archived', reason = '') {
+  return requestJson('/api/contacts/status', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contact_id: contactId, status, reason })
+  });
+}
+
+export async function updateSheetEventStatus(eventId: string, action: 'revoke' | 'restore') {
+  return requestJson('/api/events/status', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ event_id: eventId, action })
+  });
+}
+
 async function requestJson<T = Record<string, unknown>>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { credentials: 'same-origin', ...(init || {}) });
   const payload = await response.json().catch(() => ({}));
@@ -128,7 +149,7 @@ function normalizeContact(row: Record<string, unknown>): ContactRecord {
 function normalizeIntake(row: Record<string, unknown>): IntakeRecord {
   return {
     intake_id: str(row.intake_id), created_at: str(row.created_at), updated_at: str(row.updated_at), source: str(row.source, 'manual_note') as IntakeRecord['source'], capture_type: emptyToUndefined(row.capture_type) as IntakeRecord['capture_type'],
-    captured_by: str(row.captured_by, 'unknown'), source_user_email: emptyToUndefined(row.source_user_email), gmail_message_id: emptyToUndefined(row.gmail_message_id), gmail_thread_id: emptyToUndefined(row.gmail_thread_id), raw_text: str(row.raw_text),
+    captured_by: str(row.captured_by, 'unknown'), source_user_email: emptyToUndefined(row.source_user_email), gmail_message_id: emptyToUndefined(row.gmail_message_id), gmail_thread_id: emptyToUndefined(row.gmail_thread_id), gmail_rfc_message_id: emptyToUndefined(row.gmail_rfc_message_id), gmail_ingestion_key: emptyToUndefined(row.gmail_ingestion_key), source_mailbox: emptyToUndefined(row.source_mailbox), raw_text: str(row.raw_text),
     email_subject: emptyToUndefined(row.email_subject), email_from: emptyToUndefined(row.email_from), email_to: emptyToUndefined(row.email_to), email_date: emptyToUndefined(row.email_date),
     parsed_name: emptyToUndefined(row.parsed_name), parsed_email: emptyToUndefined(row.parsed_email), parsed_phone: emptyToUndefined(row.parsed_phone), parsed_company: emptyToUndefined(row.parsed_company), parsed_title: emptyToUndefined(row.parsed_title), parsed_website: emptyToUndefined(row.parsed_website), parsed_notes: emptyToUndefined(row.parsed_notes), parsed_owner: owner(row.parsed_owner), parsed_touch: emptyToUndefined(row.parsed_touch) as IntakeRecord['parsed_touch'], parsed_priority: priority(row.parsed_priority), parsed_due: emptyToUndefined(row.parsed_due), parsed_needs_touch: bool(row.parsed_needs_touch),
     event_id: emptyToUndefined(row.event_id), event_name: emptyToUndefined(row.event_name), event_slug: emptyToUndefined(row.event_slug),

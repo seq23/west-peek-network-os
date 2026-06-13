@@ -119,6 +119,9 @@ export interface IntakeRecord {
   source_user_email?: string;
   gmail_message_id?: string;
   gmail_thread_id?: string;
+  gmail_rfc_message_id?: string;
+  gmail_ingestion_key?: string;
+  source_mailbox?: string;
   source_trigger?: string;
   trigger_intent?: TriggerIntent;
   person_type?: PersonType;

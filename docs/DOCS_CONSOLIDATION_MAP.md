@@ -16,6 +16,7 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `HOSTILE_REVIEW_AND_MASTER_ADDENDUM_CROSSCHECK.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `KNOWN_EDGE_CASE_INVENTORY.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `PLACEHOLDER_LEDGER.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
+| `PROOF_COMPLETION_MASTER_PLAN_2026-06-13.md` | ACTIVE | Locked proof-completion plan and proof-boundary audit for current validators and live evidence lanes. | None |
 | `README.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `REPO_IDENTITY.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `REPO_PRODUCT_PROMISE_LEDGER.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
@@ -63,10 +64,10 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `TESTING_SEQUENCE.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
 | `TIER_VALIDATION_MODEL.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
 | `USER_JOURNEY_TEST_MATRIX.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
-| `CHANGED_FILES_2026-06-11.md` | ACTIVE | Current delivery summary/proof report for this release. | None |
-| `VALIDATION_RUN_SUMMARY_2026-06-11.md` | ACTIVE | Current delivery summary/proof report for this release. | None |
+| `docs/archive/superseded/CHANGED_FILES_2026-06-11.md` | ARCHIVED | Superseded historical release record. | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` |
+| `docs/archive/superseded/VALIDATION_RUN_SUMMARY_2026-06-11.md` | ARCHIVED | Superseded historical release record. | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` |
 | `VALIDATOR_ADMISSION_REGISTER.md` | ACTIVE | Validator admission authority and operator register. | None |
-| `FINAL_TIER_PATCH_SUMMARY_2026-06-11.md` | ACTIVE | Final tier / master addendum compliance, testing, provider proof, or delivery summary artifact. | None |
+| `docs/archive/superseded/FINAL_TIER_PATCH_SUMMARY_2026-06-11.md` | ARCHIVED | Superseded historical release record. | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` |
 | `MASTER_ADDENDUM_COMPLIANCE_LEDGER.md` | ACTIVE | Final tier / master addendum compliance, testing, provider proof, or delivery summary artifact. | None |
 | `RUNTIME_CONTEXT_TRACE_MATRIX.md` | ACTIVE | Final tier / master addendum compliance, testing, provider proof, or delivery summary artifact. | None |
 
@@ -99,3 +100,21 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `docs/validation/VALIDATION_OVERVIEW.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
 
 | `docs/validation/VALIDATOR_SIMPLIFICATION.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` | ACTIVE | Current consolidated UX/data-integrity change record. | None |
+| `docs/providers/INTELLIGENT_SHARED_INBOX.md` | ACTIVE | Shared inbox classification, deduplication, and proof contract. | None |
+| `docs/archive/superseded/UX_DATA_INTEGRITY_IMPLEMENTATION_REPORT_2026-06-13.md` | ARCHIVED | Superseded by consolidated changelog after hostile review. | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` |
+| `HOSTILE_UX_DATA_INTEGRITY_REVIEW_2026-06-13.md` | ACTIVE | Current hostile review and proof-boundary record. | None |
+
+| `DIAGNOSTICS_STANDARD.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `MASTER_GAUNTLET.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `PREDEPLOY_POSTDEPLOY_RUNBOOK.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `PROOF_FIXTURE_STANDARD.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `REAL_RUNTIME_PROOF_MATRIX.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `SECRETS_AND_VAULT_ARCHITECTURE.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `TESTING_ARCHITECTURE.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `TEST_FIXTURE_LIFECYCLE.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `WP_NETWORK_OS_HALLMARK_UX_ADDENDUM_2026-06-13.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `docs/REPO_MASTER_CONTRACT_EXTENDED_ADDENDUM_TESTING_HALLMARK_RELEASE_2026-06-13.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `docs/WP_NETWORK_OS_CANONICAL_TESTING_RELEASE_PROOF_MASTER_PLAN_2026-06-13.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `docs/WP_NETWORK_OS_REPO_SPECIFIC_TEST_IMPLEMENTATION_ADDENDUM_2026-06-13.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `tests/fixtures/README.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |

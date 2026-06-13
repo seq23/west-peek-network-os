@@ -1,0 +1,28 @@
+{
+  "fixture_id": "gmail_seo_sales_01",
+  "scenario": "Generic marketing solicitation",
+  "mailbox": "info@westpeek.ventures",
+  "sender": "founder@example.com",
+  "reply_to": "",
+  "recipients": [
+    "info@westpeek.ventures"
+  ],
+  "subject": "SEO services for West Peek",
+  "headers": [
+    {
+      "name": "Message-ID",
+      "value": "<gmail_seo_sales_01@proof.local>"
+    }
+  ],
+  "mime_tree": {
+    "mimeType": "text/plain",
+    "body": "We offer SEO services and lead generation."
+  },
+  "snippet": "We offer SEO services and lead generation.",
+  "attachments": [],
+  "expected": {
+    "category": "operational",
+    "capture": false,
+    "ingestion_key": "info@westpeek.ventures:gmail_seo_sales_01"
+  }
+}

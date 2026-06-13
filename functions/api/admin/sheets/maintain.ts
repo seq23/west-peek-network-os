@@ -100,35 +100,39 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       summary: summarize(report)
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-
-    const isAuthFailure =
-      /auth|session|unauthorized|forbidden|allowlist|cookie/i.test(message);
-
-    const isQuotaFailure =
-      /quota|rate.?limit|RESOURCE_EXHAUSTED|ReadRequestsPerMinutePerUser/i.test(message);
-
+    const detail = error instanceof Error ? error.message : String(error);
+    const classified = classifyMaintenanceError(detail);
     return json(
       {
         ok: false,
-        error: isAuthFailure
-          ? 'Authentication required.'
-          : isQuotaFailure
-            ? 'Google Sheets is temporarily rate-limited. Wait briefly and retry.'
-            : 'Sheet maintenance temporarily unavailable.',
-        retry_after_seconds: isQuotaFailure ? 75 : undefined
+        error_code: classified.code,
+        error: classified.message,
+        technical_detail: detail.slice(0, 800),
+        retryable: classified.retryable,
+        operator_action: classified.operatorAction,
+        retry_after_seconds: classified.retryAfterSeconds
       },
       {
-        status: isAuthFailure ? 401 : isQuotaFailure ? 429 : 503,
-        headers: {
-          'cache-control': 'no-store'
-        }
+        status: classified.status,
+        headers: { 'cache-control': 'no-store' }
       }
     );
   }
 };
 
 export const onRequestGet: PagesFunction = async () => json({ ok: false, error: 'Use POST.' }, { status: 405 });
+
+function classifyMaintenanceError(detail: string) {
+  if (/auth|session|unauthorized|allowlist|cookie/i.test(detail)) return { code: 'AUTH_REQUIRED', message: 'Sign in again before running sheet maintenance.', status: 401, retryable: false, operatorAction: 'Reconnect your approved Google session and retry.' };
+  if (/Missing required Google Sheets env vars|not configured/i.test(detail)) return { code: 'SHEETS_NOT_CONFIGURED', message: 'Google Sheets maintenance is not configured in this environment.', status: 503, retryable: false, operatorAction: 'Check GOOGLE_SHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, and GOOGLE_PRIVATE_KEY in the deployment environment.' };
+  if (/404|not found/i.test(detail)) return { code: 'SPREADSHEET_NOT_FOUND', message: 'The configured Google spreadsheet could not be found.', status: 404, retryable: false, operatorAction: 'Verify GOOGLE_SHEET_ID and confirm the spreadsheet still exists.' };
+  if (/403|permission|forbidden/i.test(detail)) return { code: 'SPREADSHEET_PERMISSION_DENIED', message: 'The service account does not have permission to maintain this spreadsheet.', status: 403, retryable: false, operatorAction: 'Share the spreadsheet with the configured service-account email as an editor.' };
+  if (/429|quota|rate.?limit|RESOURCE_EXHAUSTED|ReadRequestsPerMinutePerUser/i.test(detail)) return { code: 'SHEETS_RATE_LIMITED', message: 'Google Sheets is temporarily rate-limited.', status: 429, retryable: true, retryAfterSeconds: 75, operatorAction: 'Wait about 75 seconds, then run maintenance once.' };
+  if (/Create tab failed/i.test(detail)) return { code: 'TAB_CREATE_FAILED', message: 'Maintenance could not create a required spreadsheet tab.', status: 503, retryable: true, operatorAction: 'Check edit permission and retry. The response detail names the affected tab.' };
+  if (/header|Write failed.*1/i.test(detail)) return { code: 'HEADER_REPAIR_FAILED', message: 'Maintenance could not restore required spreadsheet headers.', status: 503, retryable: true, operatorAction: 'Inspect protected ranges or sheet permissions, then retry.' };
+  if (/sheet_maintenance_log/i.test(detail)) return { code: 'MAINTENANCE_LOG_WRITE_FAILED', message: 'Maintenance ran but could not write its audit log.', status: 503, retryable: true, operatorAction: 'Check the sheet_maintenance_log tab and spreadsheet write permission.' };
+  return { code: 'UNKNOWN_MAINTENANCE_FAILURE', message: 'Sheet maintenance failed before it could finish.', status: 503, retryable: true, operatorAction: 'Use the technical detail and deployment logs to identify the failing Google Sheets operation.' };
+}
 
 function normalizeRows(tab: string, headers: string[], rows: string[][], runId: string, report: Record<string, string>[]) {
   const updates: { cell: string; value: string }[] = [];

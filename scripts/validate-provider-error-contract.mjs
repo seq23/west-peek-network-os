@@ -12,5 +12,10 @@ if (!/retry_hint/.test(sheets)) failures.push('Sheets unavailable handler must e
 if (!/redactProviderError/.test(media) || !/sk-ant-/.test(media) || !/ya29\./.test(media)) failures.push('Media provider failures must redact Anthropic and Google token patterns.');
 if (!/No active Google OAuth token/.test(gmail) || !/setup_required/.test(gmail)) failures.push('Gmail sync must return setup_required when OAuth token is missing.');
 if (!/execution_allowed:\s*false/.test(gmail) && !/execution_allowed'?:\s*'false'/.test(gmail)) failures.push('Gmail sync must keep imported rows review-only/no auto-execution.');
+
+for (const fragment of ['classifyIntelligentInbox', 'skipped_irrelevant_count', 'failed_message_count', 'deterministicIntakeId', "source: input.mailboxPolicy === 'intelligent_inbox'", 'latestRows = await readTab']) {
+  if (!gmail.includes(fragment)) failures.push(`Gmail intelligent inbox/deduplication contract missing ${fragment}`);
+}
+if (/mailboxPolicy === 'founder_inquiry'.*deal_flow/s.test(gmail)) failures.push('Shared inbox must not classify every inbound message as deal flow.');
 if (!/REPLAY_DETECTED/.test(pitchProfile + pitchPacket + pitchShared)) failures.push('Pitch Lab handoff must include replay detection.');
 failOrPass('validate-provider-error-contract', failures);

@@ -29,3 +29,7 @@ Purpose: records every archived/superseded doc and its active replacement to pre
 | `docs/notification-setup.md` | `docs/archive/superseded/docs__notification-setup.md` | docs/ACTIVE_DOCS.md / active runbooks / root ledgers | Historical only. Not operating authority. |
 | `docs/security-model.md` | `docs/archive/superseded/docs__security-model.md` | docs/ACTIVE_DOCS.md / active runbooks / root ledgers | Historical only. Not operating authority. |
 | `docs/west-peek-routing-aside.md` | `docs/archive/superseded/docs__west-peek-routing-aside.md` | docs/ACTIVE_DOCS.md / active runbooks / root ledgers | Historical only. Not operating authority. |
+| `UX_DATA_INTEGRITY_IMPLEMENTATION_REPORT_2026-06-13.md` | `docs/archive/superseded/UX_DATA_INTEGRITY_IMPLEMENTATION_REPORT_2026-06-13.md` | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` | Historical only. Not operating authority. |
+| `CHANGED_FILES_2026-06-11.md` | `docs/archive/superseded/CHANGED_FILES_2026-06-11.md` | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` | Historical only. Not operating authority. |
+| `VALIDATION_RUN_SUMMARY_2026-06-11.md` | `docs/archive/superseded/VALIDATION_RUN_SUMMARY_2026-06-11.md` | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` | Historical only. Not operating authority. |
+| `FINAL_TIER_PATCH_SUMMARY_2026-06-11.md` | `docs/archive/superseded/FINAL_TIER_PATCH_SUMMARY_2026-06-11.md` | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` | Historical only. Not operating authority. |

@@ -1,0 +1,28 @@
+{
+  "fixture_id": "gmail_warm_intro_01",
+  "scenario": "Warm founder introduction",
+  "mailbox": "info@westpeek.ventures",
+  "sender": "founder@example.com",
+  "reply_to": "",
+  "recipients": [
+    "info@westpeek.ventures"
+  ],
+  "subject": "Introduction: Maya / West Peek",
+  "headers": [
+    {
+      "name": "Message-ID",
+      "value": "<gmail_warm_intro_01@proof.local>"
+    }
+  ],
+  "mime_tree": {
+    "mimeType": "text/plain",
+    "body": "Warm introduction to Maya, founder of Orbit Labs. Would love to connect you."
+  },
+  "snippet": "Warm introduction to Maya, founder of Orbit Labs. Would love to connect you.",
+  "attachments": [],
+  "expected": {
+    "category": "relationship",
+    "capture": true,
+    "ingestion_key": "info@westpeek.ventures:gmail_warm_intro_01"
+  }
+}

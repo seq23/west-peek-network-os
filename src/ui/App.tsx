@@ -7,7 +7,7 @@ import { CaptureStudio } from './CaptureStudio';
 import { ThankYouStudio } from './ThankYouStudio';
 import { EventsPage } from './Events';
 import { store } from '../data/store';
-import { createSheetContact, createSheetIntake, decideSheetApproval, fetchSheetSnapshot, markSheetNotificationRead, reviewSheetIntake, updateSheetTouchFulfillment, type SheetSnapshot } from '../services/sheetsClient';
+import { createSheetContact, createSheetIntake, decideSheetApproval, fetchSheetSnapshot, markSheetNotificationRead, reviewSheetIntake, updateSheetTouchFulfillment, updateSheetContactStatus, type SheetSnapshot } from '../services/sheetsClient';
 import type { ApprovalRecord, ContactRecord, IntakeRecord, NotificationRecord, RelationshipTouch, TouchMethod } from '../domain/types';
 import { HANDWRITTEN_VENDORS, type HandwrittenVendor } from '../domain/handwrittenVendors';
 
@@ -51,6 +51,7 @@ export function App() {
   const [page, setPage] = useState<Page>('dashboard');
   const [message, setMessage] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
+  const [mutationKey, setMutationKey] = useState<string | null>(null);
   const [sheetData, setSheetData] = useState<SheetSnapshot | null>(null);
   const [sheetStatus, setSheetStatus] = useState('Loading Google Sheets snapshot...');
   const [session, setSession] = useState<SessionState>({ authenticated: false, message: 'Checking Google OAuth session...' });
@@ -67,11 +68,12 @@ export function App() {
   }), [refreshToken]);
   const data = sheetData || localData;
 
-  async function reloadSheetsSnapshot(nextMessage?: string) {
+  async function reloadSheetsSnapshot(nextMessage?: string, fresh = true) {
     try {
-      const snapshot = await fetchSheetSnapshot();
+      const snapshot = await fetchSheetSnapshot({ fresh });
       setSheetData(snapshot);
-      setSheetStatus('Live Google Sheets snapshot loaded.');
+      const freshness = snapshot.source === 'google_sheets_batch_cache' ? `Cached snapshot (${Math.round((snapshot.cacheAgeMs || 0) / 1000)}s old).` : `Fresh Google Sheets snapshot${snapshot.refreshedAt ? ` at ${new Date(snapshot.refreshedAt).toLocaleTimeString()}` : ''}.`;
+      setSheetStatus(freshness);
       if (nextMessage) setMessage(nextMessage);
       return snapshot;
     } catch (error) {
@@ -116,7 +118,7 @@ export function App() {
     await Promise.all([loadSession(), loadOAuthStatus()]);
   }
 
-  useEffect(() => { void reloadSheetsSnapshot(); void refreshConnectionStatus(); }, []);
+  useEffect(() => { void reloadSheetsSnapshot(undefined, false); void refreshConnectionStatus(); }, []);
 
   function refresh(nextMessage?: string) {
     setRefreshToken((value) => value + 1);
@@ -143,15 +145,23 @@ export function App() {
   }
 
   async function handleIntakeReview(id: string, action: 'convert' | 'attach' | 'dismiss') {
+    const key = `intake:${id}:${action}`;
+    if (mutationKey) return;
+    setMutationKey(key);
     try {
       await reviewSheetIntake(id, action, action === 'attach' ? { attached_contact_id: window.prompt('Existing contact_id to attach to:') || '' } : {});
       await reloadSheetsSnapshot(`Intake ${action} recorded in Google Sheets.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : `Could not ${action} intake in Google Sheets.`);
+    } finally {
+      setMutationKey(null);
     }
   }
 
   async function handleApprovalDecision(id: string, decision: 'approve' | 'reject') {
+    const key = `approval:${id}:${decision}`;
+    if (mutationKey) return;
+    setMutationKey(key);
     try {
       const approval = data.approvals.find((item) => item.approval_id === id);
       await decideSheetApproval(id, decision);
@@ -169,6 +179,8 @@ export function App() {
       await reloadSheetsSnapshot(decision === 'approve' ? 'Approval recorded. Handwritten/vendor touches are now ready for manual fulfillment choice.' : `Approval ${decision} recorded in Google Sheets.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Could not record approval decision.');
+    } finally {
+      setMutationKey(null);
     }
   }
 
@@ -178,6 +190,20 @@ export function App() {
       await reloadSheetsSnapshot('Relationship touch fulfillment status recorded in Google Sheets.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Could not update relationship touch fulfillment.');
+    }
+  }
+
+  async function handleContactStatus(id: string, status: 'active' | 'archived') {
+    const key = `contact:${id}:${status}`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      await updateSheetContactStatus(id, status, status === 'archived' ? 'Archived by operator from West Peek Network.' : 'Restored by operator from archive.');
+      await reloadSheetsSnapshot(status === 'archived' ? 'Contact archived and removed from Active.' : 'Contact restored to Active.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not update contact status.');
+    } finally {
+      setMutationKey(null);
     }
   }
 
@@ -229,10 +255,10 @@ export function App() {
         {page === 'add' && <AddPerson onAdded={handleAdded} />}
         {page === 'capture' && <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}
         {page === 'thankyou' && <ThankYouStudio onSaved={() => void reloadSheetsSnapshot('Thank-you touch saved to Google Sheets.')} />}
-        {page === 'intake' && <IntakePage rows={data.intake} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id) => { void handleIntakeReview(id, 'convert'); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
-        {page === 'contacts' && <ContactsPage rows={data.contacts} />}
+        {page === 'intake' && <IntakePage rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id) => { void handleIntakeReview(id, 'convert'); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
+        {page === 'contacts' && <ContactsPage rows={data.contacts} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
         {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
-        {page === 'approvals' && <ApprovalsPage rows={data.approvals} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
+        {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
         {page === 'notifications' && <NotificationsPage rows={data.notifications} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
         {page === 'ai' && <AiReview />}
         {page === 'settings' && <SettingsPanel
@@ -240,23 +266,31 @@ export function App() {
           session={session}
           oauthStatus={oauthStatus}
           oauthMessage={oauthMessage}
-          onRefresh={() => void reloadSheetsSnapshot('Refreshed from Google Sheets.')}
+          onRefresh={() => void reloadSheetsSnapshot('Refreshed from Google Sheets. Live Google Sheets snapshot loaded.', true)}
           onSessionRefresh={() => void refreshConnectionStatus()}
-          onMaintenanceComplete={() => void reloadSheetsSnapshot('Sheet maintenance finished and snapshot refreshed.')}
+          onMaintenanceComplete={() => void reloadSheetsSnapshot('Sheet maintenance finished and a fresh snapshot was loaded.', true)}
         />}
       </main>
     </div>
   );
 }
 
-function ContactsPage({ rows }: { rows: ContactRecord[] }) {
+function ContactsPage({ rows, mutationKey, onStatus }: { rows: ContactRecord[]; mutationKey: string | null; onStatus: (id: string, status: 'active' | 'archived') => void }) {
+  const [view, setView] = useState<'active' | 'archived' | 'all'>('active');
+  const [search, setSearch] = useState('');
+  const visible = rows.filter((row) => view === 'all' || row.status === view).filter((row) => !search || [row.full_name, row.email, row.company, row.context_summary, row.tags.join(' ')].join(' ').toLowerCase().includes(search.toLowerCase()));
   return <>
-    <Header eyebrow="West Peek Network" title="People in the West Peek Network" subtitle="Relationship context, ownership, and next-step memory." />
-    <div className="grid cols-2">{rows.map((c) => <div className="card" key={c.contact_id}><h3>{c.full_name}</h3><p className="muted">{c.company || 'No company'} • Owner: {c.relationship_owner}</p><p>{c.context_summary}</p><p><span className="badge">{c.priority}</span>{c.person_type && c.person_type !== 'unknown' && <span className="badge" style={{ marginLeft: 8 }}>{c.person_type}</span>}{c.deal_flow_prospect === 'yes' && <span className="badge warn" style={{ marginLeft: 8 }}>Deal-flow prospect</span>}{c.touch_needed && <span className="badge warn" style={{ marginLeft: 8 }}>Needs touch</span>}</p></div>)}</div>
+    <Header eyebrow="West Peek Network" title="People in the West Peek Network" subtitle="Active relationships appear first. Archived contacts stay recoverable and out of normal work surfaces." />
+    <div className="filter-bar"><input aria-label="Search contacts" placeholder="Search name, email, company, context, or tags" value={search} onChange={(event) => setSearch(event.target.value)} /><div className="segmented"><button className={view === 'active' ? 'active' : ''} onClick={() => setView('active')}>Active</button><button className={view === 'archived' ? 'active' : ''} onClick={() => setView('archived')}>Archived</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visible.length} records</span></div>
+    <div className="grid cols-2">{visible.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No contacts match this view' : 'No contacts yet'}</h3></div> : visible.map((c) => { const busy = mutationKey?.startsWith(`contact:${c.contact_id}:`); return <article className="card record-card" key={c.contact_id}><div className="record-header"><div><h3>{c.full_name}</h3><p className="muted">{c.company || 'No company'} • Owner: {c.relationship_owner}</p></div><span className="badge">{humanize(c.status)}</span></div><p>{c.context_summary}</p><p><span className="badge">{c.priority}</span>{c.person_type && c.person_type !== 'unknown' && <span className="badge badge-gap">{humanize(c.person_type)}</span>}{c.deal_flow_prospect === 'yes' && <span className="badge warn badge-gap">Deal-flow prospect</span>}{c.touch_needed && <span className="badge warn badge-gap">Needs touch</span>}</p><footer className="action-footer">{c.status === 'active' ? <button className="btn danger" disabled={Boolean(busy)} onClick={() => { if (window.confirm(`Archive ${c.full_name}? The record will leave Active but remain restorable.`)) onStatus(c.contact_id, 'archived'); }}>{busy ? 'Archiving…' : 'Archive contact'}</button> : <button className="btn primary" disabled={Boolean(busy)} onClick={() => onStatus(c.contact_id, 'active')}>{busy ? 'Restoring…' : 'Restore contact'}</button>}</footer></article>})}</div>
   </>;
 }
 
-function IntakePage({ rows, onCapture, onConvert, onAttach, onDismiss }: { rows: IntakeRecord[]; onCapture: (rawText: string) => void; onConvert: (id: string) => void; onAttach: (id: string) => void; onDismiss: (id: string) => void }) {
+function IntakePage({ rows, mutationKey, onCapture, onConvert, onAttach, onDismiss }: { rows: IntakeRecord[]; mutationKey: string | null; onCapture: (rawText: string) => void; onConvert: (id: string) => void; onAttach: (id: string) => void; onDismiss: (id: string) => void }) {
+  const [view, setView] = useState<'pending' | 'history' | 'all'>('pending');
+  const [search, setSearch] = useState('');
+  const pendingStatuses = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'needs_more_info', 'pending_network_review', 'event_intake_received']);
+  const visibleRows = rows.filter((row) => view === 'all' || (view === 'pending' ? pendingStatuses.has(row.review_status) : !pendingStatuses.has(row.review_status))).filter((row) => !search || [row.parsed_name, row.parsed_company, row.parsed_email, row.email_subject, row.ai_summary, row.raw_text].join(' ').toLowerCase().includes(search.toLowerCase()));
   function submitCapture(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -264,14 +298,10 @@ function IntakePage({ rows, onCapture, onConvert, onAttach, onDismiss }: { rows:
     event.currentTarget.reset();
   }
   return <>
-    <Header eyebrow="Intake Queue" title="Review captured relationship context" subtitle="Triggered Gmail, forwarded notes, business cards, screenshots, voice notes, and partial captures land here before being added to the West Peek Network." />
-    <form className="card form" onSubmit={submitCapture}>
-      <h2>Test / manual Gmail capture</h2>
-      <p className="muted">Paste a #wpnetwork relationship note, or a #wpdealflow / #dealflow founder-deal-flow note, to create a real local Intake Queue item. Minimal captures are allowed; name/email/company/context can be enriched later.</p>
-      <textarea name="raw_text" aria-label="Gmail trigger text" required defaultValue={`#wpdealflow\nName: Jordan Miles\nCompany: Apex Family Office\nContext: Founder referred by Scooter. Prospective deal flow for review. Include company, raise, traction, deck, and ask when available.\nOwner: Scooter\nPriority: High\nDue: This week`} />
-      <button className="btn primary" type="submit">Capture to Intake Queue</button>
-    </form>
-    <div className="list" style={{ marginTop: 16 }}>{rows.map((i) => <div className="card" key={i.intake_id} data-testid={`intake-${i.intake_id}`}><div className="kicker">{i.source} • {i.review_status}{i.source_trigger ? ` • ${i.source_trigger}` : ''}</div><h3>{i.parsed_name || 'Unparsed person'}</h3><p className="muted">{i.parsed_company || 'Company not parsed'}</p><p>{i.ai_summary || i.raw_text}</p><p>{i.person_type && i.person_type !== 'unknown' && <span className="badge">{i.person_type}</span>}{i.deal_flow_prospect === 'yes' && <span className="badge warn" style={{ marginLeft: 8 }}>Deal-flow prospect</span>}</p><pre>{i.raw_text}</pre><div className="actions" style={{ marginTop: 12 }}><button className="btn primary" disabled={['converted', 'attached', 'dismissed'].includes(i.review_status)} onClick={() => onConvert(i.intake_id)}>Add to West Peek Network</button><button className="btn" disabled={['converted', 'attached', 'dismissed'].includes(i.review_status)} onClick={() => onAttach(i.intake_id)}>Attach to Existing Person</button><button className="btn" disabled={i.review_status === 'dismissed'} onClick={() => onDismiss(i.intake_id)}>Dismiss</button></div></div>)}</div>
+    <Header eyebrow="Intake Queue" title="Review captured relationship context" subtitle="Actionable captures appear first. Use #wpdealflow / #dealflow for founder or prospective deal flow. Every capture remains in human review until an operator decides." />
+    <div className="filter-bar"><input aria-label="Search intake" placeholder="Search person, company, email, subject, or summary" value={search} onChange={(event) => setSearch(event.target.value)} /><div className="segmented" role="group" aria-label="Intake view"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visibleRows.length} records</span></div>
+    <details className="card" open><summary>Manual capture</summary><form className="form compact-form" onSubmit={submitCapture}><p className="muted">Paste a real relationship or deal-flow note. Production forms start empty.</p><textarea name="raw_text" aria-label="Gmail trigger text" required placeholder="#wpnetwork or #wpdealflow, then the relationship context" /><button className="btn primary" type="submit">Capture to Intake Queue</button></form></details>
+    <div className="list">{visibleRows.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No records match this view' : 'No intake records yet'}</h3><p>{rows.length ? 'Change the search or view filters.' : 'New review items will appear here.'}</p></div> : visibleRows.map((i) => { const busy = mutationKey?.startsWith(`intake:${i.intake_id}:`); return <article className="card record-card" key={i.intake_id} data-testid={`intake-${i.intake_id}`}><header className="record-header"><div><div className="kicker">{humanize(i.source)} • {humanize(i.review_status)}</div><h3>{i.parsed_name || i.email_from || 'Unparsed person'}</h3><p className="muted">{i.parsed_company || i.email_subject || 'Company not parsed'}{i.source_mailbox ? ` • via ${i.source_mailbox}` : ''}</p></div>{i.deal_flow_prospect === 'yes' && <span className="badge warn">Deal flow</span>}</header><p className="record-summary">{bounded(i.ai_summary || i.parsed_notes || i.raw_text, 420)}</p><details><summary>View source details</summary><dl className="metadata"><dt>From</dt><dd>{i.email_from || '—'}</dd><dt>To</dt><dd>{i.email_to || '—'}</dd><dt>Message ID</dt><dd>{i.gmail_message_id || '—'}</dd></dl><pre className="raw-source">{bounded(i.raw_text, 4000)}</pre></details>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onConvert(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:convert` ? 'Adding…' : 'Add to West Peek Network'}</button><button className="btn" disabled={Boolean(busy)} onClick={() => onAttach(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:attach` ? 'Attaching…' : 'Attach to Existing Person'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onDismiss(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:dismiss` ? 'Dismissing…' : 'Dismiss'}</button></footer>}</article>})}</div>
   </>;
 }
 
@@ -365,10 +395,13 @@ function HandwrittenFulfillmentPanel({ touch, selectedVendor, onFulfillmentUpdat
   </div>;
 }
 
-function ApprovalsPage({ rows, onApprove, onReject }: { rows: ApprovalRecord[]; onApprove: (id: string) => void; onReject: (id: string) => void }) {
+function ApprovalsPage({ rows, mutationKey, onApprove, onReject }: { rows: ApprovalRecord[]; mutationKey: string | null; onApprove: (id: string) => void; onReject: (id: string) => void }) {
+  const [view, setView] = useState<'pending' | 'history'>('pending');
+  const visible = rows.filter((row) => view === 'pending' ? row.status === 'pending' : row.status !== 'pending');
   return <>
-    <Header eyebrow="Approvals" title="Approvals Needed" subtitle="Internal approval gates before sensitive actions are finalized or executed." />
-    <div className="list">{rows.map((a) => <div className="card" key={a.approval_id}><div className="kicker">{a.approval_type} • {a.risk_level}</div><h3>{a.status === 'pending' ? 'Needs decision' : a.status}</h3><p>{a.suggested_payload}</p><p className="muted">Assigned to: {a.assigned_to}</p><div className="actions"><button className="btn primary" disabled={a.status !== 'pending'} onClick={() => onApprove(a.approval_id)}>Approve</button><button className="btn" disabled={a.status !== 'pending'} onClick={() => onReject(a.approval_id)}>Reject</button></div></div>)}</div>
+    <Header eyebrow="Approvals" title="Approvals Needed" subtitle="Pending decisions appear first; completed decisions remain in History." />
+    <div className="filter-bar"><div className="segmented"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button></div><span className="result-count">{visible.length} records</span></div>
+    <div className="list">{visible.length === 0 ? <div className="empty-state"><h3>{view === 'pending' ? 'No approvals need a decision' : 'No decided approvals yet'}</h3></div> : visible.map((a) => { const busy = mutationKey?.startsWith(`approval:${a.approval_id}:`); return <article className="card record-card" key={a.approval_id}><div className="kicker">{humanize(a.approval_type)} • {humanize(a.risk_level)} risk</div><h3>{humanize(a.status)}</h3><p>{a.suggested_payload}</p><p className="muted">Assigned to: {a.assigned_to}</p>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onApprove(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:approve` ? 'Approving…' : 'Approve'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onReject(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:reject` ? 'Rejecting…' : 'Reject'}</button></footer>}</article>})}</div>
   </>;
 }
 
@@ -496,8 +529,8 @@ function SettingsPanel({
     setMaintenanceStatus('Running non-destructive Sheet maintenance...');
     try {
       const response = await fetch('/api/admin/sheets/maintain', { method: 'POST', credentials: 'same-origin' });
-      const payload = await response.json() as { ok?: boolean; run_id?: string; report_rows_written?: number; error?: string };
-      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Sheet maintenance failed.');
+      const payload = await response.json() as { ok?: boolean; run_id?: string; report_rows_written?: number; summary?: Record<string, number>; error?: string; error_code?: string; operator_action?: string; technical_detail?: string };
+      if (!response.ok || !payload.ok) throw new Error([payload.error_code, payload.error, payload.operator_action].filter(Boolean).join(' — ') || 'Sheet maintenance failed.');
       setMaintenanceStatus(`Maintenance complete. Run ${payload.run_id}; report rows written: ${payload.report_rows_written ?? 0}.`);
       onMaintenanceComplete();
     } catch (error) {
@@ -519,7 +552,9 @@ function SettingsPanel({
       </div>
       <div className="card"><h3>Canonical triggers</h3><p><strong>#wpnetwork</strong> relationship capture<br /><strong>#wpdealflow</strong> founder / prospective deal flow<br /><strong>#dealflow</strong> short alias for founder deal-flow capture</p><p className="muted">Relationship aliases: #addtowestpeek, #westpeeknetwork. Deal-flow aliases: #wpdealflow, #dealflow.</p></div>
       <div className="card"><h3>Initial users</h3><p>sequoia@westpeek.ventures<br />scooter@westpeek.ventures</p></div>
-      <div className="card"><h3>Spreadsheet + Gmail sync</h3><p>{sheetStatus}</p><p className="muted">The app reads from Google Sheets on load and after write actions. Gmail trigger sync imports matching read-only Gmail messages into Intake Queue for human review only.</p><div className="actions"><button className="btn" type="button" disabled={refreshBusy || !session.authenticated} onClick={guardedSheetRefresh}>{refreshBusy ? 'Refreshing...' : 'Refresh from Google Sheets'}</button><button className="btn primary" type="button" disabled={gmailSyncBusy || !session.authenticated} onClick={runGmailSync}>{gmailSyncBusy ? 'Syncing...' : 'Sync Gmail Triggers'}</button><button className="btn" type="button" disabled={maintenanceBusy || !session.authenticated} onClick={runSheetMaintenance}>{maintenanceBusy ? 'Running...' : 'Run Sheet Maintenance'}</button></div>{gmailSyncStatus && <p className="muted">{gmailSyncStatus}</p>}{maintenanceStatus && <p className="muted">{maintenanceStatus}</p>}</div>
+      <div className="card settings-operations"><h3>Google Sheets data</h3><p><strong>{sheetStatus}</strong></p><p className="muted">Refresh pulls the latest saved contacts, intake, approvals, touchpoints, notifications, events, and attendees from the live spreadsheet. It does not modify spreadsheet rows and explicitly bypasses the short snapshot cache.</p><button className="btn" type="button" disabled={refreshBusy || !session.authenticated} onClick={guardedSheetRefresh}>{refreshBusy ? 'Refreshing from Sheets…' : 'Refresh from Google Sheets'}</button></div>
+      <div className="card settings-operations"><h3>Gmail intake sync</h3><p className="muted">Personal mailboxes import only canonical trigger messages. When <strong>info@westpeek.ventures</strong> is connected as its own Google account, inbound inbox messages are treated as founder/deal-flow intake without requiring a hashtag. Every message still requires human review and must pass duplicate protection.</p><div className="notice subtle">The shared inbox must be connected separately. A team member signing in does not automatically monitor another mailbox.</div><button className="btn primary" type="button" disabled={gmailSyncBusy || !session.authenticated} onClick={runGmailSync}>{gmailSyncBusy ? 'Syncing Gmail…' : 'Sync connected Gmail'}</button>{gmailSyncStatus && <p className="operation-result" aria-live="polite">{gmailSyncStatus}</p>}</div>
+      <div className="card settings-operations"><h3>Sheet maintenance</h3><p className="muted">Runs a non-destructive structural check. It creates missing tabs, restores required headers, normalizes supported status and boolean values, fills missing timestamps where safe, and reports possible duplicates. It does not delete or merge records.</p><button className="btn" type="button" disabled={maintenanceBusy || !session.authenticated} onClick={() => { if (window.confirm('Run non-destructive Sheet maintenance? This may create missing tabs, restore required headers, normalize supported values, fill safe missing timestamps, and write an audit report. It will not delete or merge records.')) void runSheetMaintenance(); }}>{maintenanceBusy ? 'Running maintenance…' : 'Run Sheet Maintenance'}</button>{maintenanceStatus && <p className="operation-result" role="status" aria-live="polite">{maintenanceStatus}</p>}</div>
       <div className="card"><h3>Operator Login launchpads</h3><p>joinwestpeek.com/operator<br />westpeek.ventures/operator</p><p className="muted">Team-area access is managed outside this repo. No shared password or passphrase is stored or displayed here.</p></div>
       <div className="card">
         <h3>Google Sheets</h3>
@@ -529,6 +564,9 @@ function SettingsPanel({
     </div>
   </>;
 }
+
+function humanize(value: unknown) { return String(value || '').replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase()); }
+function bounded(value: unknown, max: number) { const text = String(value || '').trim(); return text.length > max ? `${text.slice(0, max).trim()}…` : text; }
 
 export function Header({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return <div className="topbar"><div><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p className="subtitle">{subtitle}</p></div></div>;

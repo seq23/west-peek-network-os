@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Header } from './App';
-import { createSheetEvent, createSheetEventContext } from '../services/sheetsClient';
+import { createSheetEvent, createSheetEventContext, updateSheetEventStatus } from '../services/sheetsClient';
 import type { EventAttendeeRecord, EventRecord } from '../domain/types';
 
 type Props = {
@@ -13,7 +13,10 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
   const activeEvents = events.filter((event) => event.status === 'active');
   const [selectedId, setSelectedId] = useState(activeEvents[0]?.event_id || events[0]?.event_id || '');
   const [status, setStatus] = useState('Create an event, copy the public form link, and let people enter their own details.');
-  const selected = useMemo(() => events.find((event) => event.event_id === selectedId) || events[0], [events, selectedId]);
+  const [view, setView] = useState<'active' | 'inactive' | 'all'>('active');
+  const [lifecycleBusy, setLifecycleBusy] = useState(false);
+  const visibleEvents = events.filter((event) => view === 'all' || (view === 'active' ? event.status === 'active' && event.public_form_enabled : event.status !== 'active' || !event.public_form_enabled));
+  const selected = useMemo(() => events.find((event) => event.event_id === selectedId) || visibleEvents[0] || events[0], [events, selectedId, visibleEvents]);
   const selectedAttendees = selected ? attendees.filter((row) => row.event_id === selected.event_id) : [];
   const publicLink = selected ? absoluteEventLink(selected) : '';
 
@@ -70,9 +73,25 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
     setStatus('Public event form link copied.');
   }
 
+  async function updateLifecycle(action: 'revoke' | 'restore') {
+    if (!selected || lifecycleBusy) return;
+    if (action === 'revoke' && !window.confirm(`Disable the public form for ${selected.event_name}? Existing history will remain, but new submissions will be rejected.`)) return;
+    setLifecycleBusy(true);
+    setStatus(action === 'revoke' ? 'Disabling public event form…' : 'Restoring public event form…');
+    try {
+      await updateSheetEventStatus(selected.event_id, action);
+      setStatus(action === 'revoke' ? 'Public form disabled. New submissions will be rejected.' : 'Public form restored.');
+      onSaved?.(action === 'revoke' ? 'Event form revoked in Google Sheets.' : 'Event form restored in Google Sheets.');
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Could not update event form status.');
+    } finally {
+      setLifecycleBusy(false);
+    }
+  }
+
   return <>
     <Header eyebrow="Event Capture" title="Create event forms and review attendees" subtitle="Thin layer over Intake Queue: public forms collect details, operators enrich privately, and everything remains pending human review." />
-    <div className="notice" style={{ marginBottom: 16 }}>{status}</div>
+    <div className="notice" style={{ marginBottom: 16 }} role="status" aria-live="polite">{status}</div><div className="filter-bar"><div className="segmented"><button className={view === 'active' ? 'active' : ''} onClick={() => setView('active')}>Active forms</button><button className={view === 'inactive' ? 'active' : ''} onClick={() => setView('inactive')}>Inactive</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visibleEvents.length} events</span></div>
     <div className="grid cols-2">
       <form className="card form" onSubmit={createEvent}>
         <h2>Create event</h2>
@@ -86,13 +105,13 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
 
       <div className="card">
         <h2>Selected event</h2>
-        {events.length ? <>
-          <Field label="Choose event"><select value={selected?.event_id || ''} onChange={(event) => setSelectedId(event.target.value)}>{events.map((event) => <option key={event.event_id} value={event.event_id}>{event.event_name} — {event.status}</option>)}</select></Field>
+        {visibleEvents.length ? <>
+          <Field label="Choose event"><select value={selected?.event_id || ''} onChange={(event) => setSelectedId(event.target.value)}>{visibleEvents.map((event) => <option key={event.event_id} value={event.event_id}>{event.event_name} — {event.status}</option>)}</select></Field>
           {selected && <>
             <p><strong>{selected.event_name}</strong></p>
             <p className="muted">{selected.location || 'No location'} • {selected.event_date || 'No date'} • Owner: {selected.owner_email}</p>
             <p><a href={publicLink} target="_blank" rel="noopener noreferrer">{publicLink}</a></p>
-            <div className="actions"><button className="btn primary" type="button" onClick={copyLink}>Copy public form link</button><a className="btn" href={publicLink} target="_blank" rel="noopener noreferrer">Open public form</a></div>
+            <div className="actions"><button className="btn primary" type="button" disabled={!selected.public_form_enabled} onClick={copyLink}>Copy public form link</button><a className="btn" aria-disabled={!selected.public_form_enabled} href={selected.public_form_enabled ? publicLink : undefined} target="_blank" rel="noopener noreferrer">Open public form</a>{selected.public_form_enabled && selected.status === 'active' ? <button className="btn danger" type="button" disabled={lifecycleBusy} onClick={() => void updateLifecycle('revoke')}>{lifecycleBusy ? 'Disabling…' : 'Disable public form'}</button> : <button className="btn primary" type="button" disabled={lifecycleBusy} onClick={() => void updateLifecycle('restore')}>{lifecycleBusy ? 'Restoring…' : 'Restore public form'}</button>}</div>
             <p className="muted">Public form collects name, email, company, title, LinkedIn, interest, and follow-up consent. No public uploads. No automatic contact creation.</p>
           </>}
         </> : <p>No events yet. Create one to generate a public attendee form link.</p>}

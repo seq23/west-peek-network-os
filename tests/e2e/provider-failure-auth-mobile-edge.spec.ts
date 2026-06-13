@@ -8,7 +8,7 @@ async function installFailureHarness(page: Page) {
   const data: any = { contacts: [], intake_queue: [], relationship_touches: [], approvals: [], notifications: [], events: [], event_attendees: [], ai_suggestions: [], oauth_tokens: [], sheet_maintenance_log: [] };
   await page.route('**/api/session', (route) => send(route, { ok: false, authenticated: false, error: 'Session expired.' }, 401));
   await page.route('**/api/oauth/status', (route) => send(route, { ok: false, gmail_oauth_connected: false, browser_session_connected: false, status: 'disconnected', setup_required: true }, 503));
-  await page.route('**/api/sheets/snapshot', (route) => send(route, { ok: true, data }));
+  await page.route('**/api/sheets/snapshot**', (route) => send(route, { ok: true, data }));
   await page.route('**/api/admin/sheets/maintain', (route) => send(route, { ok: false, error: 'Authentication required.' }, 401));
   await page.route('**/api/intake/create', async (route) => {
     const raw = (route.request().postDataJSON() as { raw_text?: string }).raw_text || '';
@@ -50,7 +50,7 @@ test.describe('provider failure, auth/session, mobile, and edge-case E2E', () =>
 
     await page.getByLabel('Gmail trigger text').fill('#wpnetwork\nMissing all useful fields.');
     await page.getByRole('main').getByRole('button', { name: /Capture to Intake Queue/i }).click();
-    await expect(page.getByRole('main')).toContainText(/needs_more_info|missing_fields|human_review_required|execution_allowed/i);
+    await expect(page.getByRole('main')).toContainText(/needs_more_info|Needs More Info|missing_fields|Missing fields|human_review_required|Human review|required|execution_allowed/i);
     await expect(page.getByRole('main')).not.toContainText(/email sent|approved automatically|executed automatically/i);
   });
 

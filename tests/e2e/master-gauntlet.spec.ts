@@ -54,7 +54,7 @@ async function installHarness(page: Page) {
 
   await page.route('**/api/session', (route) => json(route, { ok: true, authenticated: true, user: { email: 'sequoia@westpeek.ventures' } }));
   await page.route('**/api/oauth/status', (route) => json(route, { ok: true, browser_session_connected: true, browser_session_email: 'sequoia@westpeek.ventures', gmail_oauth_connected: true, connected_email: 'sequoia@westpeek.ventures', provider: 'google', status: 'active' }));
-  await page.route('**/api/sheets/snapshot', (route) => json(route, { ok: true, data }));
+  await page.route('**/api/sheets/snapshot**', (route) => json(route, { ok: true, data, source: 'fixture', refreshed_at: now(), freshness_requested: route.request().url().includes('fresh=1') }));
   await page.route('**/api/triggers/check', async (route) => {
     const body = route.request().postDataJSON() as { text?: string };
     const text = body.text || '';
@@ -186,7 +186,7 @@ test.describe('West Peek Network OS master gauntlet', () => {
     expect(h.getSnapshot().contacts.map((row) => row.full_name)).not.toContain('Deal Flow Founder');
 
     await page.getByTestId(/intake-/).first().getByRole('button', { name: /Add to West Peek Network|Convert/i }).click();
-    await expect(page.getByRole('main')).toContainText(/converted|Intake conversion recorded/i);
+    await expect(page.getByRole('main')).toContainText(/converted|Intake conversion recorded|Intake convert recorded/i);
     await page.reload();
     await nav(page, 'West Peek Network');
     await expect(page.getByRole('main')).toContainText(/Deal Flow Alias|Prospective Deal Flow|Founder/i);

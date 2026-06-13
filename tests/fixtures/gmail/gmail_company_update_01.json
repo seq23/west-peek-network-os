@@ -1,0 +1,28 @@
+{
+  "fixture_id": "gmail_company_update_01",
+  "scenario": "Revenue and traction update",
+  "mailbox": "info@westpeek.ventures",
+  "sender": "founder@example.com",
+  "reply_to": "",
+  "recipients": [
+    "info@westpeek.ventures"
+  ],
+  "subject": "Acme AI traction update",
+  "headers": [
+    {
+      "name": "Message-ID",
+      "value": "<gmail_company_update_01@proof.local>"
+    }
+  ],
+  "mime_tree": {
+    "mimeType": "text/plain",
+    "body": "We reached $1M ARR and 120 customers. Sharing our company update."
+  },
+  "snippet": "We reached $1M ARR and 120 customers. Sharing our company update.",
+  "attachments": [],
+  "expected": {
+    "category": "company_info",
+    "capture": true,
+    "ingestion_key": "info@westpeek.ventures:gmail_company_update_01"
+  }
+}

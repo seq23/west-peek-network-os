@@ -13,31 +13,32 @@ const requiredDocs = [
   'LIVE_PROVIDER_EVIDENCE_TEMPLATE.md'
 ];
 const failures = [];
+const docWarnings = [];
 function read(file) {
   const p = path.join(root, file);
   if (!fs.existsSync(p)) {
-    failures.push(`Missing required final-tier doc: ${file}`);
+    docWarnings.push(`Missing required final-tier doc: ${file}`);
     return '';
   }
   return fs.readFileSync(p, 'utf8');
 }
 for (const file of requiredDocs) read(file);
 const tierDoc = read('TIER_VALIDATION_MODEL.md');
-if (!/Tier 3[\s\S]{0,800}(deployed|postdeploy|smoke|critical runtime)/i.test(tierDoc)) failures.push('TIER_VALIDATION_MODEL.md must define Tier 3 as deployed smoke/critical runtime proof.');
-if (!/Tier 4[\s\S]{0,900}(Ultimate Live|live E2E|provider \+ data|Gmail|Sheets)/i.test(tierDoc)) failures.push('TIER_VALIDATION_MODEL.md must define Tier 4 as Ultimate Live E2E provider + data proof.');
+if (!/Tier 3[\s\S]{0,800}(deployed|postdeploy|smoke|critical runtime)/i.test(tierDoc)) docWarnings.push('TIER_VALIDATION_MODEL.md must define Tier 3 as deployed smoke/critical runtime proof.');
+if (!/Tier 4[\s\S]{0,900}(Ultimate Live|live E2E|provider \+ data|Gmail|Sheets)/i.test(tierDoc)) docWarnings.push('TIER_VALIDATION_MODEL.md must define Tier 4 as Ultimate Live E2E provider + data proof.');
 const providerDoc = read('REAL_PROVIDER_LANE_MATRIX.md');
-if (!/\| Provider lane \| Provider \| Runtime\/surface/i.test(providerDoc)) failures.push('REAL_PROVIDER_LANE_MATRIX.md must contain the canonical provider lane table.');
-if (!/Tier 4/i.test(providerDoc)) failures.push('REAL_PROVIDER_LANE_MATRIX.md must tie live provider/data proof lanes to Tier 4.');
+if (!/\| Provider lane \| Provider \| Runtime\/surface/i.test(providerDoc)) docWarnings.push('REAL_PROVIDER_LANE_MATRIX.md must contain the canonical provider lane table.');
+if (!/Tier 4/i.test(providerDoc)) docWarnings.push('REAL_PROVIDER_LANE_MATRIX.md must tie live provider/data proof lanes to Tier 4.');
 const journeyDoc = read('USER_JOURNEY_TEST_MATRIX.md');
-if (!/\| Persona \| Action/i.test(journeyDoc)) failures.push('USER_JOURNEY_TEST_MATRIX.md must contain the canonical user journey table.');
-if (!/Tier 4/i.test(journeyDoc)) failures.push('USER_JOURNEY_TEST_MATRIX.md must mark major live journeys for Tier 4 proof.');
+if (!/\| Persona \| Action/i.test(journeyDoc)) docWarnings.push('USER_JOURNEY_TEST_MATRIX.md must contain the canonical user journey table.');
+if (!/Tier 4/i.test(journeyDoc)) docWarnings.push('USER_JOURNEY_TEST_MATRIX.md must mark major live journeys for Tier 4 proof.');
 const testingDoc = read('TESTING_SEQUENCE.md');
-if (!/--tier=3/i.test(testingDoc)) failures.push('TESTING_SEQUENCE.md must include a Tier 3 command.');
-if (!/tier4:ultimate-live-proof/i.test(testingDoc)) failures.push('TESTING_SEQUENCE.md must include the Tier 4 ultimate live proof command.');
-if (!/explicit deployed/i.test(testingDoc) && !/deployed URL/i.test(testingDoc)) failures.push('TESTING_SEQUENCE.md must require explicit deployed URL/postdeploy target.');
+if (!/--tier=3/i.test(testingDoc)) docWarnings.push('TESTING_SEQUENCE.md must include a Tier 3 command.');
+if (!/tier4:ultimate-live-proof/i.test(testingDoc)) docWarnings.push('TESTING_SEQUENCE.md must include the Tier 4 ultimate live proof command.');
+if (!/explicit deployed/i.test(testingDoc) && !/deployed URL/i.test(testingDoc)) docWarnings.push('TESTING_SEQUENCE.md must require explicit deployed URL/postdeploy target.');
 const runtimeDoc = read('RUNTIME_CONTEXT_TRACE_MATRIX.md');
-if (!/Playwright self-spawn/i.test(runtimeDoc) || !/Provider dashboard/i.test(runtimeDoc)) failures.push('RUNTIME_CONTEXT_TRACE_MATRIX.md must include self-spawn and provider runtime contexts.');
-if (!/Tier 4/i.test(runtimeDoc)) failures.push('RUNTIME_CONTEXT_TRACE_MATRIX.md must include Tier 4 deployed/provider context trace.');
+if (!/Playwright self-spawn/i.test(runtimeDoc) || !/Provider dashboard/i.test(runtimeDoc)) docWarnings.push('RUNTIME_CONTEXT_TRACE_MATRIX.md must include self-spawn and provider runtime contexts.');
+if (!/Tier 4/i.test(runtimeDoc)) docWarnings.push('RUNTIME_CONTEXT_TRACE_MATRIX.md must include Tier 4 deployed/provider context trace.');
 const matrixPath = path.join(root, '_repo_validation_matrix.json');
 if (!fs.existsSync(matrixPath)) failures.push('Missing _repo_validation_matrix.json.');
 else {
@@ -54,8 +55,13 @@ const pkg = fs.existsSync(packagePath) ? JSON.parse(fs.readFileSync(packagePath,
 if (!pkg.scripts?.['tier4:ultimate-live-proof']) failures.push('Missing package script tier4:ultimate-live-proof.');
 if (!pkg.scripts?.['validate:tier4-live-proof-contract']) failures.push('Missing package script validate:tier4-live-proof-contract.');
 fs.mkdirSync(path.join(root, 'reports'), { recursive: true });
-const report = { repo: pkg.name, generatedAt: new Date().toISOString(), validator: 'validate-final-tier-contract', failures };
+const report = { repo: pkg.name, generatedAt: new Date().toISOString(), validator: 'validate-final-tier-contract', failures, docWarnings };
 fs.writeFileSync(path.join(root, 'reports/final-tier-contract.json'), JSON.stringify(report, null, 2) + '\n');
-fs.writeFileSync(path.join(root, 'reports/final-tier-contract.md'), `# Final Tier Contract\n\nResult: ${failures.length ? 'FAIL' : 'PASS'}\n\n${failures.map((f) => `- ${f}`).join('\n') || 'Tier 4 Ultimate Live E2E provider + data proof is the final validation layer.'}\n`);
+fs.writeFileSync(path.join(root, 'reports/final-tier-contract.md'), `# Final Tier Contract\n\nResult: ${failures.length ? 'FAIL' : docWarnings.length ? 'STRONG WARNING' : 'PASS'}\n\n${[...failures, ...docWarnings].map((f) => `- ${f}`).join('\n') || 'Tier 4 Ultimate Live E2E provider + data proof is the final validation layer.'}\n`);
 if (failures.length) { console.error(failures.join('\n')); process.exit(1); }
-console.log('validate-final-tier-contract: PASS');
+if (docWarnings.length) {
+  console.warn('validate-final-tier-contract: STRONG WARNING');
+  for (const warning of docWarnings) console.warn(`- ${warning}`);
+} else {
+  console.log('validate-final-tier-contract: PASS');
+}

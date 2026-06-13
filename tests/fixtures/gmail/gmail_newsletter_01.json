@@ -1,0 +1,28 @@
+{
+  "fixture_id": "gmail_newsletter_01",
+  "scenario": "Newsletter",
+  "mailbox": "info@westpeek.ventures",
+  "sender": "founder@example.com",
+  "reply_to": "",
+  "recipients": [
+    "info@westpeek.ventures"
+  ],
+  "subject": "Weekly venture newsletter",
+  "headers": [
+    {
+      "name": "Message-ID",
+      "value": "<gmail_newsletter_01@proof.local>"
+    }
+  ],
+  "mime_tree": {
+    "mimeType": "text/plain",
+    "body": "Newsletter. Unsubscribe here."
+  },
+  "snippet": "Newsletter. Unsubscribe here.",
+  "attachments": [],
+  "expected": {
+    "category": "operational",
+    "capture": false,
+    "ingestion_key": "info@westpeek.ventures:gmail_newsletter_01"
+  }
+}

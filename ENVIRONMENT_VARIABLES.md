@@ -76,3 +76,13 @@ The authenticated snapshot endpoint supports:
 `/api/sheets/snapshot?fresh=1`
 
 This bypasses the short-lived snapshot cache so Tier 4 can prove immediate Google Sheets write/readback behavior. Normal application reads may continue using the cache.
+
+## Test-only provider controls
+
+- `APP_ENV=test`
+- `AUTH_PROVIDER=test`
+- `DATA_PROVIDER=fixture`
+- `GMAIL_PROVIDER=fixture`
+- `SHEETS_PROVIDER=local-adapter`
+
+These values are valid only in local/test runtime. Fixture or test-auth activation on a production/non-local hostname must hard-fail.

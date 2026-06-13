@@ -1,0 +1,28 @@
+{
+  "fixture_id": "gmail_malformed_sender_01",
+  "scenario": "Broken sender envelope",
+  "mailbox": "info@westpeek.ventures",
+  "sender": "broken-envelope",
+  "reply_to": "",
+  "recipients": [
+    "info@westpeek.ventures"
+  ],
+  "subject": "Hello",
+  "headers": [
+    {
+      "name": "Message-ID",
+      "value": "<gmail_malformed_sender_01@proof.local>"
+    }
+  ],
+  "mime_tree": {
+    "mimeType": "text/plain",
+    "body": "Potential company information with malformed sender."
+  },
+  "snippet": "Potential company information with malformed sender.",
+  "attachments": [],
+  "expected": {
+    "category": "noise",
+    "capture": false,
+    "ingestion_key": "info@westpeek.ventures:gmail_malformed_sender_01"
+  }
+}

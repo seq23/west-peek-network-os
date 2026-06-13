@@ -220,7 +220,7 @@ async function harness(page: Page) {
     source: 'cached',
     cache_ttl_seconds: 75
   }));
-  await page.route('**/api/sheets/snapshot', (route) => send(route, { ok: true, data }));
+  await page.route('**/api/sheets/snapshot**', (route) => send(route, { ok: true, data, source: 'fixture', refreshed_at: now(), freshness_requested: route.request().url().includes('fresh=1') }));
   await page.route('**/api/admin/sheets/maintain', (route) => {
     data.sheet_maintenance_log.unshift({ run_id: rid('maint'), created_at: now(), status: 'complete' });
     return send(route, { ok: true, run_id: 'maint_e2e', report_rows_written: 1 });
@@ -571,7 +571,7 @@ test('AI smoke test: creates pending human-review suggestion without auto execut
 
 test('settings: refresh connection status shows OAuth and browser session state', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Refresh connection status$/i }).click(); await mainText(page, /Gmail OAuth|Browser session|Connected|signed in/i); });
 test('settings: refresh from Google Sheets loads snapshot', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Refresh from Google Sheets$/i }).click(); await mainText(page, /Refreshed from Google Sheets|Live Google Sheets snapshot loaded/i); });
-test('settings: Run Sheet Maintenance uses authenticated route', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Run Sheet Maintenance$/i }).click(); await mainText(page, /Maintenance complete|report_rows_written|run_id/i); });
+test('settings: Run Sheet Maintenance uses authenticated route', async ({ page }) => { await nav(page, 'Settings'); page.once('dialog', (dialog) => dialog.accept()); await page.getByRole('main').getByRole('button', { name: /^Run Sheet Maintenance$/i }).click(); await mainText(page, /Maintenance complete|report rows written|run_id/i); });
 
 
 test('surface: deal-flow guidance appears across Dashboard Add Person Intake Instructions and Settings', async ({ page }) => {

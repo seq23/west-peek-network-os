@@ -1,0 +1,28 @@
+{
+  "fixture_id": "gmail_ambiguous_company_01",
+  "scenario": "Near-threshold company message",
+  "mailbox": "info@westpeek.ventures",
+  "sender": "founder@example.com",
+  "reply_to": "",
+  "recipients": [
+    "info@westpeek.ventures"
+  ],
+  "subject": "Company overview",
+  "headers": [
+    {
+      "name": "Message-ID",
+      "value": "<gmail_ambiguous_company_01@proof.local>"
+    }
+  ],
+  "mime_tree": {
+    "mimeType": "text/plain",
+    "body": "We are a startup building workflow software and would like to connect."
+  },
+  "snippet": "We are a startup building workflow software and would like to connect.",
+  "attachments": [],
+  "expected": {
+    "category": "company_info",
+    "capture": true,
+    "ingestion_key": "info@westpeek.ventures:gmail_ambiguous_company_01"
+  }
+}

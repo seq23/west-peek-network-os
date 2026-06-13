@@ -3,11 +3,14 @@ import { json, readJson } from '../../_shared/json';
 import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
 import { decryptTokenPayload, encryptTokenPayload, type TokenEnv } from '../../_shared/tokens';
 import { classifyTrigger, containsTrigger, inferNeedsTouch, normalizeOwner, normalizePriority, normalizeTouch, parseFields } from '../../_shared/triggers';
+import { classifyIntelligentInbox, type InboxClassification } from '../../_shared/providers/intelligent-inbox';
 
 type Env = RuntimeEnv & AuthEnv & TokenEnv & { GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string };
 type Context = { request: Request; env: Env };
 
-type Body = { query?: string; max_results?: number; run_id?: string; dry_run?: boolean };
+type Body = { query?: string; max_results?: number; run_id?: string; dry_run?: boolean; mailbox_email?: string };
+type MailboxPolicy = 'trigger_only' | 'intelligent_inbox';
+const activeMailboxSyncs = new Set<string>();
 type TokenPayload = { access_token?: string; refresh_token?: string; expires_in?: number; scope?: string; token_type?: string };
 type GmailMessageList = { messages?: Array<{ id: string; threadId?: string }> };
 type GmailMessage = { id: string; threadId?: string; payload?: { headers?: Array<{ name: string; value: string }>; body?: { data?: string }; parts?: GmailPart[] }; snippet?: string; internalDate?: string };
@@ -26,7 +29,8 @@ export async function onRequestPost({ request, env }: Context) {
 
   const body = await readJson<Body>(request).catch(() => ({} as Body));
   const runId = clean(body.run_id) || `gmail_sync_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
-  const query = clean(body.query) || DEFAULT_QUERY;
+  const requestedMailbox = clean(body.mailbox_email).toLowerCase();
+  const queryOverride = clean(body.query);
   const maxResults = Math.min(Math.max(Number(body.max_results || MAX_RESULTS), 1), 25);
 
   let tokenPayload: TokenPayload;
@@ -35,10 +39,10 @@ export async function onRequestPost({ request, env }: Context) {
     const tokenRows = await readTab(env, 'oauth_tokens', { ensureHeaders: false });
     const activeRows = tokenRows
       .filter((row) => String(row.provider || '').toLowerCase() === 'google' && String(row.status || '').toLowerCase() === 'active')
-      .filter((row) => !row.user_email || String(row.user_email).toLowerCase() === user.email.toLowerCase())
+      .filter((row) => requestedMailbox ? String(row.user_email || '').toLowerCase() === requestedMailbox : (!row.user_email || String(row.user_email).toLowerCase() === user.email.toLowerCase()))
       .sort((a, b) => timestamp(b.updated_at || b.created_at) - timestamp(a.updated_at || a.created_at));
     const latest = activeRows[0];
-    if (!latest) return json({ ok: false, error: 'No active Google OAuth token found. Connect Gmail first.', setup_required: true }, { status: 409 });
+    if (!latest) return json({ ok: false, error_code: 'MAILBOX_NOT_CONNECTED', error: requestedMailbox ? `No active Google OAuth token found for ${requestedMailbox}. Connect that mailbox first.` : 'No active Google OAuth token found. Connect Gmail first.', setup_required: true }, { status: 409 });
     tokenOwner = String(latest.user_email || user.email).toLowerCase();
     tokenPayload = await decryptTokenPayload<TokenPayload>(env, String(latest.encrypted_payload || ''), String(latest.encryption_iv || ''));
   } catch (error) {
@@ -46,6 +50,8 @@ export async function onRequestPost({ request, env }: Context) {
     return json({ ok: false, error: error instanceof Error ? error.message : 'Could not read OAuth token.' }, { status: 503 });
   }
 
+  const mailboxPolicy: MailboxPolicy = tokenOwner === 'info@westpeek.ventures' ? 'intelligent_inbox' : 'trigger_only';
+  const query = queryOverride || (mailboxPolicy === 'intelligent_inbox' ? 'in:inbox newer_than:30d -category:promotions -category:social' : DEFAULT_QUERY);
   let accessToken = tokenPayload.access_token || '';
   if (!accessToken && tokenPayload.refresh_token) {
     try {
@@ -57,6 +63,8 @@ export async function onRequestPost({ request, env }: Context) {
     }
   }
   if (!accessToken) return json({ ok: false, error: 'Google OAuth token payload does not include an access token or refresh token.', reconnect_required: true }, { status: 409 });
+  if (activeMailboxSyncs.has(tokenOwner)) return json({ ok: false, error_code: 'SYNC_ALREADY_RUNNING', error: `A Gmail sync is already running for ${tokenOwner}.`, mailbox: tokenOwner }, { status: 409 });
+  activeMailboxSyncs.add(tokenOwner);
 
   try {
     let messages = await listMessages(accessToken, query, maxResults);
@@ -69,35 +77,57 @@ export async function onRequestPost({ request, env }: Context) {
     if (!messages.ok) return json({ ok: false, error: `Gmail search failed: ${messages.status} ${messages.text}` }, { status: 502 });
 
     const existingRows = await readTab(env, 'intake_queue', { ensureHeaders: false });
-    const existingMessageIds = new Set(existingRows.map((row) => String(row.gmail_message_id || '')).filter(Boolean));
+    const existingKeys = new Set(existingRows.flatMap((row) => [String(row.gmail_ingestion_key || ''), String(row.gmail_message_id || ''), String(row.gmail_rfc_message_id || '')]).filter(Boolean));
     const imported = [] as Array<Record<string, unknown>>;
     const skippedDuplicates = [] as string[];
+    const skippedIrrelevant = [] as Array<{ message_id: string; category: string; score: number }>;
+    const failedMessages = [] as Array<{ message_id: string; status: number }>;
     const inspected = [] as string[];
 
     for (const item of messages.payload.messages || []) {
       const message = await getMessage(accessToken, item.id);
-      if (!message.ok) continue;
+      if (!message.ok) { failedMessages.push({ message_id: item.id, status: message.status }); continue; }
       inspected.push(item.id);
-      if (existingMessageIds.has(item.id)) { skippedDuplicates.push(item.id); continue; }
       const rawText = extractText(message.payload);
       const headers = headerMap(message.payload);
       const searchableText = [headers.subject, headers.from, headers.to, rawText, message.payload.snippet].filter(Boolean).join('\n');
-      if (!containsTrigger(searchableText)) continue;
-      const intake = buildGmailIntake({ rawText: searchableText, headers, message: message.payload, userEmail: user.email, runId });
-      if (!body.dry_run) await appendRecord(env, 'intake_queue', intake);
+      const rfcMessageId = clean(headers['message-id']).toLowerCase();
+      const ingestionKey = `${tokenOwner}:${item.id}`;
+      if (existingKeys.has(ingestionKey) || existingKeys.has(item.id) || (rfcMessageId && existingKeys.has(rfcMessageId))) { skippedDuplicates.push(item.id); continue; }
+      if (mailboxPolicy === 'trigger_only' && !containsTrigger(searchableText)) continue;
+      const inboxClassification = mailboxPolicy === 'intelligent_inbox' ? classifyIntelligentInbox(headers, rawText) : undefined;
+      if (inboxClassification && !inboxClassification.capture) {
+        skippedIrrelevant.push({ message_id: item.id, category: inboxClassification.category, score: inboxClassification.score });
+        continue;
+      }
+      const intake = buildGmailIntake({ rawText: searchableText, headers, message: message.payload, userEmail: user.email, mailboxEmail: tokenOwner, mailboxPolicy, ingestionKey, rfcMessageId, runId, inboxClassification });
+      if (!body.dry_run) {
+        const latestRows = await readTab(env, 'intake_queue', { ensureHeaders: false });
+        const alreadyWritten = latestRows.some((row) => String(row.gmail_ingestion_key || '') === ingestionKey || String(row.gmail_message_id || '') === item.id || (rfcMessageId && String(row.gmail_rfc_message_id || '').toLowerCase() === rfcMessageId));
+        if (alreadyWritten) { skippedDuplicates.push(item.id); continue; }
+        await appendRecord(env, 'intake_queue', intake);
+      }
       imported.push(intake);
-      existingMessageIds.add(item.id);
+      existingKeys.add(ingestionKey);
+      existingKeys.add(item.id);
+      if (rfcMessageId) existingKeys.add(rfcMessageId);
     }
 
     return json({
       ok: true,
       provider: 'google_gmail',
+      mailbox: tokenOwner,
+      mailbox_policy: mailboxPolicy,
       sync_id: runId,
       query,
       inspected_message_ids: inspected,
       imported_count: imported.length,
       skipped_duplicate_count: skippedDuplicates.length,
       skipped_duplicate_message_ids: skippedDuplicates,
+      skipped_irrelevant_count: skippedIrrelevant.length,
+      skipped_irrelevant_messages: skippedIrrelevant,
+      failed_message_count: failedMessages.length,
+      failed_messages: failedMessages,
       imported_intake_ids: imported.map((row) => row.intake_id),
       human_review_required: true,
       execution_allowed: false,
@@ -107,6 +137,8 @@ export async function onRequestPost({ request, env }: Context) {
   } catch (error) {
     if (error instanceof Error && error.message.includes('Google Sheets')) return sheetsUnavailable(error);
     return json({ ok: false, error: error instanceof Error ? error.message : 'Gmail sync failed.' }, { status: 503 });
+  } finally {
+    activeMailboxSyncs.delete(tokenOwner);
   }
 }
 
@@ -159,32 +191,36 @@ async function storeRefreshedToken(env: Env, userEmail: string, token: TokenPayl
   });
 }
 
-function buildGmailIntake(input: { rawText: string; headers: Record<string, string>; message: GmailMessage; userEmail: string; runId: string }) {
+function buildGmailIntake(input: { rawText: string; headers: Record<string, string>; message: GmailMessage; userEmail: string; mailboxEmail: string; mailboxPolicy: MailboxPolicy; ingestionKey: string; rfcMessageId: string; runId: string; inboxClassification?: InboxClassification }) {
   const fields = parseFields(input.rawText);
-  const classification = classifyTrigger(input.rawText);
+  const smart = input.inboxClassification;
+  const classification = smart ? { source_trigger: `shared_inbox_${smart.category}`, trigger_intent: smart.triggerIntent, person_type: smart.personType, deal_flow_prospect: smart.dealFlowProspect, deal_context: `Intelligent shared-inbox classification: ${smart.category}; score ${smart.score}; ${smart.reasons.join(', ')}` } : classifyTrigger(input.rawText);
   const now = new Date().toISOString();
-  const envelope = inferFromEnvelope(input.headers, input.userEmail);
+  const envelope = inferFromEnvelope(input.headers, input.userEmail, input.mailboxEmail);
   const parsedName = fields.name || envelope.name || '';
   const parsedEmail = fields.email || envelope.email || '';
   const parsedNotes = fields.context || fields.notes || stripTrigger(input.rawText) || 'Minimal Gmail trigger capture. Review email thread for context.';
   return {
-    intake_id: `intake_gmail_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+    intake_id: deterministicIntakeId(input.mailboxEmail, input.message.id),
     created_at: now,
     updated_at: now,
-    source: 'gmail_trigger',
+    source: input.mailboxPolicy === 'intelligent_inbox' ? 'gmail_shared_inbox' : 'gmail_trigger',
     capture_type: 'email_thread',
     captured_by: input.userEmail,
     source_user_email: input.userEmail,
+    source_mailbox: input.mailboxEmail,
     source_file_name: '',
     source_file_type: '',
     gmail_message_id: input.message.id,
     gmail_thread_id: input.message.threadId || '',
+    gmail_rfc_message_id: input.rfcMessageId,
+    gmail_ingestion_key: input.ingestionKey,
     source_trigger: classification.source_trigger,
     trigger_intent: classification.trigger_intent,
     person_type: classification.person_type,
     deal_flow_prospect: classification.deal_flow_prospect,
     deal_context: classification.deal_context,
-    raw_text: input.rawText.slice(0, 6000),
+    raw_text: cleanEmailText(input.rawText).slice(0, 6000),
     email_subject: input.headers.subject || '',
     email_from: input.headers.from || '',
     email_to: input.headers.to || '',
@@ -205,7 +241,7 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
     transcript_text: '',
     missing_fields: missingFields(parsedName, parsedEmail, fields.company).join(', '),
     ai_summary: classification.trigger_intent === 'deal_flow' ? `Founder / prospective deal flow. ${parsedNotes}` : parsedNotes,
-    ai_confidence: parsedName || parsedEmail ? 'medium' : 'low',
+    ai_confidence: smart ? (smart.score >= 6 ? 'high' : 'medium') : (parsedName || parsedEmail ? 'medium' : 'low'),
     internal_data_trace: JSON.stringify([
       { stage: 'gmail_search', status: 'passed', detail: `imported by Gmail sync ${input.runId}` },
       { stage: 'trigger_detected', status: 'passed', detail: classification.source_trigger || 'accepted trigger' },
@@ -217,16 +253,36 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
   };
 }
 
-function extractText(message: GmailMessage) {
-  const chunks: string[] = [];
-  collectParts(message.payload?.parts || [], chunks);
-  if (message.payload?.body?.data) chunks.push(decodeBody(message.payload.body.data));
-  return chunks.join('\n').replace(/\s+/g, ' ').trim() || message.snippet || '';
+function cleanEmailText(value: string) {
+  return value
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/(?:On .+? wrote:|From:.+?Sent:.+?To:.+?Subject:)[\s\S]*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
-function collectParts(parts: GmailPart[], chunks: string[]) {
+
+function extractText(message: GmailMessage) {
+  const plain: string[] = [];
+  const html: string[] = [];
+  collectParts(message.payload?.parts || [], plain, html);
+  if (message.payload?.body?.data) plain.push(decodeBody(message.payload.body.data));
+  const preferred = plain.find((value) => cleanEmailText(value).length > 0) || html.find((value) => cleanEmailText(value).length > 0) || message.snippet || '';
+  return cleanEmailText(preferred);
+}
+function collectParts(parts: GmailPart[], plain: string[], html: string[]) {
   for (const part of parts) {
-    if (part.parts?.length) collectParts(part.parts, chunks);
-    if ((part.mimeType || '').startsWith('text/') && part.body?.data) chunks.push(decodeBody(part.body.data));
+    if (part.parts?.length) collectParts(part.parts, plain, html);
+    if (!part.body?.data) continue;
+    if (part.mimeType === 'text/plain') plain.push(decodeBody(part.body.data));
+    else if (part.mimeType === 'text/html') html.push(decodeBody(part.body.data));
   }
 }
 function decodeBody(value: string) {
@@ -238,9 +294,15 @@ function headerMap(message: GmailMessage) {
   for (const header of message.payload?.headers || []) out[header.name.toLowerCase()] = header.value;
   return out;
 }
-function inferFromEnvelope(headers: Record<string, string>, userEmail: string) {
-  const candidates = [headers.from, headers.to].filter(Boolean).map(parseMailbox).filter(Boolean) as Array<{ name: string; email: string }>;
-  return candidates.find((candidate) => candidate.email.toLowerCase() !== userEmail.toLowerCase()) || candidates[0] || { name: '', email: '' };
+function inferFromEnvelope(headers: Record<string, string>, userEmail: string, mailboxEmail: string) {
+  const excluded = new Set([userEmail, mailboxEmail].map((value) => value.toLowerCase()));
+  const candidates = [headers.from, headers['reply-to'], headers.to].filter(Boolean).map(parseMailbox).filter(Boolean) as Array<{ name: string; email: string }>;
+  return candidates.find((candidate) => !excluded.has(candidate.email.toLowerCase())) || candidates[0] || { name: '', email: '' };
+}
+
+function deterministicIntakeId(mailboxEmail: string, gmailMessageId: string) {
+  const stable = `${mailboxEmail}:${gmailMessageId}`.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(-96);
+  return `intake_gmail_${stable}`;
 }
 function parseMailbox(value: string) {
   const angle = value.match(/([^<]*)<([^>]+)>/);

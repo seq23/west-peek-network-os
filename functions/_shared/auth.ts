@@ -1,6 +1,9 @@
 import { json } from './json';
+import { testAuthEmail, type RuntimeTestAuthEnv } from './test-auth-provider';
 
 export interface AuthEnv {
+  AUTH_PROVIDER?: string;
+  APP_ENV?: string;
   ADMIN_EMAIL_ALLOWLIST?: string;
   APP_SESSION_SECRET?: string;
   GOOGLE_CLIENT_ID?: string;
@@ -60,6 +63,8 @@ export function requireAuthEnv(env: AuthEnv) {
 
 
 export async function authenticatedUserEmail(request: Request, env: AuthEnv, options: { allowHeaderFallback?: boolean } = {}) {
+  const explicitTestEmail = testAuthEmail(request, env as RuntimeTestAuthEnv);
+  if (explicitTestEmail) return explicitTestEmail;
   const approvedUsers = allowedEmails(env);
   const sessionCookie = getCookie(request, 'wpn_session');
 

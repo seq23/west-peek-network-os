@@ -1,0 +1,28 @@
+{
+  "fixture_id": "gmail_reply_chain_pitch_01",
+  "scenario": "Pitch inside reply chain",
+  "mailbox": "info@westpeek.ventures",
+  "sender": "founder@example.com",
+  "reply_to": "",
+  "recipients": [
+    "info@westpeek.ventures"
+  ],
+  "subject": "Re: Company introduction",
+  "headers": [
+    {
+      "name": "Message-ID",
+      "value": "<gmail_reply_chain_pitch_01@proof.local>"
+    }
+  ],
+  "mime_tree": {
+    "mimeType": "text/plain",
+    "body": "Following up on our fundraising pitch and traction."
+  },
+  "snippet": "Following up on our fundraising pitch and traction.",
+  "attachments": [],
+  "expected": {
+    "category": "pitch",
+    "capture": true,
+    "ingestion_key": "info@westpeek.ventures:gmail_reply_chain_pitch_01"
+  }
+}

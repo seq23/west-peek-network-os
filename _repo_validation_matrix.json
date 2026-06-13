@@ -541,40 +541,40 @@
       "name": "validate:artifact-manifest-current",
       "command": "npm run validate:artifact-manifest-current",
       "category": "governance",
-      "severity": "HARD FAIL",
+      "severity": "STRONG WARNING",
       "tier": "tier1",
       "proofLayer": "STATIC VALIDATION PASSED",
-      "productionRisk": "source/contract/artifact hygiene drift",
+      "productionRisk": "documentation or release-metadata drift; no direct runtime, security, data-integrity, or deployability risk",
       "whatItProves": "Runs validate:artifact-manifest-current.",
       "whatItDoesNotProve": "Does not prove live runtime/provider/browser behavior.",
-      "failureHandling": "Block selected delivery/proof layer until fixed or explicitly reclassified.",
-      "ownerDecisionNeeded": "NO unless intentionally changing scope."
+      "failureHandling": "Emit STRONG WARNING and continue. Documentation-only findings never block build, browser proof, updater commit, push, or release.",
+      "ownerDecisionNeeded": "NO for release continuation; repair during documentation maintenance."
     },
     {
       "name": "Docs consolidation admission",
       "command": "npm run validate:docs-consolidation",
       "category": "governance",
-      "severity": "HARD FAIL",
+      "severity": "STRONG WARNING",
       "tier": "tier1",
       "proofLayer": "static governance validation",
-      "productionRisk": "Doc sprawl, conflicting runbooks, stale instructions, and hidden operating authority.",
+      "productionRisk": "documentation or release-metadata drift; no direct runtime, security, data-integrity, or deployability risk",
       "whatItProves": "Every active Markdown document is mapped and every archived document is indexed with an active replacement.",
       "whatItDoesNotProve": "Does not prove the archived content is still semantically useful or that human readers reviewed all active docs.",
-      "failureHandling": "HARD FAIL blocks delivery because repo governance cannot prove docs/validators are controlled.",
-      "ownerDecisionNeeded": "YES if failing or if a validator/doc needs retirement/reclassification."
+      "failureHandling": "Emit STRONG WARNING and continue. Documentation-only findings never block build, browser proof, updater commit, push, or release.",
+      "ownerDecisionNeeded": "NO for release continuation; repair during documentation maintenance."
     },
     {
       "name": "validate:docs-match-package-scripts",
       "command": "npm run validate:docs-match-package-scripts",
       "category": "governance",
-      "severity": "HARD FAIL",
+      "severity": "STRONG WARNING",
       "tier": "tier1",
       "proofLayer": "STATIC VALIDATION PASSED",
-      "productionRisk": "source/contract/artifact hygiene drift",
+      "productionRisk": "documentation or release-metadata drift; no direct runtime, security, data-integrity, or deployability risk",
       "whatItProves": "Runs validate:docs-match-package-scripts.",
       "whatItDoesNotProve": "Does not prove live runtime/provider/browser behavior.",
-      "failureHandling": "Block selected delivery/proof layer until fixed or explicitly reclassified.",
-      "ownerDecisionNeeded": "NO unless intentionally changing scope."
+      "failureHandling": "Emit STRONG WARNING and continue. Documentation-only findings never block build, browser proof, updater commit, push, or release.",
+      "ownerDecisionNeeded": "NO for release continuation; repair during documentation maintenance."
     },
     {
       "name": "E2E required coverage matrix",
@@ -737,27 +737,27 @@
       "name": "validate:tier-docs-current",
       "command": "npm run validate:tier-docs-current",
       "category": "governance",
-      "severity": "HARD FAIL",
+      "severity": "STRONG WARNING",
       "tier": "tier1",
       "proofLayer": "STATIC VALIDATION PASSED",
-      "productionRisk": "source/contract/artifact hygiene drift",
+      "productionRisk": "documentation or release-metadata drift; no direct runtime, security, data-integrity, or deployability risk",
       "whatItProves": "Runs validate:tier-docs-current.",
       "whatItDoesNotProve": "Does not prove live runtime/provider/browser behavior.",
-      "failureHandling": "Block selected delivery/proof layer until fixed or explicitly reclassified.",
-      "ownerDecisionNeeded": "NO unless intentionally changing scope."
+      "failureHandling": "Emit STRONG WARNING and continue. Documentation-only findings never block build, browser proof, updater commit, push, or release.",
+      "ownerDecisionNeeded": "NO for release continuation; repair during documentation maintenance."
     },
     {
       "name": "validate:tier4-docs-complete",
       "command": "npm run validate:tier4-docs-complete",
       "category": "governance",
-      "severity": "HARD FAIL",
+      "severity": "STRONG WARNING",
       "tier": "tier1",
       "proofLayer": "STATIC VALIDATION PASSED",
-      "productionRisk": "source/contract/artifact hygiene drift",
+      "productionRisk": "documentation or release-metadata drift; no direct runtime, security, data-integrity, or deployability risk",
       "whatItProves": "Runs validate:tier4-docs-complete.",
       "whatItDoesNotProve": "Does not prove live runtime/provider/browser behavior.",
-      "failureHandling": "Block selected delivery/proof layer until fixed or explicitly reclassified.",
-      "ownerDecisionNeeded": "NO unless intentionally changing scope."
+      "failureHandling": "Emit STRONG WARNING and continue. Documentation-only findings never block build, browser proof, updater commit, push, or release.",
+      "ownerDecisionNeeded": "NO for release continuation; repair during documentation maintenance."
     },
     {
       "name": "validate:tier4-lane-registry",

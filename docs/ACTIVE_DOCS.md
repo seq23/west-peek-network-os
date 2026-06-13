@@ -4,6 +4,10 @@ Status: ACTIVE
 Purpose: single operator entrypoint that prevents doc sprawl. If a document is not listed here or mapped in `docs/DOCS_CONSOLIDATION_MAP.md`, it is not an active operating authority.
 
 ## Active operating surfaces
+- `PROOF_COMPLETION_MASTER_PLAN_2026-06-13.md`
+- `HOSTILE_UX_DATA_INTEGRITY_REVIEW_2026-06-13.md`
+- `docs/providers/INTELLIGENT_SHARED_INBOX.md`
+- `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md`
 - `ARCHITECTURAL_DECISIONS.md`
 - `ARTIFACT_MANIFEST.md`
 - `COMPLEXITY_LEDGER.md`
@@ -24,8 +28,6 @@ Purpose: single operator entrypoint that prevents doc sprawl. If a document is n
 - `TESTING_SEQUENCE.md`
 - `TIER_VALIDATION_MODEL.md`
 - `USER_JOURNEY_TEST_MATRIX.md`
-- `CHANGED_FILES_2026-06-11.md`
-- `VALIDATION_RUN_SUMMARY_2026-06-11.md`
 - `docs/HOSTILE_FLEXIBLE_INTAKE_REVIEW_06-07-26.md`
 - `docs/PHASE_9C_NETWORK_OS_HANDOFF_REVIEW.md`
 - `docs/PITCH_LAB_HANDOFF_CONTRACT.md`
@@ -61,7 +63,6 @@ Purpose: single operator entrypoint that prevents doc sprawl. If a document is n
 | Document | Status | Purpose |
 |---|---|---|
 | `TERMINAL_RELEASE_RUNBOOK.md` | ACTIVE | Terminal release/update/deploy/postdeploy/provider-proof runbook. |
-- `FINAL_TIER_PATCH_SUMMARY_2026-06-11.md`
 - `VALIDATOR_ADMISSION_REGISTER.md`
 - `docs/ACTIVE_DOCS.md`
 - `docs/evidence/GMAIL_SEED_MESSAGE_GUIDE.md`
@@ -86,3 +87,16 @@ Purpose: single operator entrypoint that prevents doc sprawl. If a document is n
 - `docs/validation/TIER_4_ULTIMATE_LIVE_PROOF.md`
 - `docs/validation/VALIDATION_COMMANDS.md`
 - `docs/validation/VALIDATION_OVERVIEW.md`
+
+## 2026-06-13 canonical migration additions
+- `../TESTING_ARCHITECTURE.md`
+- `../DIAGNOSTICS_STANDARD.md`
+- `../PROOF_FIXTURE_STANDARD.md`
+- `../SECRETS_AND_VAULT_ARCHITECTURE.md`
+- `../MASTER_GAUNTLET.md`
+- `../PREDEPLOY_POSTDEPLOY_RUNBOOK.md`
+- `../REAL_RUNTIME_PROOF_MATRIX.md`
+- `../TEST_FIXTURE_LIFECYCLE.md`
+- `../WP_NETWORK_OS_HALLMARK_UX_ADDENDUM_2026-06-13.md`
+- `WP_NETWORK_OS_CANONICAL_TESTING_RELEASE_PROOF_MASTER_PLAN_2026-06-13.md`
+- `WP_NETWORK_OS_REPO_SPECIFIC_TEST_IMPLEMENTATION_ADDENDUM_2026-06-13.md`

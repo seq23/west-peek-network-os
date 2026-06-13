@@ -1,3 +1,4 @@
+<!-- ARCHIVED: superseded by UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md. -->
 # Final Tier Patch Summary — west-peek-network-os
 
 Status: STRUCTURAL GOVERNANCE PATCH

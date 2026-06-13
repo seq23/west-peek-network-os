@@ -19,3 +19,6 @@ tsconfig.tsbuildinfo
 reports/
 
 .auth/
+
+# Safe committed test environment template
+!/.env.test.example

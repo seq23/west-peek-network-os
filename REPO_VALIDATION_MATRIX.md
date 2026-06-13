@@ -12,7 +12,6 @@ Hard proof commands:
 ## Static/predeploy hard fail validators
 
 - `validate:no-generated-artifacts`
-- `validate:artifact-manifest-current`
 - `validate:google-private-key-contract`
 - `validate:no-raw-atob-errors`
 - `validate:oauth-connect-contract`
@@ -20,11 +19,21 @@ Hard proof commands:
 - `validate:tier4-live-proof-contract`
 - `validate:tier4-lane-registry`
 - `validate:tier4-report-schema`
-- `validate:docs-match-package-scripts`
 - `validate:repo-matrix-consistency`
 - `validate:no-localhost-defaults`
+
+
+## Documentation advisory validators — never release-blocking
+
+The following validators are documentation/governance advisories only. They may emit `STRONG WARNING` or `WARNING`, but they must never stop build, browser proof, updater commit, push, or release:
+
+- `validate:artifact-manifest-current`
+- `validate:docs-match-package-scripts`
 - `validate:tier-docs-current`
 - `validate:tier4-docs-complete`
+- `validate:docs-consolidation`
+
+Locked rule: documentation-only drift is not equivalent to product, security, data-integrity, deployment, or artifact-safety failure.
 
 ## Tier 4 lanes
 
@@ -58,3 +67,36 @@ Tier 4 live-provider requirements remain hard requirements during Tier 4. They a
 ### Wrapper exclusion rule
 
 Convenience wrappers (`release:proof`, `test:everything`, `validate:predeploy:full`, `validate:postdeploy:strict`) are package entrypoints, not matrix rows. They are excluded from `_repo_validation_matrix.json` to prevent recursive/self-nesting validation loops. Target validators and proof lanes remain represented in the matrix.
+
+## UX/data-integrity hostile-review update — 2026-06-13
+
+No new standalone validator was admitted. The existing `validate:provider-error-contract` gate now covers the intelligent shared-inbox and deduplication source contract. This avoids a second token-scanning validator for the same production risk.
+
+Proof boundary: the static gate proves required controls exist in source. Only live Gmail/Sheets evidence can prove production classification quality and duplicate behavior across Cloudflare instances.
+
+## Locked Proof Completion Lanes — 2026-06-13
+
+The authoritative implementation and evidence requirements are in `PROOF_COMPLETION_MASTER_PLAN_2026-06-13.md`.
+
+The following remain NOT PROVEN until their dedicated live/deployed lanes pass:
+
+1. Live Gmail intelligent classification accuracy.
+2. Cross-instance duplicate handling under simultaneous deployed syncs.
+3. Live Google Sheets maintenance behavior and idempotency.
+4. Headed Playwright journeys for the current UX/data-integrity changes.
+5. Deployed Cloudflare runtime.
+6. GitHub Actions status for the delivered revision.
+7. Postdeploy provider proof.
+
+Typecheck, local build, static validators, documentation governance, and ZIP checks must be reported only under their specific proof layers. They do not substitute for the seven lanes above.
+
+## Canonical migration additions — 2026-06-13
+
+| Validator / Test | Command | Category | Severity | Production Risk | What It Proves | What It Does Not Prove | Failure Handling |
+|---|---|---|---|---|---|---|---|
+| Provider architecture integration | `npm run test:provider-architecture` | LOCAL INTEGRATION | HARD FAIL | Fixture/live contract drift, unsafe test auth, non-durable local proof | Twelve intelligent-inbox fixtures, explicit provider modes, production exclusion, durable local Sheets readback, dedupe, maintenance idempotency, exact cleanup | Live Gmail, live Sheets, deployed concurrency | Fix product or harness; do not weaken fixtures |
+| Local Master Gauntlet | `npm run test:gauntlet:local` | LOCAL PERSISTENCE/READBACK | HARD FAIL | Broken critical lifecycle or fake local persistence | Founder inquiry capture, ten-way local duplicate resistance, maintenance idempotency, contact lifecycle, event history preservation, approval/notification resolution, fresh readback, cleanup | Cloudflare isolate race, real provider behavior, headed UX | Preserve diagnostics and fix exact failed lane |
+| Test-auth production exclusion | Included in `test:provider-architecture` | SECURITY CONTRACT | HARD FAIL | Production auth bypass | Test auth requires explicit test env/provider/local host | Production OAuth correctness | Block release |
+| Hallmark expert review | `~/run_hallmark_audit.sh <repo> ...` plus expert review | HUMAN UX REVIEW | STRONG WARNING / HARD FAIL when trust or usability is materially damaged | Human-hostile or brand-damaging UX | Evidence pack plus expert findings and remediation | Runtime correctness | Implement approved findings and run browser proof |
+
+| Browserless mocked web contracts | `npm run test:web-contracts:mocked` | LOCAL INTEGRATION | HARD FAIL | Client/API contract drift | Request routing, serialization, snapshot normalization, fresh-read metadata, structured error propagation | DOM, navigation, layout, real browser, deployment, live providers | Fix client contract or objectively wrong fixture | No |

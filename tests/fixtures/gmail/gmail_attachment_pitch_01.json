@@ -1,0 +1,28 @@
+{
+  "fixture_id": "gmail_attachment_pitch_01",
+  "scenario": "Minimal body plus deck",
+  "mailbox": "info@westpeek.ventures",
+  "sender": "founder@example.com",
+  "reply_to": "",
+  "recipients": [
+    "info@westpeek.ventures"
+  ],
+  "subject": "Deck attached",
+  "headers": [
+    {
+      "name": "Message-ID",
+      "value": "<gmail_attachment_pitch_01@proof.local>"
+    }
+  ],
+  "mime_tree": {
+    "mimeType": "text/plain",
+    "body": "Founder here. Pitch deck attached for our pre-seed round."
+  },
+  "snippet": "Founder here. Pitch deck attached for our pre-seed round.",
+  "attachments": [],
+  "expected": {
+    "category": "pitch",
+    "capture": true,
+    "ingestion_key": "info@westpeek.ventures:gmail_attachment_pitch_01"
+  }
+}

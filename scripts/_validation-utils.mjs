@@ -24,6 +24,14 @@ export function failOrPass(name, failures) {
   }
   console.log(`${name}: PASS`);
 }
+export function warnOrPass(name, warnings, severity = 'STRONG WARNING') {
+  if (warnings.length) {
+    console.warn(`${name}: ${severity}`);
+    for (const warning of warnings) console.warn(`- ${warning}`);
+    return;
+  }
+  console.log(`${name}: PASS`);
+}
 export function listFiles(dir = root) {
   const out = [];
   const walk = (base) => {
