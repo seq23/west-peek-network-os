@@ -55,62 +55,147 @@ function runLane(lane) {
   });
 }
 const results = [];
-for (const lane of lanes) {
+const reportCheckLane = lanes.find((lane) => lane.id === 'tier4-report-check');
+if (!reportCheckLane) throw new Error('Tier 4 report-check lane is missing.');
+
+const executionLanes = lanes.filter((lane) => lane.id !== 'tier4-report-check');
+
+for (const lane of executionLanes) {
   console.log(`\n[Tier 4] ${lane.title}`);
   // eslint-disable-next-line no-await-in-loop
   results.push(await runLane(lane));
 }
-const failures = results.filter((lane) => lane.status === 'FAIL');
-const unproven = results.filter((lane) => lane.status === 'UNPROVEN');
-const warnings = unproven.map((lane) => `${lane.id}: UNPROVEN — ${(lane.missing || []).join(', ')}`);
-const passed = results.filter((lane) => lane.status === 'PASS');
-const result = failures.length || unproven.length ? 'BLOCKED — TIER 4 ULTIMATE LIVE E2E PROOF REQUIRED' : 'TIER 4 PASSED — ULTIMATE LIVE E2E PROVIDER + DATA PROOF';
-const report = {
-  repo: 'west-peek-network-os',
-  commit: process.env.GIT_COMMIT || 'UNKNOWN_NOT_QUERIED',
-  generatedAt: new Date().toISOString(),
-  startedAt: startedAt.toISOString(),
-  baseUrl,
-  cloudflareDeployment: process.env.CLOUDFLARE_DEPLOYMENT_VERSION || 'UNKNOWN_NOT_QUERIED',
-  runId,
-  mode: dryRun ? 'dry-run-blocked' : 'live',
-  oauthStorageStateUsed: Boolean(process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE),
-  interactiveOAuthRequired: !(process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE),
-  result,
-  counts: { total: results.length, passed: passed.length, failed: failures.length, unproven: unproven.length },
-  proofSummary: {
-    googleOAuthConnected: results.find((r) => r.id === 'tier4-oauth-connect-live')?.status === 'PASS',
-    gmailTriggerImported: results.find((r) => r.id === 'tier4-gmail-trigger-ingestion-live')?.status === 'PASS',
-    googleSheetsReadWriteReadback: results.find((r) => r.id === 'tier4-google-sheets-readwrite-live')?.status === 'PASS',
-    humanReviewCompleted: results.find((r) => r.id === 'tier4-human-review-workflow-live')?.status === 'PASS',
-    contactWorkflowCompleted: results.find((r) => r.id === 'tier4-contact-workflow-live')?.status === 'PASS',
-    relationshipTouchApprovalCompleted: results.find((r) => r.id === 'tier4-relationship-touch-live')?.status === 'PASS',
-    publicEventSubmissionCompleted: results.find((r) => r.id === 'tier4-public-event-live')?.status === 'PASS',
-    pitchLabSignedHandoffCompleted: results.find((r) => r.id === 'tier4-pitchlab-signed-handoff-live')?.status === 'PASS',
-    aiOcrVoiceLiveOrUnavailableControlled: results.find((r) => r.id === 'tier4-ai-ocr-voice-live')?.status === 'PASS',
-    authBoundariesVerified: results.find((r) => r.id === 'tier4-auth-boundary-live')?.status === 'PASS',
-    runtimeContextVerified: results.find((r) => r.id === 'tier4-runtime-context-live')?.status === 'PASS',
-    reportChecked: results.find((r) => r.id === 'tier4-report-check')?.status === 'PASS'
-  },
-  warnings,
-  failures: failures.map((lane) => `${lane.id}: FAIL exit=${lane.exitCode}; see ${lane.log}`),
-  unprovenLayers: unproven.map((lane) => `${lane.id}: ${lane.proves}`),
-  generatedArtifacts: ['reports/tier4/tier4-ultimate-live-proof.md', 'reports/tier4/tier4-ultimate-live-proof.json', 'reports/tier4/*.log'],
-  lanes: results
+
+function buildReport(currentResults, resultOverride = '') {
+  const failures = currentResults.filter((lane) => lane.status === 'FAIL');
+  const unproven = currentResults.filter((lane) => lane.status === 'UNPROVEN');
+  const warnings = unproven.map((lane) => `${lane.id}: UNPROVEN — ${(lane.missing || []).join(', ')}`);
+  const passed = currentResults.filter((lane) => lane.status === 'PASS');
+  const result = resultOverride || (
+    failures.length || unproven.length
+      ? 'BLOCKED — TIER 4 ULTIMATE LIVE E2E PROOF REQUIRED'
+      : 'TIER 4 PASSED — ULTIMATE LIVE E2E PROVIDER + DATA PROOF'
+  );
+
+  return {
+    repo: 'west-peek-network-os',
+    commit: process.env.GIT_COMMIT || 'UNKNOWN_NOT_QUERIED',
+    generatedAt: new Date().toISOString(),
+    startedAt: startedAt.toISOString(),
+    baseUrl,
+    cloudflareDeployment: process.env.CLOUDFLARE_DEPLOYMENT_VERSION || 'UNKNOWN_NOT_QUERIED',
+    runId,
+    mode: dryRun ? 'dry-run-blocked' : 'live',
+    oauthStorageStateUsed: Boolean(process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE),
+    interactiveOAuthRequired: !(process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE),
+    result,
+    counts: {
+      total: currentResults.length,
+      passed: passed.length,
+      failed: failures.length,
+      unproven: unproven.length
+    },
+    proofSummary: {
+      googleOAuthConnected: currentResults.find((r) => r.id === 'tier4-oauth-connect-live')?.status === 'PASS',
+      gmailTriggerImported: currentResults.find((r) => r.id === 'tier4-gmail-trigger-ingestion-live')?.status === 'PASS',
+      googleSheetsReadWriteReadback: currentResults.find((r) => r.id === 'tier4-google-sheets-readwrite-live')?.status === 'PASS',
+      humanReviewCompleted: currentResults.find((r) => r.id === 'tier4-human-review-workflow-live')?.status === 'PASS',
+      contactWorkflowCompleted: currentResults.find((r) => r.id === 'tier4-contact-workflow-live')?.status === 'PASS',
+      relationshipTouchApprovalCompleted: currentResults.find((r) => r.id === 'tier4-relationship-touch-live')?.status === 'PASS',
+      publicEventSubmissionCompleted: currentResults.find((r) => r.id === 'tier4-public-event-live')?.status === 'PASS',
+      pitchLabSignedHandoffCompleted: currentResults.find((r) => r.id === 'tier4-pitchlab-signed-handoff-live')?.status === 'PASS',
+      aiOcrVoiceLiveOrUnavailableControlled: currentResults.find((r) => r.id === 'tier4-ai-ocr-voice-live')?.status === 'PASS',
+      authBoundariesVerified: currentResults.find((r) => r.id === 'tier4-auth-boundary-live')?.status === 'PASS',
+      runtimeContextVerified: currentResults.find((r) => r.id === 'tier4-runtime-context-live')?.status === 'PASS',
+      reportChecked: currentResults.find((r) => r.id === 'tier4-report-check')?.status === 'PASS'
+    },
+    warnings,
+    failures: failures.map((lane) => `${lane.id}: FAIL exit=${lane.exitCode}; see ${lane.log}`),
+    unprovenLayers: unproven.map((lane) => `${lane.id}: ${lane.proves}`),
+    generatedArtifacts: [
+      'reports/tier4/tier4-ultimate-live-proof.md',
+      'reports/tier4/tier4-ultimate-live-proof.json',
+      'reports/tier4/*.log'
+    ],
+    lanes: currentResults
+  };
+}
+
+function writeReportFiles(currentResults, resultOverride = '') {
+  const report = buildReport(currentResults, resultOverride);
+  const jsonPath = path.join(reportsDir, 'tier4-ultimate-live-proof.json');
+  const markdownPath = path.join(reportsDir, 'tier4-ultimate-live-proof.md');
+
+  fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2) + '\n');
+
+  const md = [
+    '# TIER 4 ULTIMATE LIVE E2E PROOF REPORT',
+    '',
+    `Repo: ${report.repo}`,
+    `Commit: ${report.commit}`,
+    `Generated: ${report.generatedAt}`,
+    `Deployment URL: ${baseUrl || 'UNSET'}`,
+    `Cloudflare/deployed runtime target: ${baseUrl || 'UNSET'}`,
+    `Run ID: ${runId}`,
+    `Mode: ${report.mode}`,
+    `OAuth storage state used: ${report.oauthStorageStateUsed}`,
+    `Interactive OAuth required: ${report.interactiveOAuthRequired}`,
+    `Result: ${report.result}`,
+    '',
+    '## Lanes',
+    ...currentResults.map((lane) => `- ${lane.id}: ${lane.status}${lane.missing?.length ? ` — missing ${lane.missing.join(', ')}` : ''} (${lane.log})`),
+    '',
+    '## Proof Summary',
+    ...Object.entries(report.proofSummary).map(([key, value]) => `- ${key}: ${value}`),
+    '',
+    '## Warnings',
+    report.warnings.length ? report.warnings.map((warning) => `- ${warning}`).join('\n') : 'None.',
+    '',
+    '## Failures',
+    report.failures.length ? report.failures.map((failure) => `- ${failure}`).join('\n') : 'None.',
+    '',
+    '## Unproven Layers',
+    report.unprovenLayers.length ? report.unprovenLayers.map((layer) => `- ${layer}`).join('\n') : 'None.',
+    '',
+    '## Generated Artifacts',
+    ...report.generatedArtifacts.map((artifact) => `- ${artifact}`),
+    '',
+    '## Final Result',
+    report.result,
+    ''
+  ].join('\n');
+
+  fs.writeFileSync(markdownPath, md);
+  return { report, md, jsonPath };
+}
+
+const pendingReportCheck = {
+  ...reportCheckLane,
+  status: 'PENDING',
+  exitCode: null,
+  startedAt: '',
+  endedAt: '',
+  log: path.relative(root, path.join(reportsDir, `${reportCheckLane.id}.log`)),
+  missing: []
 };
-fs.writeFileSync(path.join(reportsDir, 'tier4-ultimate-live-proof.json'), JSON.stringify(report, null, 2) + '\n');
-const md = [
-  '# TIER 4 ULTIMATE LIVE E2E PROOF REPORT', '',
-  `Repo: ${report.repo}`, `Commit: ${report.commit}`, `Generated: ${report.generatedAt}`, `Deployment URL: ${baseUrl || 'UNSET'}`, `Cloudflare/deployed runtime target: ${baseUrl || 'UNSET'}`, `Run ID: ${runId}`, `Mode: ${report.mode}`, `OAuth storage state used: ${report.oauthStorageStateUsed}`, `Interactive OAuth required: ${report.interactiveOAuthRequired}`, `Result: ${result}`, '',
-  '## Lanes', ...results.map((lane) => `- ${lane.id}: ${lane.status}${lane.missing?.length ? ` — missing ${lane.missing.join(', ')}` : ''} (${lane.log})`), '',
-  '## Proof Summary', ...Object.entries(report.proofSummary).map(([key, value]) => `- ${key}: ${value}`), '',
-  '## Warnings', warnings.length ? warnings.map((w) => `- ${w}`).join('\n') : 'None.', '',
-  '## Failures', report.failures.length ? report.failures.map((f) => `- ${f}`).join('\n') : 'None.', '',
-  '## Unproven Layers', report.unprovenLayers.length ? report.unprovenLayers.map((u) => `- ${u}`).join('\n') : 'None.', '',
-  '## Generated Artifacts', ...report.generatedArtifacts.map((a) => `- ${a}`), '',
-  '## Final Result', result, ''
-].join('\n');
-fs.writeFileSync(path.join(reportsDir, 'tier4-ultimate-live-proof.md'), md);
+
+const interim = writeReportFiles(
+  [...results, pendingReportCheck],
+  'PENDING — TIER 4 REPORT CHECK'
+);
+
+process.env.TIER4_REPORT_CHECK_INPUT = interim.jsonPath;
+
+console.log(`\n[Tier 4] ${reportCheckLane.title}`);
+results.push(await runLane(reportCheckLane));
+
+const { report, md } = writeReportFiles(results);
 console.log(`\n${md}`);
+
 if (dryRun) fs.rmSync(reportsDir, { recursive: true, force: true });
-process.exit(failures.length || unproven.length ? 1 : 0);
+
+process.exit(
+  report.failures.length || report.unprovenLayers.length
+    ? 1
+    : 0
+);
