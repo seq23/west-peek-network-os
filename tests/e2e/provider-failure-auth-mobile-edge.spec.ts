@@ -24,7 +24,12 @@ async function installFailureHarness(page: Page) {
 }
 
 async function nav(page: Page, label: string) {
-  await page.getByRole('navigation', { name: /Primary/i }).getByRole('button', { name: new RegExp(`^${label}$`, 'i') }).click();
+  const target = page.getByRole('navigation', { name: /Primary/i }).getByRole('button', { name: new RegExp(`^${label}$`, 'i') });
+  if (!(await target.isVisible())) {
+    await page.getByRole('button', { name: /^Menu$/i }).click();
+    await expect(target).toBeVisible();
+  }
+  await target.click();
   await expect(page.getByRole('main')).toBeVisible();
 }
 

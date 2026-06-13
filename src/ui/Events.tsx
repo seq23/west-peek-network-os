@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Header } from './App';
+import { Header, RouteGuide } from './App';
 import { createSheetEvent, createSheetEventContext, updateSheetEventStatus } from '../services/sheetsClient';
 import type { EventAttendeeRecord, EventRecord } from '../domain/types';
 
@@ -91,6 +91,7 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
 
   return <>
     <Header eyebrow="Event Capture" title="Create event forms and review attendees" subtitle="Thin layer over Intake Queue: public forms collect details, operators enrich privately, and everything remains pending human review." />
+    <RouteGuide purpose="Create public intake links and manage event-specific relationship context." primaryAction="Create or select an event, then copy its public form link." caution="Disabling a form preserves the event and attendees; it does not delete history." />
     <div className="notice" style={{ marginBottom: 16 }} role="status" aria-live="polite">{status}</div><div className="filter-bar"><div className="segmented"><button className={view === 'active' ? 'active' : ''} onClick={() => setView('active')}>Active forms</button><button className={view === 'inactive' ? 'active' : ''} onClick={() => setView('inactive')}>Inactive</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visibleEvents.length} events</span></div>
     <div className="grid cols-2">
       <form className="card form" onSubmit={createEvent}>

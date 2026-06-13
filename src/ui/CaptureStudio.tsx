@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Header } from './App';
+import { Header, RouteGuide } from './App';
 import type { EventRecord } from '../domain/types';
 
 const acceptedImage = '.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,image/*';
@@ -44,6 +44,7 @@ export function CaptureStudio({ events = [], onSaved }: { events?: EventRecord[]
 
   return <>
     <Header eyebrow="Capture Studio" title="Add people from cards, screenshots, and voice notes" subtitle="Capture first, enrich later. Every upload creates an Intake Queue draft with human review required and no automatic send/add." />
+    <RouteGuide purpose="Convert cards, screenshots, and voice notes into reviewable intake." primaryAction="Choose the source type, optionally tie it to an event, then upload." caution="Uploads create drafts; they do not create final contacts or send anything." />
     <div className="grid cols-2">
       <form className="card form" onSubmit={submitMedia}>
         <h2>Card or notes screenshot OCR</h2>

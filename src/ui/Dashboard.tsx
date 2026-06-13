@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, BookOpen, CalendarDays, CheckCircle2, CreditCard, Inbox, MailCheck, Mic, Plus, RefreshCw, ShieldCheck, Users } from 'lucide-react';
+import { AlertCircle, ArrowRight, CalendarDays, CreditCard, Inbox, MailCheck, Mic, Plus, ShieldCheck } from 'lucide-react';
 import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch } from '../domain/types';
 
 type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'capture' | 'thankyou' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
@@ -30,13 +30,13 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
   const openIntake = data.intake.filter((item) => openStatus.has(item.review_status));
   const openTouches = data.touches.filter((item) => openTouchStatus.has(item.status));
   const pendingApprovals = data.approvals.filter((item) => item.status === 'pending');
-  const activeEvents = (data.events || []).filter((event) => event.status === 'active');
-  const missingInfo = data.intake.filter((item) => item.missing_fields || item.review_status === 'needs_more_info');
+  const activeEvents = (data.events || []).filter((event) => event.status === 'active' && !isProofRecord(event.event_name, event.event_id));
+  const missingInfo = data.intake.filter((item) => (item.missing_fields || item.review_status === 'needs_more_info') && !isProofRecord(item.parsed_name, item.intake_id));
   const nextWork = [
     ...openIntake.slice(0, 3).map((item) => ({ label: item.parsed_name || item.parsed_email || item.event_name || 'Unreviewed intake', detail: item.parsed_company || item.source || 'Pending human review', page: 'intake' as Page })),
     ...openTouches.slice(0, 2).map((item) => ({ label: item.recipient_name || item.contact_email || item.reason, detail: `${item.method} • ${item.status}`, page: 'touches' as Page })),
     ...pendingApprovals.slice(0, 2).map((item) => ({ label: item.approval_type || 'Approval needed', detail: item.risk_level, page: 'approvals' as Page }))
-  ].slice(0, 6);
+  ].filter((item) => !isProofRecord(item.label)).slice(0, 6);
 
   return <>
     <section className="hero-panel">
@@ -50,8 +50,8 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
           <button className="btn" onClick={() => go('capture')}><CreditCard size={17} /> Card / voice capture</button>
         </div>
       </div>
-      <div className="status-card">
-        <div className="kicker">Live system status</div>
+      <div className="status-card compact-status">
+        <div className="section-head"><div><div className="kicker">System health</div><h2>{runtime.gmailOauthConnected && runtime.sessionAuthenticated && runtime.usingLiveSheets ? 'Ready' : 'Needs attention'}</h2></div><button className="btn small" onClick={() => go('settings')}>Details</button></div>
         <StatusLine
           label="Gmail OAuth"
           value={runtime.gmailOauthConnected ? `Connected: ${runtime.gmailOauthEmail || runtime.sessionEmail || 'approved user'}` : 'Not connected / token not found'}
@@ -63,9 +63,7 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
           good={runtime.sessionAuthenticated}
         />
         <StatusLine label="Google Sheets" value={runtime.usingLiveSheets ? 'Live snapshot loaded' : runtime.sheetStatus} good={runtime.usingLiveSheets} />
-        <StatusLine label="Claude / Vision" value="Configured route available; run provider smoke test before claiming live OCR." />
-        <StatusLine label="Speech-to-Text" value="Configured route available; real audio test required." />
-        <button className="btn small" onClick={() => go('settings')}><RefreshCw size={15} /> Open settings</button>
+        {(!runtime.gmailOauthConnected || !runtime.sessionAuthenticated || !runtime.usingLiveSheets) && <p className="muted">Resolve degraded connections in Settings before relying on sync, OCR, or transcription.</p>}
       </div>
     </section>
 
@@ -97,7 +95,7 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
 
     <section className="grid cols-3" style={{ marginTop: 16 }}>
       <Panel title="Active events" empty="No active events yet." rows={activeEvents.map((event) => `${event.event_name}${event.location ? ` • ${event.location}` : ''}`)} onClick={() => go('events')} />
-      <Panel title="Missing info" empty="No missing-field items in this snapshot." rows={missingInfo.slice(0, 6).map((item) => `${item.parsed_name || item.parsed_email || item.source}: ${item.missing_fields || 'needs more info'}`)} onClick={() => go('intake')} />
+      <Panel title="Missing info" empty="No missing-field items in this snapshot." rows={missingInfo.slice(0, 6).map((item) => `${item.parsed_name || item.parsed_email || humanSource(item.source)} needs ${humanMissing(item.missing_fields)}`)} onClick={() => go('intake')} />
       <Panel title="Notifications" empty="No unread notifications." rows={data.notifications.filter((n) => n.status === 'unread').slice(0, 6).map((n) => `${n.priority}: ${n.subject}`)} onClick={() => go('notifications')} />
     </section>
 
@@ -119,4 +117,13 @@ function Panel({ title, rows, empty, onClick }: { title: string; rows: string[];
 }
 function EmptyState({ title, body }: { title: string; body?: string }) {
   return <div className="empty-state"><AlertCircle size={18} /><strong>{title}</strong>{body && <p>{body}</p>}</div>;
+}
+
+function isProofRecord(...values: unknown[]) {
+  return values.some((value) => /tier[ _-]?4|proof|fixture|e2e|smoke[_ -]?test|wpno-tier4/i.test(String(value || '')));
+}
+function humanSource(value: unknown) { return String(value || 'capture').replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()); }
+function humanMissing(value: unknown) {
+  const fields=String(value || 'more information').split(',').map((item)=>item.trim().replaceAll('_',' ')).filter(Boolean);
+  return fields.length ? fields.join(', ') : 'more information';
 }

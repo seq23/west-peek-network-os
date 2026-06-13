@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, CreditCard, Home, Inbox, MailCheck, Plus, Settings, Sparkles, Users } from 'lucide-react';
+import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, CreditCard, Home, Inbox, MailCheck, Menu, Plus, Settings, Sparkles, Users, X } from 'lucide-react';
 import { Dashboard } from './Dashboard';
 import { Instructions } from './Instructions';
 import { AddPerson } from './AddPerson';
@@ -49,6 +49,7 @@ type OAuthStatus = {
 
 export function App() {
   const [page, setPage] = useState<Page>('dashboard');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
   const [mutationKey, setMutationKey] = useState<string | null>(null);
@@ -218,7 +219,8 @@ export function App() {
 
   return (
     <div className="shell">
-      <aside className="sidebar">
+      <aside className={`sidebar ${mobileNavOpen ? 'mobile-open' : ''}`}>
+        <button className="mobile-nav-toggle" type="button" aria-expanded={mobileNavOpen} aria-controls="primary-navigation" onClick={() => setMobileNavOpen((value) => !value)}>{mobileNavOpen ? <X size={18} /> : <Menu size={18} />}<span>{mobileNavOpen ? 'Close menu' : 'Menu'}</span></button>
         <div className="brand">
           <img className="brand-logo" src="/wp-logo.jpg" alt="West Peek logo" />
           <div>
@@ -226,18 +228,14 @@ export function App() {
             <div className="brand-sub">West Peek internal</div>
           </div>
         </div>
-        <nav className="nav" aria-label="Primary">
+        <nav id="primary-navigation" className="nav" aria-label="Primary">
           {navItems.map((item) => (
-            <button key={item.page} className={page === item.page ? 'active' : ''} onClick={() => setPage(item.page)}>
+            <button key={item.page} className={page === item.page ? 'active' : ''} onClick={() => { setPage(item.page); setMobileNavOpen(false); }}>
               {item.icon} {item.label}
             </button>
           ))}
         </nav>
-        <div className="sidebar-note">
-          <strong>Truth state</strong>
-          <p>{session.authenticated ? `Google OAuth connected: ${session.email}` : 'Google OAuth not connected in this browser.'}</p>
-          <p>{sheetData ? 'Live Sheets snapshot loaded.' : 'Using local fallback until Sheets loads.'}</p>
-        </div>
+        <div className="sidebar-health" aria-label="System health"><span className={`health-dot ${session.authenticated && sheetData ? 'good' : ''}`} /><span>{session.authenticated && sheetData ? 'Systems ready' : 'Setup needs attention'}</span></div>
       </aside>
       <main className="main">
         {message && <div className="notice" style={{ marginBottom: 16 }}>{message}</div>}
@@ -281,6 +279,7 @@ function ContactsPage({ rows, mutationKey, onStatus }: { rows: ContactRecord[]; 
   const visible = rows.filter((row) => view === 'all' || row.status === view).filter((row) => !search || [row.full_name, row.email, row.company, row.context_summary, row.tags.join(' ')].join(' ').toLowerCase().includes(search.toLowerCase()));
   return <>
     <Header eyebrow="West Peek Network" title="People in the West Peek Network" subtitle="Active relationships appear first. Archived contacts stay recoverable and out of normal work surfaces." />
+    <RouteGuide purpose="Find and manage finalized relationship records." primaryAction="Search or review active contacts." secondary="Archive stale records without deleting history." caution="Intake belongs in the Intake Queue until reviewed." />
     <div className="filter-bar"><input aria-label="Search contacts" placeholder="Search name, email, company, context, or tags" value={search} onChange={(event) => setSearch(event.target.value)} /><div className="segmented"><button className={view === 'active' ? 'active' : ''} onClick={() => setView('active')}>Active</button><button className={view === 'archived' ? 'active' : ''} onClick={() => setView('archived')}>Archived</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visible.length} records</span></div>
     <div className="grid cols-2">{visible.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No contacts match this view' : 'No contacts yet'}</h3></div> : visible.map((c) => { const busy = mutationKey?.startsWith(`contact:${c.contact_id}:`); return <article className="card record-card" key={c.contact_id}><div className="record-header"><div><h3>{c.full_name}</h3><p className="muted">{c.company || 'No company'} • Owner: {c.relationship_owner}</p></div><span className="badge">{humanize(c.status)}</span></div><p>{c.context_summary}</p><p><span className="badge">{c.priority}</span>{c.person_type && c.person_type !== 'unknown' && <span className="badge badge-gap">{humanize(c.person_type)}</span>}{c.deal_flow_prospect === 'yes' && <span className="badge warn badge-gap">Deal-flow prospect</span>}{c.touch_needed && <span className="badge warn badge-gap">Needs touch</span>}</p><footer className="action-footer">{c.status === 'active' ? <button className="btn danger" disabled={Boolean(busy)} onClick={() => { if (window.confirm(`Archive ${c.full_name}? The record will leave Active but remain restorable.`)) onStatus(c.contact_id, 'archived'); }}>{busy ? 'Archiving…' : 'Archive contact'}</button> : <button className="btn primary" disabled={Boolean(busy)} onClick={() => onStatus(c.contact_id, 'active')}>{busy ? 'Restoring…' : 'Restore contact'}</button>}</footer></article>})}</div>
   </>;
@@ -299,6 +298,7 @@ function IntakePage({ rows, mutationKey, onCapture, onConvert, onAttach, onDismi
   }
   return <>
     <Header eyebrow="Intake Queue" title="Review captured relationship context" subtitle="Actionable captures appear first. Use #wpdealflow / #dealflow for founder or prospective deal flow. Every capture remains in human review until an operator decides." />
+    <RouteGuide purpose="Turn raw captures into trusted relationship records." primaryAction="Resolve pending intake one item at a time." secondary="Capture a manual note when no source integration is available." caution="Nothing converts, attaches, or dismisses without operator action." />
     <div className="filter-bar"><input aria-label="Search intake" placeholder="Search person, company, email, subject, or summary" value={search} onChange={(event) => setSearch(event.target.value)} /><div className="segmented" role="group" aria-label="Intake view"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visibleRows.length} records</span></div>
     <details className="card" open><summary>Manual capture</summary><form className="form compact-form" onSubmit={submitCapture}><p className="muted">Paste a real relationship or deal-flow note. Production forms start empty.</p><textarea name="raw_text" aria-label="Gmail trigger text" required placeholder="#wpnetwork or #wpdealflow, then the relationship context" /><button className="btn primary" type="submit">Capture to Intake Queue</button></form></details>
     <div className="list">{visibleRows.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No records match this view' : 'No intake records yet'}</h3><p>{rows.length ? 'Change the search or view filters.' : 'New review items will appear here.'}</p></div> : visibleRows.map((i) => { const busy = mutationKey?.startsWith(`intake:${i.intake_id}:`); return <article className="card record-card" key={i.intake_id} data-testid={`intake-${i.intake_id}`}><header className="record-header"><div><div className="kicker">{humanize(i.source)} • {humanize(i.review_status)}</div><h3>{i.parsed_name || i.email_from || 'Unparsed person'}</h3><p className="muted">{i.parsed_company || i.email_subject || 'Company not parsed'}{i.source_mailbox ? ` • via ${i.source_mailbox}` : ''}</p></div>{i.deal_flow_prospect === 'yes' && <span className="badge warn">Deal flow</span>}</header><p className="record-summary">{bounded(i.ai_summary || i.parsed_notes || i.raw_text, 420)}</p><details><summary>View source details</summary><dl className="metadata"><dt>From</dt><dd>{i.email_from || '—'}</dd><dt>To</dt><dd>{i.email_to || '—'}</dd><dt>Message ID</dt><dd>{i.gmail_message_id || '—'}</dd></dl><pre className="raw-source">{bounded(i.raw_text, 4000)}</pre></details>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onConvert(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:convert` ? 'Adding…' : 'Add to West Peek Network'}</button><button className="btn" disabled={Boolean(busy)} onClick={() => onAttach(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:attach` ? 'Attaching…' : 'Attach to Existing Person'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onDismiss(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:dismiss` ? 'Dismissing…' : 'Dismiss'}</button></footer>}</article>})}</div>
@@ -308,7 +308,8 @@ function IntakePage({ rows, mutationKey, onCapture, onConvert, onAttach, onDismi
 function TouchesPage({ rows, contacts, onFulfillmentUpdate }: { rows: RelationshipTouch[]; contacts: ContactRecord[]; onFulfillmentUpdate: (touch: RelationshipTouch, update: Partial<RelationshipTouch>) => void }) {
   return <>
     <Header eyebrow="Relationship Touches" title="Intentional follow-through" subtitle="Actions that say: I remembered, I appreciated it, I followed through. Handwritten notes stay manual until a human chooses vendor or self-fulfillment." />
-    <div className="grid cols-2">{rows.map((t) => {
+    <RouteGuide purpose="Review relationship follow-through without confusing drafts with completed outreach." primaryAction="Work the next due touch, then record the fulfillment state." secondary="Use the recipient, method, due date, and reason to distinguish similar records." caution="Network OS never sends, orders, pays, or mails on its own." />
+    <div className="grid cols-2">{rows.length === 0 ? <div className="empty-state"><h3>No relationship touches yet</h3><p>Approved follow-up drafts and thank-you actions will appear here.</p></div> : rows.map((t) => {
       const contact = contacts.find((c) => c.contact_id === t.contact_id);
       const methodLabel = t.method.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
       const selectedVendor = HANDWRITTEN_VENDORS.find((vendor) => vendor.name === t.vendor_name) || HANDWRITTEN_VENDORS[0];
@@ -400,6 +401,7 @@ function ApprovalsPage({ rows, mutationKey, onApprove, onReject }: { rows: Appro
   const visible = rows.filter((row) => view === 'pending' ? row.status === 'pending' : row.status !== 'pending');
   return <>
     <Header eyebrow="Approvals" title="Approvals Needed" subtitle="Pending decisions appear first; completed decisions remain in History." />
+    <RouteGuide purpose="Make explicit decisions on sensitive or external actions." primaryAction="Review the payload and approve or reject." secondary="Use History to audit completed decisions." caution="Approval never means automatic payment, sending, or vendor execution." />
     <div className="filter-bar"><div className="segmented"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button></div><span className="result-count">{visible.length} records</span></div>
     <div className="list">{visible.length === 0 ? <div className="empty-state"><h3>{view === 'pending' ? 'No approvals need a decision' : 'No decided approvals yet'}</h3></div> : visible.map((a) => { const busy = mutationKey?.startsWith(`approval:${a.approval_id}:`); return <article className="card record-card" key={a.approval_id}><div className="kicker">{humanize(a.approval_type)} • {humanize(a.risk_level)} risk</div><h3>{humanize(a.status)}</h3><p>{a.suggested_payload}</p><p className="muted">Assigned to: {a.assigned_to}</p>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onApprove(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:approve` ? 'Approving…' : 'Approve'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onReject(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:reject` ? 'Rejecting…' : 'Reject'}</button></footer>}</article>})}</div>
   </>;
@@ -408,7 +410,8 @@ function ApprovalsPage({ rows, mutationKey, onApprove, onReject }: { rows: Appro
 function NotificationsPage({ rows, onRead }: { rows: NotificationRecord[]; onRead: (id: string, recipientEmail?: string) => void }) {
   return <>
     <Header eyebrow="Notifications" title="Calm reminders, not approvals" subtitle="Notification links open authenticated approval pages. They do not approve actions directly." />
-    <div className="list">{rows.map((n) => <div className="card" key={n.notification_id}><div className="kicker">{n.priority} • {n.status}</div><h3>{n.subject}</h3><p className="muted">{n.recipient_email}</p>{n.body_preview && <p>{n.body_preview}</p>}<button className="btn" disabled={n.status !== 'unread'} onClick={() => onRead(n.notification_id, n.recipient_email)}>Mark read</button></div>)}</div>
+    <RouteGuide purpose="See what needs attention without mixing reminders with decisions." primaryAction="Open the relevant workflow, then mark the reminder read." caution="Notifications cannot approve or execute actions." />
+    <div className="list">{rows.length === 0 ? <div className="empty-state"><h3>No notifications need attention</h3><p>Operational reminders will appear here without becoming approvals.</p></div> : rows.map((n) => <article className="card record-card" key={n.notification_id}><div className="record-header"><div><div className="kicker">{humanize(n.priority)} priority • {humanize(n.status)}</div><h3>{n.subject}</h3><p className="muted">Recipient: {n.recipient_email || 'Operator'}</p></div>{n.status === 'unread' && <span className="badge warn">Needs attention</span>}</div>{n.body_preview && <p className="record-summary">{n.body_preview}</p>}<footer className="action-footer"><button className="btn" disabled={n.status !== 'unread'} onClick={() => onRead(n.notification_id, n.recipient_email)}>{n.status === 'unread' ? 'Mark read' : 'Read'}</button></footer></article>)}</div>
   </>;
 }
 
@@ -443,6 +446,7 @@ function AiReview() {
 
   return <>
     <Header eyebrow="AI review" title="AI Suggestions Ready for Review" subtitle="AI prepares. Human approves. System never executes AI output without approval." />
+    <RouteGuide purpose="Test and inspect AI recommendations safely." primaryAction="Run one deliberate smoke test only when needed." secondary="Review the returned suggestion and guardrail fields." caution="This route may consume provider credit and never auto-executes." />
     <div className="grid cols-2">
       <div className="card"><h3>Live Claude suggestion route</h3><p>Runs one authenticated smoke test against the deployed Cloudflare Function and writes a pending_human_review ai_suggestions row to Google Sheets.</p><p className="muted">Requires Google session. Uses a real Anthropic API call, so it may consume a small amount of Claude API credit.</p><button className="btn primary" disabled={busy} onClick={runSmokeTest}>{busy ? 'Testing Claude...' : 'Run Claude smoke test'}</button><pre>{result}</pre></div>
       <div className="card"><h3>Human-review guardrail</h3><p>The AI route returns <strong>human_review_required: true</strong> and <strong>execution_allowed: false</strong>. It does not send email, order gifts, merge contacts, delete records, or approve actions.</p><span className="badge warn">Pending human approval only</span></div>
@@ -542,6 +546,7 @@ function SettingsPanel({
 
   return <>
     <Header eyebrow="Settings" title="Connections and operator settings" subtitle="Check OAuth, open the live spreadsheet, refresh data, and manage external handoff links." />
+    <RouteGuide purpose="Maintain provider connections and operational health." primaryAction="Fix degraded connections before running sync or maintenance." secondary="Refresh data only when a current readback is needed." caution="Maintenance is non-destructive; shared inboxes require separate connection." />
     <div className="grid cols-2">
       <div className="card">
         <h3>Google Gmail OAuth</h3>
@@ -563,6 +568,10 @@ function SettingsPanel({
       <div className="card"><h3>Handwritten note vendors</h3><p className="muted">Preferred starting point: Handwrytten for API/logo automation later. Backup: Simply Noted for real-ink note service. Simple fallback: Postable. Always include “I’ll do it myself” when no third party should be used.</p><div className="actions"><a className="btn" href="https://www.handwrytten.com/" target="_blank" rel="noopener noreferrer">Handwrytten</a><a className="btn" href="https://simplynoted.com/" target="_blank" rel="noopener noreferrer">Simply Noted</a><a className="btn" href="https://www.postable.com/business" target="_blank" rel="noopener noreferrer">Postable</a></div></div><div className="card"><h3>Cloudflare secrets</h3><p>Use scripts/secrets/push-cloudflare-secrets.sh after decrypting .env.local.</p></div>
     </div>
   </>;
+}
+
+export function RouteGuide({ purpose, primaryAction, secondary, caution }: { purpose: string; primaryAction: string; secondary?: string; caution?: string }) {
+  return <section className="route-guide" aria-label="Route guidance"><div><span>Purpose</span><strong>{purpose}</strong></div><div><span>Primary action</span><strong>{primaryAction}</strong></div>{secondary && <div><span>Secondary</span><strong>{secondary}</strong></div>}{caution && <div className="route-caution"><span>Guardrail</span><strong>{caution}</strong></div>}</section>;
 }
 
 function humanize(value: unknown) { return String(value || '').replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase()); }

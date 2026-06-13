@@ -133,3 +133,12 @@ Future Reversal Conditions: None. Proof-layer honesty is permanent; only individ
 **Validation impact:** `validate:artifact-manifest-current`, `validate:docs-consolidation`, `validate:docs-match-package-scripts` documentation parity, `validate:tier-docs-current`, and `validate:tier4-docs-complete` are non-blocking.
 
 **Future reversal conditions:** Only by explicit owner instruction changing the global documentation-severity law.
+
+## 2026-06-13 — Hallmark global route remediation
+
+- Preserve the West Peek black/white/cream/orange brand system.
+- Apply observed Hallmark defect classes globally through shared shell, route guidance, form, record, action, and responsive patterns.
+- Add route-specific hierarchy and copy based on actual route purpose and state model without fabricating unobserved product behavior.
+- Use explicit mobile navigation; hidden navigation is not acceptable human wayfinding.
+- Filter proof/test fixtures from normal operator surfaces.
+- Keep semantic success/warning/error colors subordinate to the primary brand palette.

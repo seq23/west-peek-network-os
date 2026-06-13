@@ -407,7 +407,12 @@ async function boot(page: Page) {
 }
 
 async function nav(page: Page, label: (typeof sidebar)[number]) {
-  await page.getByRole('navigation', { name: /Primary/i }).getByRole('button', { name: new RegExp(`^${label}$`, 'i') }).click();
+  const target = page.getByRole('navigation', { name: /Primary/i }).getByRole('button', { name: new RegExp(`^${label}$`, 'i') });
+  if (!(await target.isVisible())) {
+    await page.getByRole('button', { name: /^Menu$/i }).click();
+    await expect(target).toBeVisible();
+  }
+  await target.click();
   await expect(page.getByRole('main')).toBeVisible();
 }
 
@@ -594,5 +599,5 @@ test('surface: deal-flow guidance appears across Dashboard Add Person Intake Ins
 test('instructions: canonical triggers and capture route examples are present', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /#wpnetwork/i); await mainText(page, /#addtowestpeek/i); await mainText(page, /#westpeeknetwork/i); await mainText(page, /#wpdealflow/i); await mainText(page, /#dealflow/i); await mainText(page, /business card|screenshot/i); await mainText(page, /voice note/i); });
 test('instructions: no automatic execution guardrails are visible', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /Human approval is required before|does not silently send|Nothing sends automatically/i); });
 
-test('surface: mobile viewport keeps primary actions reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await expect(page.getByRole('navigation', { name: /Primary/i })).toBeVisible(); await nav(page, 'Dashboard'); await nav(page, 'Add Person'); await nav(page, 'Intake Queue'); await nav(page, 'How to Add People'); });
+test('surface: mobile viewport keeps primary actions reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await expect(page.getByRole('button', { name: /^Menu$/i })).toBeVisible(); await nav(page, 'Dashboard'); await nav(page, 'Add Person'); await nav(page, 'Intake Queue'); await nav(page, 'How to Add People'); });
 test('mobile: every left-sidebar route remains reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); for (const label of sidebar) { await nav(page, label); await mainText(page, contentBySidebar[label]); } });

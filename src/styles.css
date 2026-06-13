@@ -235,3 +235,15 @@ body { background: radial-gradient(circle at 15% 0%, rgba(242,106,33,.14), trans
   .grid.cols-2, .hero-panel { grid-template-columns:1fr; }
 }
 .badge-gap { margin-left:8px; }
+
+/* Hallmark global route remediation — 2026-06-13 */
+.mobile-nav-toggle{display:none;align-items:center;gap:8px;width:100%;min-height:44px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.05);color:#fff;padding:10px 12px;font-weight:800;margin-bottom:10px}
+.sidebar-health{display:flex;align-items:center;gap:8px;margin-top:16px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.1);color:#cdbfb4;font-size:12px;font-weight:750}.health-dot{width:8px;height:8px;border-radius:50%;background:#c76b2d;box-shadow:0 0 0 4px rgba(199,107,45,.12)}.health-dot.good{background:#4bb07a;box-shadow:0 0 0 4px rgba(75,176,122,.12)}
+.route-guide{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:12px 0 18px;border:1px solid var(--wp-line);border-radius:16px;overflow:hidden;background:var(--wp-line);box-shadow:var(--wp-tight-shadow)}.route-guide>div{background:#fff;padding:12px 14px;min-height:76px}.route-guide span{display:block;color:var(--wp-muted);font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}.route-guide strong{display:block;font-size:13px;line-height:1.35}.route-guide .route-caution{background:#fff7ef}
+.compact-status .status-line{grid-template-columns:100px 1fr}.compact-status h2{margin:2px 0 8px;font-size:28px}.compact-status .section-head{align-items:center}
+.page-section{margin-top:18px}.page-section>.section-head{margin-bottom:12px}.page-section h2{font-size:clamp(22px,3vw,32px)}
+.form.card>h2,.card>h2{letter-spacing:-.025em}.form .field{margin-bottom:14px}.form label{font-weight:800}.form input,.form textarea,.form select{min-height:46px;font-size:15px}.form textarea{min-height:110px}
+.record-card h3{margin-bottom:4px}.record-card p{line-height:1.5}.action-footer{justify-content:flex-start}.action-footer .btn:first-child{font-weight:850}
+.settings-operations{border-left:4px solid #f2c3a0}.operation-result{border-left:3px solid var(--wp-orange)}
+@media (max-width:920px){.route-guide{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.mobile-nav-toggle{display:flex}.sidebar .nav{display:none;overflow:visible;flex-direction:column;padding:0}.sidebar.mobile-open .nav{display:flex}.sidebar.mobile-open{position:relative;z-index:20}.sidebar-health{margin-top:8px}.route-guide{grid-template-columns:1fr}.route-guide>div{min-height:auto}.topbar{padding:18px}.topbar h1{font-size:clamp(30px,10vw,44px)}.subtitle{font-size:15px;line-height:1.5}.filter-bar{position:static}.record-card>*,.record-card>.record-header{margin-left:14px;margin-right:14px}.action-footer{margin-left:0!important;margin-right:0!important}.grid.cols-3{grid-template-columns:1fr}.status-line strong{font-size:14px}.truth-strip{align-items:flex-start}}

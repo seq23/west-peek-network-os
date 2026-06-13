@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Header } from './App';
+import { Header, RouteGuide } from './App';
 
 export function ThankYouStudio({ onSaved }: { onSaved?: () => void }) {
   const [recipient, setRecipient] = useState('Jordan Miles');
@@ -40,6 +40,7 @@ export function ThankYouStudio({ onSaved }: { onSaved?: () => void }) {
 
   return <>
     <Header eyebrow="Thank-You Card Studio" title="Create a West Peek branded thank-you" subtitle="Draft a virtual card, save it as a relationship touch, and keep approval/send manual. Nothing sends automatically." />
+    <RouteGuide purpose="Draft a thoughtful relationship touch without sending it." primaryAction="Create the draft, inspect the preview, then choose a manual delivery path." caution="Saving a touch does not send email, place an order, or charge a card." />
     <div className="grid cols-2">
       <form className="card form" onSubmit={createDraft}>
         <h2>Create thank-you touch</h2>

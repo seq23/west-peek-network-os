@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ContactRecord, DealFlowProspect, Owner, PersonType, TouchMethod } from '../domain/types';
 import { quickAddSchema } from '../domain/schema';
 import { createStableId } from '../domain/ids';
-import { Header } from './App';
+import { Header, RouteGuide } from './App';
 
 export function AddPerson({ onAdded }: { onAdded: (record: ContactRecord, touchMethod: TouchMethod) => void }) {
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +81,7 @@ export function AddPerson({ onAdded }: { onAdded: (record: ContactRecord, touchM
 
   return <>
     <Header eyebrow="Manual add" title="Add to West Peek Network" subtitle="Flexible capture for someone West Peek should remember. For founders or prospective deal flow, mark Person Type and Deal-flow Prospect directly here." />
+    <RouteGuide purpose="Create one clean finalized relationship record." primaryAction="Use Intake Queue instead when details are incomplete or untrusted." caution="Direct add writes a final network record." />
     <form className="card form" onSubmit={submit}>
       {error && <div className="notice">{error}</div>}
       <div className="grid cols-2">
