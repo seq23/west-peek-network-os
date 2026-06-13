@@ -52,3 +52,14 @@ Not proven in sandbox:
 - live Gmail / Google Sheets
 - cross-instance concurrency
 - final authenticated Hallmark browser recapture
+
+## Hallmark global route refinement artifact
+
+- Baseline ZIP: `west-peek-network-os-main_BASELINE_06-13-26_3bcc69ee.zip`
+- Source ZIP: `west-peek-network-os-main_BASELINE_06-13-26_ba238a32.zip`
+- Repo root: `west-peek-network-os`
+- Changed files: `src/ui/App.tsx`, `src/ui/Dashboard.tsx`, `src/styles.css`, `ARCHITECTURAL_DECISIONS.md`, `HALLMARK_GLOBAL_ROUTE_REFINEMENT_2026-06-13.md`, `ARTIFACT_MANIFEST.md`
+- Generated artifacts excluded: `node_modules/`, `dist/`, `playwright-report/`, `test-results/`, `logs/`, `artifacts/`, `.auth/`, `tsconfig.tsbuildinfo`
+- Validation status: sandbox-safe validators and production build passed; local Chromium validation required
+- Proof limits: deployed visual rendering, authenticated Hallmark recapture, live providers, GitHub Actions, and Cloudflare runtime are not proven by this package
+

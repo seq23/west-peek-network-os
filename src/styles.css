@@ -247,3 +247,60 @@ body { background: radial-gradient(circle at 15% 0%, rgba(242,106,33,.14), trans
 .settings-operations{border-left:4px solid #f2c3a0}.operation-result{border-left:3px solid var(--wp-orange)}
 @media (max-width:920px){.route-guide{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px){.mobile-nav-toggle{display:flex}.sidebar .nav{display:none;overflow:visible;flex-direction:column;padding:0}.sidebar.mobile-open .nav{display:flex}.sidebar.mobile-open{position:relative;z-index:20}.sidebar-health{margin-top:8px}.route-guide{grid-template-columns:1fr}.route-guide>div{min-height:auto}.topbar{padding:18px}.topbar h1{font-size:clamp(30px,10vw,44px)}.subtitle{font-size:15px;line-height:1.5}.filter-bar{position:static}.record-card>*,.record-card>.record-header{margin-left:14px;margin-right:14px}.action-footer{margin-left:0!important;margin-right:0!important}.grid.cols-3{grid-template-columns:1fr}.status-line strong{font-size:14px}.truth-strip{align-items:flex-start}}
+
+/* Hallmark senior UX refinement — global route pass */
+.badge-stack{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:44%}
+.compact-metadata{margin:14px 18px 0}
+.panel-button{min-height:0;padding:0;overflow:hidden;text-align:left}
+.panel-button>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;cursor:pointer}
+.panel-button>summary::-webkit-details-marker{display:none}
+.panel-button>summary>span{display:flex;align-items:center;gap:10px}
+.panel-count{display:grid;place-items:center;min-width:30px;height:30px;border-radius:10px;background:#fff0e6;color:var(--wp-orange-dark);font-weight:900}
+.panel-content{padding:0 18px 18px}
+.panel-content .mini-card{display:grid;gap:3px}
+.panel-content .mini-card small{color:var(--wp-muted);line-height:1.35}
+.panel-action{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:12px;padding:11px 0 0;border:0;border-top:1px solid var(--wp-line);background:transparent;color:var(--wp-ink);font-weight:850;cursor:pointer}
+.truth-short{display:none}
+.route-guide{margin-top:14px}
+.topbar+.route-guide{margin-top:12px}
+.record-card{content-visibility:auto;contain-intrinsic-size:360px}
+.record-card .record-summary{max-width:78ch}
+.card details>summary{font-weight:850;cursor:pointer}
+.grid.cols-2>.empty-state,.grid.cols-3>.empty-state{grid-column:1/-1}
+
+@media (max-width:1100px){
+  .sidebar{position:relative;height:auto}
+  .shell{grid-template-columns:1fr}
+  .mobile-nav-toggle{display:flex}
+  .sidebar .nav{display:none;grid-template-columns:repeat(2,minmax(0,1fr));max-height:56vh;overflow:auto;padding-right:4px}
+  .sidebar.mobile-open .nav{display:grid}
+  .sidebar-health{margin-top:8px}
+  .main{max-width:none}
+  .hero-panel{grid-template-columns:1fr 1fr}
+}
+
+@media (max-width:760px){
+  .sidebar .nav,.sidebar.mobile-open .nav{grid-template-columns:1fr}
+  .hero-panel{grid-template-columns:1fr}
+  .hero-copy,.status-card{border-radius:22px;padding:22px 18px}
+  .hero-copy .actions{display:grid;grid-template-columns:1fr}
+  .hero-copy .actions .btn{width:100%;justify-content:center}
+  .compact-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .metric-card{padding:14px;align-items:flex-start}
+  .metric-card .metric{font-size:30px;min-width:42px}
+  .secondary-panels{display:block!important}
+  .secondary-panels .panel-button{margin-top:10px}
+  .secondary-panels .panel-button:not([open]) .panel-content{display:none}
+  .panel-button>summary{padding:15px}
+  .panel-content{padding:0 15px 15px}
+  .truth-long{display:none}
+  .truth-short{display:inline}
+  .truth-strip{font-size:13px;line-height:1.4;padding:12px 14px}
+  .badge-stack{max-width:none;justify-content:flex-start}
+  .compact-metadata{margin-left:14px;margin-right:14px;grid-template-columns:1fr}
+  .compact-metadata dt{margin-top:6px;color:var(--wp-muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em}
+  .record-card .record-summary{max-width:none}
+  .route-guide{display:none}
+  .topbar{margin-bottom:14px}
+  .topbar h1{line-height:1.02}
+}

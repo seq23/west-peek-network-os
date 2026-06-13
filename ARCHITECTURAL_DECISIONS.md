@@ -142,3 +142,7 @@ Future Reversal Conditions: None. Proof-layer honesty is permanent; only individ
 - Use explicit mobile navigation; hidden navigation is not acceptable human wayfinding.
 - Filter proof/test fixtures from normal operator surfaces.
 - Keep semantic success/warning/error colors subordinate to the primary brand palette.
+## 2026-06-13 — Hallmark global route refinement
+
+The post-remediation Hallmark findings are applied as reusable route-level UX laws, not dashboard-only cosmetic fixes. All operational routes must expose identity, context, state, and next action; secondary mobile content may collapse; tablet/mobile navigation must use an explicit menu; and the West Peek black/white/cream/orange brand remains authoritative.
+
