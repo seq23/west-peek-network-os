@@ -23,7 +23,10 @@ const SNAPSHOT_CACHE_TTL_MS = 45_000;
 export async function onRequestGet({ request, env }: Context) {
   try {
     const user = await requireAuthenticatedUser(request, env);
-    if (snapshotCache && snapshotCache.userEmail === user.email && Date.now() < snapshotCache.expiresAt) {
+    const url = new URL(request.url);
+    const forceFresh = url.searchParams.get('fresh') === '1';
+
+    if (!forceFresh && snapshotCache && snapshotCache.userEmail === user.email && Date.now() < snapshotCache.expiresAt) {
       return json({ ...(snapshotCache.payload as Record<string, unknown>), source: 'google_sheets_batch_cache' }, { headers: { 'cache-control': 'private, max-age=30' } });
     }
 

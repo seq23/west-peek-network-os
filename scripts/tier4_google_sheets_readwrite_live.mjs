@@ -1,3 +1,4 @@
 #!/usr/bin/env node
-console.error('BLOCKED — Google Sheets live read/write/readback requires deployed credentials and real provider evidence. Set GOOGLE_SHEETS_LIVE_E2E=1 with WEST_PEEK_E2E_RUN_ID after deployment.');
-process.exit(1);
+import { runTier4PlaywrightLane } from './tier4_playwright_lane_runner.mjs';
+
+runTier4PlaywrightLane('google sheets read write readback live');

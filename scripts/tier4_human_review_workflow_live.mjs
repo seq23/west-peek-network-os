@@ -1,3 +1,4 @@
 #!/usr/bin/env node
-console.error('BLOCKED — Human review live workflow requires authenticated deployed browser/storage state and real run id evidence.');
-process.exit(1);
+import { runTier4PlaywrightLane } from './tier4_playwright_lane_runner.mjs';
+
+runTier4PlaywrightLane('human review workflow live');

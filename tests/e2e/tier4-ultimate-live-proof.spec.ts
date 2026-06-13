@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { expect, test } from '@playwright/test';
+import { expect, request as playwrightRequest, test } from '@playwright/test';
 
 const liveEnabled = () => process.env.TIER4_ULTIMATE_LIVE_PROOF === '1';
 const baseUrlConfigured = () => Boolean(process.env.PLAYWRIGHT_BASE_URL?.startsWith('https://') || process.env.POSTDEPLOY_BASE_URL?.startsWith('https://'));
@@ -9,15 +9,28 @@ function hmac(body: string, secret: string, submittedAt: string) {
 }
 
 test.describe('Tier 4 Ultimate Live E2E provider + data proof', () => {
-  test('auth boundary denies private APIs without session and deployed runtime is explicit', async ({ request }) => {
+  test('auth boundary denies private APIs without session and deployed runtime is explicit', async () => {
     test.skip(!liveEnabled(), 'TIER4_ULTIMATE_LIVE_PROOF=1 required.');
     expect(baseUrlConfigured(), 'Tier 4 must run against an explicit deployed HTTPS URL, not localhost.').toBeTruthy();
-    const session = await request.get('/api/session');
-    expect([200, 401, 403]).toContain(session.status());
-    const provider = await request.get('/api/provider/status');
-    expect([401, 403]).toContain(provider.status());
-    const payload = await provider.json().catch(() => ({}));
-    expect(JSON.stringify(payload)).not.toMatch(/private_key|client_secret|ya29\.|Bearer\s+/i);
+
+    const baseURL = process.env.PLAYWRIGHT_BASE_URL || process.env.POSTDEPLOY_BASE_URL;
+    const anonymous = await playwrightRequest.newContext({
+      baseURL,
+      storageState: { cookies: [], origins: [] }
+    });
+
+    try {
+      const session = await anonymous.get('/api/session');
+      expect([401, 403]).toContain(session.status());
+
+      const provider = await anonymous.get('/api/provider/status');
+      expect([401, 403]).toContain(provider.status());
+
+      const payload = await provider.json().catch(() => ({}));
+      expect(JSON.stringify(payload)).not.toMatch(/private_key|client_secret|ya29\.|Bearer\s+/i);
+    } finally {
+      await anonymous.dispose();
+    }
   });
 
   test('authenticated browser session can reach provider status and OAuth status', async ({ page }) => {

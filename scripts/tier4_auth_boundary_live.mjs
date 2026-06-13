@@ -1,3 +1,4 @@
 #!/usr/bin/env node
-console.error('BLOCKED — Auth boundary live proof requires deployed URL and optionally browser storage state for positive session checks.');
-process.exit(1);
+import { runTier4PlaywrightLane } from './tier4_playwright_lane_runner.mjs';
+
+runTier4PlaywrightLane('auth boundary live');

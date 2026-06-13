@@ -1,3 +1,4 @@
 #!/usr/bin/env node
-console.error('BLOCKED — Public event live proof requires deployed browser access and run id marked form evidence.');
-process.exit(1);
+import { runTier4PlaywrightLane } from './tier4_playwright_lane_runner.mjs';
+
+runTier4PlaywrightLane('public event live');

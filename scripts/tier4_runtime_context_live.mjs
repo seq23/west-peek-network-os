@@ -1,3 +1,4 @@
 #!/usr/bin/env node
-console.error('BLOCKED — Runtime context live proof requires deployed URL, run id, and live provider behavior checks.');
-process.exit(1);
+import { runTier4PlaywrightLane } from './tier4_playwright_lane_runner.mjs';
+
+runTier4PlaywrightLane('runtime context live');

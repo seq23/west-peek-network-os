@@ -17,3 +17,5 @@ tsconfig.tsbuildinfo
 !.env.preview.example
 !.env.production.example
 reports/
+
+.auth/
