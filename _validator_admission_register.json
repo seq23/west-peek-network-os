@@ -1624,6 +1624,24 @@
       "removalConditions": "Remove only if package script is retired and docs/matrix are updated in same change."
     },
     {
+      "script": "validate:tier4-cleanup-contract",
+      "command": "node scripts/validate-tier4-cleanup-contract.mjs",
+      "status": "ACTIVE",
+      "admission": "registered_proof_lane",
+      "parentOrMatrixAuthority": "REPO_VALIDATION_MATRIX.md / _repo_validation_matrix.json",
+      "category": "governance",
+      "severity": "HARD FAIL",
+      "productionRisk": "Production proof-fixture cleanup could target the wrong run, leave active fixtures behind, or overclaim verified cleanup.",
+      "whatItProves": "The Tier 4 cleanup command, guarded endpoint, exact-run scoping, preview mode, cleanup markers, and verification contract are present and wired consistently.",
+      "whatItDoesNotProve": "Does not prove deployed Google Sheets cleanup execution or readback; those require authenticated production execution against an explicit proof run ID.",
+      "failureHandling": "HARD FAIL blocks delivery and release because unsafe or incomplete production fixture cleanup cannot be admitted.",
+      "ownerDecisionNeeded": "YES if the cleanup scope, deletion model, provider behavior, or verification requirements change.",
+      "expectedFailureFrequency": "Low; failures indicate cleanup lifecycle drift or an incomplete implementation.",
+      "runtimeCost": "Low static validation cost; live cleanup remains an explicit authenticated production operation.",
+      "maintenanceCost": "Review whenever Tier 4 writers, Sheet tabs, fixture fields, snapshot filtering, or cleanup behavior change.",
+      "removalConditions": "Remove only if the cleanup lifecycle is replaced and the replacement proof is admitted in the same change."
+    },
+    {
       "script": "validate:tier4-docs-complete",
       "command": "node scripts/validate-tier4-docs-complete.mjs",
       "status": "ACTIVE",
