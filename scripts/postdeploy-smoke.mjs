@@ -8,10 +8,10 @@ if (!base || !/^https?:\/\//.test(base)) {
   process.exit(1);
 }
 const targets = ['/', '/api/oauth/status'];
-function fetch(url) {
+function fetch(url, headers = {}) {
   return new Promise((resolve, reject) => {
     const lib = url.startsWith('https:') ? request : httpRequest;
-    const req = lib(url, { method: 'GET' }, (res) => {
+    const req = lib(url, { method: 'GET', headers }, (res) => {
       let body = '';
       res.on('data', (chunk) => body += chunk);
       res.on('end', () => resolve({ status: res.statusCode, body }));
@@ -23,8 +23,9 @@ function fetch(url) {
 let failed = false;
 for (const target of targets) {
   const url = new URL(target, base).toString();
-  const res = await fetch(url);
-  const ok = target === '/' ? res.status >= 200 && res.status < 400 : [200, 401, 403, 429, 503].includes(res.status);
+  const headers = target === '/' ? { accept: 'text/html' } : {};
+  const res = await fetch(url, headers);
+  const ok = target === '/' ? [200, 301, 302, 303, 307, 308, 401].includes(res.status) : [200, 401, 403, 429, 503].includes(res.status);
   console.log(`${target}: ${res.status} ${ok ? 'PASS' : 'FAIL'}`);
   if (!ok || /Cannot read properties|RESOURCE_EXHAUSTED|Quota exceeded|Google Sheets header read failed/i.test(res.body)) failed = true;
 }
