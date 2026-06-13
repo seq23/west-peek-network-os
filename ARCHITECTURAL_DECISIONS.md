@@ -150,3 +150,16 @@ The post-remediation Hallmark findings are applied as reusable route-level UX la
 ## 2026-06-13 — External authenticated browser-state vault
 
 Decision: preserve Google-authenticated Playwright storage state as encrypted ciphertext outside the repo, with repo-owned atomic backup/restore/status wrappers. The disposable `.auth/` copy may be deleted by snapshot updates and recreated on demand. Tier 4 and Hallmark use the same validated state. This avoids repeated OAuth while preventing committed cookies or session material.
+
+## ADR-AUTH-STATE-002 — First-run authenticated browser-state capture is repo-owned and reusable
+
+- **Date:** 2026-06-13
+- **Status:** Accepted
+- **Context:** The encrypted auth-state vault could back up and restore an existing Playwright storage state, but the initial production-authenticated state still required an undocumented one-off `playwright codegen` command.
+- **Decision:** Add `npm run auth:capture` as the canonical first-run and session-refresh workflow. It opens the deployed HTTPS app, saves to a temporary storage-state file, validates the required production session cookie/domain/expiry, atomically installs the repo-local `.auth` state, and refuses overwrite unless explicitly enabled. A generic repo-tools utility is maintained separately for reuse across repos.
+- **Alternatives considered:** Manual one-off terminal command; Hallmark-specific capture; Tier-4-specific capture; committed auth fixtures.
+- **Reasoning:** One shared capture path reduces operator friction, prevents drift between Hallmark and Tier 4, and keeps real session state out of Git and baseline ZIPs.
+- **Tradeoffs:** Initial authentication remains interactive; Google or application session expiry still requires recapture.
+- **Risks accepted:** Playwright codegen UI behavior may evolve; contract validation protects the command surface but live capture remains locally proven.
+- **Validation impact:** Auth-state vault validator must require the capture script and package command. Synthetic capture tests verify overwrite refusal, validation, atomic install, and permissions.
+- **Future reversal conditions:** Replace only if Playwright deprecates codegen storage capture or the app adopts a safer first-class programmatic auth bootstrap.

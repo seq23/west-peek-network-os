@@ -2,6 +2,7 @@ import fs from 'node:fs';
 const failures = [];
 const required = [
   'scripts/auth-state/common.sh',
+  'scripts/auth-state/capture.sh',
   'scripts/auth-state/backup.sh',
   'scripts/auth-state/restore.sh',
   'scripts/auth-state/status.sh',
@@ -15,6 +16,14 @@ const gitignore = fs.readFileSync('.gitignore','utf8');
 if (!/^\.auth\/$/m.test(gitignore)) failures.push('.auth/ must remain gitignored');
 const common = fs.readFileSync('scripts/auth-state/common.sh','utf8');
 for (const phrase of ['AI_AUTH_VAULTS/west-peek-network-os','wpn_session','west-peek-network-os.pages.dev']) if (!common.includes(phrase)) failures.push(`auth-state contract missing ${phrase}`);
+
+const capture = fs.readFileSync('scripts/auth-state/capture.sh','utf8');
+for (const phrase of ['playwright codegen','--save-storage','AUTH_CAPTURE_OVERWRITE','validate_auth_state','mv -f']) if (!capture.includes(phrase)) failures.push(`auth capture contract missing ${phrase}`);
+if (!capture.includes('https://west-peek-network-os.pages.dev')) failures.push('auth capture must default to deployed West Peek URL');
+if (!capture.includes('npm run auth:backup')) failures.push('auth capture must direct operator to encrypted backup');
+const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
+if (pkg.scripts?.['auth:capture'] !== 'bash scripts/auth-state/capture.sh') failures.push('package.json missing canonical auth:capture command');
+
 const hallmark = fs.readFileSync('scripts/auth-state/run-hallmark.sh','utf8');
 if (!hallmark.includes('--storage-state')) failures.push('Hallmark wrapper must pass --storage-state');
 if (!hallmark.includes('does not support --storage-state')) failures.push('Hallmark wrapper must capability-check --storage-state support');

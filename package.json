@@ -129,7 +129,8 @@
     "auth:remove-local": "bash scripts/auth-state/remove-local.sh",
     "tier4:authenticated": "bash scripts/auth-state/run-tier4.sh",
     "hallmark:authenticated": "bash scripts/auth-state/run-hallmark.sh",
-    "validate:auth-state-vault": "node scripts/validate-auth-state-vault-contract.mjs"
+    "validate:auth-state-vault": "node scripts/validate-auth-state-vault-contract.mjs",
+    "auth:capture": "bash scripts/auth-state/capture.sh"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

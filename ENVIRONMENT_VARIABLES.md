@@ -93,3 +93,10 @@ These values are valid only in local/test runtime. Fixture or test-auth activati
 - `AUTH_STATE_LOCAL_PATH` — optional disposable repo-local storage-state path override.
 - `HALLMARK_RUNNER` — optional Hallmark runner path override.
 - `HALLMARK_BASE_URL` — optional Hallmark target URL override; defaults to the deployed Pages URL.
+
+## Auth-state capture controls
+
+- `AUTH_CAPTURE_URL` — explicit deployed HTTPS URL used by `npm run auth:capture`; defaults to the production Pages URL.
+- `AUTH_CAPTURE_OVERWRITE=1` — permits intentional replacement of an existing local storage-state file when refreshing an expired or revoked session.
+- `AUTH_STATE_LOCAL_PATH` — optional override for the disposable restored/captured Playwright storage-state path.
+- `AUTH_STATE_VAULT_PATH` — optional override for the external encrypted canonical vault path.

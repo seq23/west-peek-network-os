@@ -2,8 +2,8 @@
 
 ## Current baseline
 
-- ZIP: `west-peek-network-os-main_BASELINE_06-13-26_c3f6a812.zip`
-- Source ZIP: `west-peek-network-os-main_BASELINE_06-13-26_c3f6a812.zip`
+- ZIP: `west-peek-network-os-main_BASELINE_06-13-26_ec2611ca.zip`
+- Source ZIP: `west-peek-network-os-main_BASELINE_06-13-26_ec2611ca.zip`
 - Repo root: `west-peek-network-os`
 - Mode: full snapshot baseline
 
@@ -55,8 +55,8 @@ Not proven in sandbox:
 
 ## Hallmark global route refinement artifact
 
-- Baseline ZIP: `west-peek-network-os-main_BASELINE_06-13-26_c3f6a812.zip`
-- Source ZIP: `west-peek-network-os-main_BASELINE_06-13-26_c3f6a812.zip`
+- Baseline ZIP: `west-peek-network-os-main_BASELINE_06-13-26_ec2611ca.zip`
+- Source ZIP: `west-peek-network-os-main_BASELINE_06-13-26_ec2611ca.zip`
 - Repo root: `west-peek-network-os`
 - Changed files: `src/ui/App.tsx`, `src/ui/Dashboard.tsx`, `src/styles.css`, `ARCHITECTURAL_DECISIONS.md`, `HALLMARK_GLOBAL_ROUTE_REFINEMENT_2026-06-13.md`, `ARTIFACT_MANIFEST.md`
 - Generated artifacts excluded: `node_modules/`, `dist/`, `playwright-report/`, `test-results/`, `logs/`, `artifacts/`, `.auth/`, `tsconfig.tsbuildinfo`
@@ -76,3 +76,13 @@ This baseline adds external encrypted authenticated-state backup/restore plus sh
 - Added non-secret Tier 4 provider-input preflight disclosure.
 - Revalidated encrypted backup/delete/restore, Hallmark wrapper wiring, Tier 4 environment wiring, secret non-disclosure, shell syntax, TypeScript, secret scan, documentation parity, and validator admission.
 - Authentication restoration serves both Hallmark and Tier 4; provider-specific Tier 4 inputs and Gmail seed messages remain independently required.
+
+
+## First-run authenticated capture addition
+
+- Baseline ZIP: `west-peek-network-os-main_BASELINE_06-13-26_ec2611ca.zip`
+- Added `scripts/auth-state/capture.sh` and `npm run auth:capture`.
+- Added explicit initial-capture and refresh workflow to vault and postdeploy runbooks.
+- Extended the auth-state contract validator so backup/restore cannot be considered complete without a first-run capture path.
+- Verified synthetic Playwright capture, overwrite refusal, session/domain/expiration validation, atomic install, file mode `0600`, shell syntax, TypeScript, vault contract, and package/documentation parity.
+- The real Google OAuth interaction remains local operator proof.

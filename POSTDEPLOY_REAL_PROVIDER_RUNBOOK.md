@@ -13,6 +13,10 @@ Updated: 2026-06-11
 - Safe test event slug
 - Local access to provider secrets without printing them
 
+## One-time authenticated browser-state capture
+
+If no valid encrypted auth-state vault exists, run `npm run auth:capture`, complete deployed Google OAuth, close the Playwright browser after the authenticated dashboard loads, then run `npm run auth:backup`. Future Hallmark and Tier 4 runs restore this state automatically until the session expires or is revoked.
+
 ## Gmail operator seed messages
 
 Send fresh messages to the connected Gmail account. Each message body must include the run ID.

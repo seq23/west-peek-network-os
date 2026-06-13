@@ -15,12 +15,19 @@ Both paths may be overridden with `AUTH_STATE_VAULT_PATH` and `AUTH_STATE_LOCAL_
 
 ## Commands
 
+- `npm run auth:capture` — open the deployed app in Playwright, complete Google authentication once, validate the resulting `wpn_session`, and atomically install `.auth/playwright-storage-state.json`. It refuses to overwrite an existing local state unless `AUTH_CAPTURE_OVERWRITE=1` is set intentionally.
 - `npm run auth:status` — report whether the vault/local state exists and validate the local state without printing cookie values.
 - `npm run auth:backup` — encrypt the current repo-local authenticated state into the external canonical vault.
 - `npm run auth:restore` — decrypt and atomically restore the repo-local state with mode `0600`.
 - `npm run auth:remove-local` — remove only the disposable local state while preserving the encrypted vault.
 - `npm run tier4:authenticated` — restore when needed, export the storage-state variables, print a non-secret provider-input preflight, and launch Tier 4. Authentication alone does not replace Gmail seed messages, live-lane flags, Google Sheets enablement, Pitch Lab secret availability, or AI/OCR/voice mode selection.
 - `npm run hallmark:authenticated` — restore when needed and run the Hallmark evidence collector against the deployed app.
+
+## Initial capture
+
+Run `npm run auth:capture`. Complete Google sign-in in the Playwright browser, wait for the authenticated dashboard, and close the browser. Then run `npm run auth:backup` to create the external encrypted canonical copy.
+
+The capture command defaults to `https://west-peek-network-os.pages.dev`. Override only with an explicit deployed HTTPS URL using `AUTH_CAPTURE_URL`.
 
 ## Security laws
 
