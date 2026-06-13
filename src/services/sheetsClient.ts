@@ -19,7 +19,9 @@ export type AddEventContextInput = { event_id: string; public_name?: string; pub
 
 export async function fetchSheetSnapshot(options: { fresh?: boolean } = {}): Promise<SheetSnapshot> {
   const url = options.fresh ? '/api/sheets/snapshot?fresh=1' : '/api/sheets/snapshot';
-  const payload = await requestJson<{ data?: Record<string, unknown[]>; source?: string; refreshed_at?: string; freshness_requested?: boolean; cache_age_ms?: number }>(url);
+  const payload = await requestJson<{ data?: Record<string, unknown[]>; source?: string; refreshed_at?: string; freshness_requested?: boolean; cache_age_ms?: number }>(url, {
+    cache: 'no-store'
+  });
   const data = payload.data || {};
   return {
     source: payload.source,

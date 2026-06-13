@@ -27,7 +27,7 @@ export async function onRequestGet({ request, env }: Context) {
     const forceFresh = url.searchParams.get('fresh') === '1';
 
     if (!forceFresh && snapshotCache && snapshotCache.userEmail === user.email && Date.now() < snapshotCache.expiresAt) {
-      return json({ ...(snapshotCache.payload as Record<string, unknown>), source: 'google_sheets_batch_cache', freshness_requested: false, cache_age_ms: Math.max(0, SNAPSHOT_CACHE_TTL_MS - (snapshotCache.expiresAt - Date.now())) }, { headers: { 'cache-control': 'private, max-age=30' } });
+      return json({ ...(snapshotCache.payload as Record<string, unknown>), source: 'google_sheets_batch_cache', freshness_requested: false, cache_age_ms: Math.max(0, SNAPSHOT_CACHE_TTL_MS - (snapshotCache.expiresAt - Date.now())) }, { headers: { 'cache-control': 'private, no-store, max-age=0' } });
     }
 
     // One batchGet request replaces eight tab reads and avoids per-tab header reads.
@@ -35,7 +35,7 @@ export async function onRequestGet({ request, env }: Context) {
     const data = Object.fromEntries(TABS.map((tab) => [tab, latestById(raw[tab] || [], IDS[tab])]));
     const payload = { ok: true, persistence: 'google_sheets', source: 'google_sheets_batch', freshness_requested: forceFresh, cache_age_ms: 0, refreshed_at: new Date().toISOString(), user_email: user.email, data };
     snapshotCache = { userEmail: user.email, payload, expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS };
-    return json(payload, { headers: { 'cache-control': 'private, max-age=30' } });
+    return json(payload, { headers: { 'cache-control': 'private, no-store, max-age=0' } });
   } catch (error) {
     const detail = error instanceof Error ? error.message : 'Google Sheets snapshot unavailable.';
     if (detail.includes('Google Sheets')) return sheetsUnavailable(error);
