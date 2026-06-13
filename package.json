@@ -44,7 +44,7 @@
     "validate:triggers": "node scripts/validate-trigger-product-promises.mjs",
     "validate:validator-admission": "node scripts/validate-validator-admission.mjs",
     "test:e2e:live-gmail:real": "LIVE_GMAIL_TRIGGER_E2E=1 playwright test tests/e2e/live-gmail-trigger-ingestion.spec.ts --trace on --workers=1",
-    "test:e2e:public-pitchlab-real": "playwright test tests/e2e/public-event-and-pitchlab.spec.ts --trace on --workers=1",
+    "test:e2e:public-pitchlab-real": "playwright test tests/e2e/public-event-and-pitchlab.spec.ts --grep \"postdeploy Pitch Lab signed profile and packet\" --trace on --workers=1",
     "test:e2e:local-functions-headed": "PLAYWRIGHT_HEADED=1 playwright test tests/e2e/provider-failure-auth-mobile-edge.spec.ts tests/e2e/public-event-and-pitchlab.spec.ts --headed --trace on --workers=1",
     "test:e2e:maxdepth-headed": "PLAYWRIGHT_HEADED=1 playwright test tests/e2e/master-gauntlet.spec.ts tests/e2e/network-os.spec.ts tests/e2e/provider-failure-auth-mobile-edge.spec.ts --headed --trace on --workers=1",
     "validate:provider-lanes": "node scripts/validate-provider-lanes.mjs",

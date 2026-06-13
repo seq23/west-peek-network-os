@@ -149,7 +149,26 @@ async function sheetsFetch(env: RuntimeEnv, token: string, path: string, init: R
 
 function rowsToObjects(values: string[][]) {
   const [header = [], ...rows] = values;
-  return rows.map((row: string[]) => Object.fromEntries(header.map((key: string, index: number) => [key, row[index] || ''])));
+
+  return rows.map((row: string[]) => {
+    const record: Record<string, string> = {};
+
+    header.forEach((rawKey: string, index: number) => {
+      const key = String(rawKey || '').trim();
+      if (!key) return;
+
+      const value = row[index] || '';
+
+      // Historical sheets may contain duplicate headers. Preserve the first
+      // populated value instead of allowing a later blank duplicate column
+      // to overwrite valid data.
+      if (!(key in record) || (!record[key] && value)) {
+        record[key] = value;
+      }
+    });
+
+    return record;
+  });
 }
 
 function serializeCell(value: unknown): string {
