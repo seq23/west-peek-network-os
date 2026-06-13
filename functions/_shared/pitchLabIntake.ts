@@ -1,6 +1,7 @@
 import { json } from './json';
+import { appendRecord, readTab, type RuntimeEnv } from './sheets';
 
-export interface PitchLabIntakeEnv {
+export interface PitchLabIntakeEnv extends RuntimeEnv {
   PITCH_LAB_SHARED_SECRET?: string;
   PITCH_LAB_ALLOWED_ORIGIN?: string;
 }
@@ -138,6 +139,24 @@ export async function requirePitchLabSignature(request: Request, env: PitchLabIn
   if (Math.abs(Date.now() - submittedAtMs) > 10 * 60 * 1000) return { ok: false, response: json({ ok: false, error_code: 'STALE_REQUEST', message: 'Pitch Lab request timestamp is outside the allowed replay window.' }, { status: 401 }) };
   const expected = await sign(secret, `${submittedAt}.${bodyText}`);
   if (!timingSafeEqual(signature, expected)) return { ok: false, response: json({ ok: false, error_code: 'BAD_SIGNATURE', message: 'Invalid Pitch Lab signature.' }, { status: 401 }) };
+  const signatureHash = await publicHash(signature);
+  try {
+    const rows = await readTab(env, 'provider_replay_guard');
+    if (rows.some((row) => String(row.provider) === 'pitch_lab' && String(row.signature_hash) === signatureHash)) {
+      return { ok: false, response: json({ ok: false, error_code: 'REPLAY_DETECTED', message: 'Pitch Lab request signature has already been used.' }, { status: 409 }) };
+    }
+    await appendRecord(env, 'provider_replay_guard', {
+      replay_id: `replay_pitchlab_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+      created_at: new Date().toISOString(),
+      provider: 'pitch_lab',
+      signature_hash: signatureHash,
+      submitted_at: submittedAt,
+      source_ip: request.headers.get('cf-connecting-ip') || '',
+      status: 'accepted'
+    });
+  } catch (error) {
+    return { ok: false, response: json({ ok: false, error_code: 'REPLAY_GUARD_UNAVAILABLE', message: error instanceof Error ? error.message : 'Replay guard unavailable.' }, { status: 503 }) };
+  }
   return { ok: true };
 }
 
@@ -145,6 +164,11 @@ async function sign(secret: string, message: string) {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message));
   return base64UrlBytes(new Uint8Array(signature));
+}
+
+async function publicHash(value: string) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return base64UrlBytes(new Uint8Array(digest)).slice(0, 32);
 }
 
 function timingSafeEqual(a: string, b: string) {

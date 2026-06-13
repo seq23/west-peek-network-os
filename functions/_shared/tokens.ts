@@ -15,6 +15,24 @@ export async function encryptTokenPayload(env: TokenEnv, payload: unknown) {
   };
 }
 
+export async function decryptTokenPayload<T = unknown>(env: TokenEnv, ciphertext: string, iv: string): Promise<T> {
+  if (!env.TOKEN_ENCRYPTION_SECRET) throw new Error('Missing TOKEN_ENCRYPTION_SECRET.');
+  if (!ciphertext || !iv) throw new Error('Encrypted token payload is incomplete.');
+  const key = await deriveAesKey(env.TOKEN_ENCRYPTION_SECRET);
+  const plaintext = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: base64UrlDecode(iv) },
+    key,
+    base64UrlDecode(ciphertext)
+  );
+  return JSON.parse(new TextDecoder().decode(plaintext)) as T;
+}
+
+function base64UrlDecode(input: string) {
+  const padded = input.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - input.length % 4) % 4);
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
 async function deriveAesKey(secret: string) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
   return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);

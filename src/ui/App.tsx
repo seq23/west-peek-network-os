@@ -436,6 +436,8 @@ function SettingsPanel({
 }) {
   const [maintenanceStatus, setMaintenanceStatus] = useState<string | null>(null);
   const [maintenanceBusy, setMaintenanceBusy] = useState(false);
+  const [gmailSyncBusy, setGmailSyncBusy] = useState(false);
+  const [gmailSyncStatus, setGmailSyncStatus] = useState('');
   const [refreshBusy, setRefreshBusy] = useState(false);
 
   async function guardedSessionRefresh() {
@@ -455,6 +457,32 @@ function SettingsPanel({
       await onRefresh();
     } finally {
       setTimeout(() => setRefreshBusy(false), 1500);
+    }
+  }
+
+  async function runGmailSync() {
+    if (gmailSyncBusy) return;
+    if (!session.authenticated) {
+      setGmailSyncStatus('Authentication required. Connect / reconnect Gmail on this same production domain, then retry.');
+      return;
+    }
+    setGmailSyncBusy(true);
+    setGmailSyncStatus('Syncing Gmail trigger messages into Intake Queue...');
+    try {
+      const response = await fetch('/api/gmail/sync', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ max_results: 10 })
+      });
+      const payload = await response.json() as { ok?: boolean; imported_count?: number; skipped_duplicate_count?: number; imported_intake_ids?: string[]; error?: string; sync_id?: string };
+      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Gmail sync failed.');
+      setGmailSyncStatus(`Gmail sync ${payload.sync_id || 'complete'}: imported ${payload.imported_count ?? 0}; duplicates skipped ${payload.skipped_duplicate_count ?? 0}.`);
+      await onRefresh();
+    } catch (error) {
+      setGmailSyncStatus(error instanceof Error ? error.message : 'Gmail sync failed.');
+    } finally {
+      setGmailSyncBusy(false);
     }
   }
 
@@ -491,12 +519,11 @@ function SettingsPanel({
       </div>
       <div className="card"><h3>Canonical triggers</h3><p><strong>#wpnetwork</strong> relationship capture<br /><strong>#wpdealflow</strong> founder / prospective deal flow<br /><strong>#dealflow</strong> short alias for founder deal-flow capture</p><p className="muted">Relationship aliases: #addtowestpeek, #westpeeknetwork. Deal-flow aliases: #wpdealflow, #dealflow.</p></div>
       <div className="card"><h3>Initial users</h3><p>sequoia@westpeek.ventures<br />scooter@westpeek.ventures</p></div>
-      <div className="card"><h3>Spreadsheet sync</h3><p>{sheetStatus}</p><p className="muted">The app reads from Google Sheets on load and after write actions. If someone edits the spreadsheet directly, click refresh to pull the latest rows into the app.</p><div className="actions"><button className="btn" type="button" disabled={refreshBusy || !session.authenticated} onClick={guardedSheetRefresh}>{refreshBusy ? 'Refreshing...' : 'Refresh from Google Sheets'}</button><button className="btn primary" type="button" disabled={maintenanceBusy || !session.authenticated} onClick={runSheetMaintenance}>{maintenanceBusy ? 'Running...' : 'Run Sheet Maintenance'}</button></div>{maintenanceStatus && <p className="muted">{maintenanceStatus}</p>}</div>
-      <div className="card"><h3>Operator Login launchpads</h3><p>joinwestpeek.com/operator<br />westpeek.ventures/operator</p><p className="muted">Shared password gate: 3021WPeek. Links open Network OS and Venture Deals Calculator.</p></div>
+      <div className="card"><h3>Spreadsheet + Gmail sync</h3><p>{sheetStatus}</p><p className="muted">The app reads from Google Sheets on load and after write actions. Gmail trigger sync imports matching read-only Gmail messages into Intake Queue for human review only.</p><div className="actions"><button className="btn" type="button" disabled={refreshBusy || !session.authenticated} onClick={guardedSheetRefresh}>{refreshBusy ? 'Refreshing...' : 'Refresh from Google Sheets'}</button><button className="btn primary" type="button" disabled={gmailSyncBusy || !session.authenticated} onClick={runGmailSync}>{gmailSyncBusy ? 'Syncing...' : 'Sync Gmail Triggers'}</button><button className="btn" type="button" disabled={maintenanceBusy || !session.authenticated} onClick={runSheetMaintenance}>{maintenanceBusy ? 'Running...' : 'Run Sheet Maintenance'}</button></div>{gmailSyncStatus && <p className="muted">{gmailSyncStatus}</p>}{maintenanceStatus && <p className="muted">{maintenanceStatus}</p>}</div>
+      <div className="card"><h3>Operator Login launchpads</h3><p>joinwestpeek.com/operator<br />westpeek.ventures/operator</p><p className="muted">Team-area access is managed outside this repo. No shared password or passphrase is stored or displayed here.</p></div>
       <div className="card">
         <h3>Google Sheets</h3>
-        <p>Google Sheets is the v1 persistence layer for contacts, intake, touches, approvals, notifications, AI suggestions, OAuth tokens, and provider-backed capture rows.</p>
-        <p><a className="btn primary" href="https://docs.google.com/spreadsheets/d/1g2Tyeb8u1sYYQB5dhMEFgIMd5SlZR1h1FxHWUhbG1G8/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Open live spreadsheet →</a></p>
+        <p>Google Sheets is the v1 persistence layer for contacts, intake, touches, approvals, notifications, AI suggestions, OAuth tokens, and provider-backed capture rows. The live spreadsheet link is intentionally kept in operator docs/password manager, not exposed in the browser UI.</p>
       </div>
       <div className="card"><h3>Handwritten note vendors</h3><p className="muted">Preferred starting point: Handwrytten for API/logo automation later. Backup: Simply Noted for real-ink note service. Simple fallback: Postable. Always include “I’ll do it myself” when no third party should be used.</p><div className="actions"><a className="btn" href="https://www.handwrytten.com/" target="_blank" rel="noopener noreferrer">Handwrytten</a><a className="btn" href="https://simplynoted.com/" target="_blank" rel="noopener noreferrer">Simply Noted</a><a className="btn" href="https://www.postable.com/business" target="_blank" rel="noopener noreferrer">Postable</a></div></div><div className="card"><h3>Cloudflare secrets</h3><p>Use scripts/secrets/push-cloudflare-secrets.sh after decrypting .env.local.</p></div>
     </div>

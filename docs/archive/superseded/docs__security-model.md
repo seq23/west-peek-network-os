@@ -15,7 +15,7 @@ Every production API route must enforce authenticated session, approved email al
 
 ## Team page
 
-`joinwestpeek.com/team` uses a simple shared password gate: `3021WPeek`. Anything behind the Team page can be used by any user with that password.
+`joinwestpeek.com/team` uses a simple shared password gate: `stored in owner password manager`. Anything behind the Team page can be used by any user with that password.
 
 ## Secrets
 

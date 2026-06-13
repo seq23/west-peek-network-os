@@ -1,43 +1,28 @@
-# E2E Required Test Matrix — West Peek Network OS
+# E2E Required Test Matrix
 
-Status: ACTIVE  
-Date: 2026-06-11  
-Purpose: repo-owned E2E coverage ledger for the Master Contract / Master Addendum.
+Tier 2: local browser gauntlet where possible.
+Tier 3: postdeploy strict smoke and safe routing.
+Tier 4: postdeploy only, Ultimate Live E2E provider + data proof.
 
-## Completion rule
+Required Tier 4 lanes:
 
-West Peek Network OS cannot be called COMPLETE until every HARD FAIL lane below is either:
+- `tier4-prereq-postdeploy-strict`
+- `tier4-oauth-connect-live`
+- `tier4-gmail-trigger-ingestion-live`
+- `tier4-google-sheets-readwrite-live`
+- `tier4-human-review-workflow-live`
+- `tier4-contact-workflow-live`
+- `tier4-relationship-touch-live`
+- `tier4-public-event-live`
+- `tier4-pitchlab-signed-handoff-live`
+- `tier4-ai-ocr-voice-live`
+- `tier4-auth-boundary-live`
+- `tier4-runtime-context-live`
+- `tier4-report-check`
 
-1. implemented as an executable E2E/proof lane and passed, or
-2. explicitly labeled UNPROVEN with completion impact.
+## Tier 4 / Max-depth anchor coverage update
 
-## Matrix
-
-| Required lane | Required file / command | Current repo status | Completion impact |
-|---|---|---:|---|
-| Capstone product lifecycle gauntlet | `tests/e2e/master-gauntlet.spec.ts`; `npm run test:e2e:master-gauntlet` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| Public event form submit + invalid states | `tests/e2e/public-event-and-pitchlab.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass locally or postdeploy. |
-| Pitch Lab signed packet + invalid/replay denial | `tests/e2e/public-event-and-pitchlab.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass with real deployment secret evidence. |
-| `#wpnetwork` browser intake lifecycle | `tests/e2e/master-gauntlet.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| `#addtowestpeek` alias | `tests/e2e/master-gauntlet.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| `#westpeeknetwork` alias | `tests/e2e/master-gauntlet.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| `#wpdealflow` founder/deal-flow classification | `tests/e2e/master-gauntlet.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| `#dealflow` alias classification | `tests/e2e/master-gauntlet.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| No automatic contact, email, intro, note, approval, or send from triggers | `tests/e2e/master-gauntlet.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| Malformed trigger and duplicate trigger behavior | `tests/e2e/provider-failure-auth-mobile-edge.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| Protected route/session denial | `tests/e2e/provider-failure-auth-mobile-edge.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| Provider failure UI for Gmail, Sheets, Claude, OCR, voice | `tests/e2e/provider-failure-auth-mobile-edge.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| Mobile critical workflows | `tests/e2e/provider-failure-auth-mobile-edge.spec.ts` | PRESENT / NOT RUN | Blocks COMPLETE until run/pass. |
-| Live Gmail trigger ingestion | `tests/e2e/live-gmail-trigger-ingestion.spec.ts`; `npm run test:e2e:live-gmail` | PRESENT AS LIVE PROOF LANE / UNPROVEN | Blocks COMPLETE until run with real Gmail/OAuth/Sheets. |
-| Postdeploy critical runtime smoke | `tests/e2e/network-os.live.spec.ts`; `npm run test:e2e:live` | PRESENT / UNPROVEN | Blocks production-readiness claim until run. |
-| Headed visual gauntlet | `npm run test:e2e:local-headed` | PRESENT AS COMMAND / UNPROVEN | Requires local human-visible run for visual trust. |
-| E2E coverage static guard | `npm run validate:e2e-coverage` | PRESENT | Does not prove browser behavior. |
-
-## Explicit UNPROVEN lanes until evidence exists
-
-- LIVE GMAIL TRIGGER INGESTION
-- GOOGLE SHEETS LIVE READ/WRITE
-- PITCH LAB DEPLOYED SECRET PARITY
-- CLOUDFLARE ENV PARITY
-- POSTDEPLOY FULL JOURNEY
-- HEADED VISUAL HUMAN REVIEW
+Capstone product lifecycle gauntlet: required in Tier 2/Tier 4 proof.
+No automatic contact: Gmail/Pitch Lab/public intake remains human-review until explicit action.
+POSTDEPLOY: deployed smoke/safety is Tier 3 and required before Tier 4.
+UNPROVEN: missing provider/deployed evidence must be named honestly.

@@ -7,7 +7,7 @@ const required = [
   'ENVIRONMENT_VARIABLES.md', '.env.example', '.env.local.example', 'wrangler.toml', 'src/main.tsx',
   'src/ui/App.tsx', 'src/ui/Instructions.tsx', 'src/ui/AddPerson.tsx', 'docs/instructions-page-content.md', 'docs/cumulative-build-spec.md', 'docs/data-schemas.md', 'docs/provider-contracts.md', 'docs/HOSTILE_FLEXIBLE_INTAKE_REVIEW_06-07-26.md',
   'docs/secrets-and-cloudflare.md', 'docs/playwright-local-testing.md', 'scripts/secrets/decrypt-local-env.sh', 'scripts/secrets/check-secrets.sh',
-  'scripts/secrets/push-cloudflare-secrets.sh', 'secrets/network-os.local.env.gpg', 'src/domain/workflows.ts', 'tests/domain/workflows.mjs', 'functions/api/health.ts', 'functions/api/session.ts', 'functions/auth/google.ts', 'functions/auth/callback/google.ts', 'functions/_shared/auth.ts', 'functions/_shared/tokens.ts', 'functions/api/intake/create.ts', 'functions/api/intake/pitch-lab.ts', 'functions/_shared/pitchLabIntake.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/triggers/check.ts', 'functions/api/ai/suggestions/create.ts',
+  'scripts/secrets/push-cloudflare-secrets.sh', 'secrets/network-os.local.env.gpg', 'src/domain/workflows.ts', 'tests/domain/workflows.mjs', 'functions/api/health.ts', 'functions/api/session.ts', 'functions/auth/google.ts', 'functions/auth/callback/google.ts', 'functions/_shared/auth.ts', 'functions/_shared/tokens.ts', 'functions/api/intake/create.ts', 'functions/api/intake/pitch-lab.ts', 'functions/_shared/pitchLabIntake.ts', 'functions/api/contacts/create.ts', 'functions/api/approvals/decision.ts', 'functions/api/notifications/read.ts', 'functions/api/triggers/check.ts', 'functions/api/gmail/sync.ts', 'functions/api/provider/status.ts', 'functions/_middleware.ts', 'functions/api/ai/suggestions/create.ts',
   'functions/api/intake/media/create.ts',
   'functions/api/intake/review.ts', 'functions/api/sheets/snapshot.ts',
   'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
@@ -28,11 +28,11 @@ if (missingFragments.length) {
   process.exit(1);
 }
 const cumulative = fs.readFileSync(path.join(root, 'docs/cumulative-build-spec.md'), 'utf8');
-const requiredRuntimeFragments = ['createSheetContact', 'createSheetIntake', 'reviewSheetIntake', 'fetchSheetSnapshot', 'decideSheetApproval', 'markSheetNotificationRead', 'findDuplicateContact', 'createNotificationForApproval', 'wpn_session', 'oauth_tokens', '/v1/messages', 'ai_suggestions', 'relationship_touches', 'google_speech_to_text', 'extractIntakeFromImage', 'virtual_thank_you_card', 'execution_allowed: false', 'Open live spreadsheet', 'Event form link', 'public form link'];
+const requiredRuntimeFragments = ['createSheetContact', 'createSheetIntake', 'reviewSheetIntake', 'fetchSheetSnapshot', 'decideSheetApproval', 'markSheetNotificationRead', 'findDuplicateContact', 'createNotificationForApproval', 'wpn_session', 'oauth_tokens', '/v1/messages', 'ai_suggestions', 'Gmail sync creates review queue row only', 'relationship_touches', 'google_speech_to_text', 'extractIntakeFromImage', 'virtual_thank_you_card', 'execution_allowed: false', 'Event form link', 'public form link'];
 const appRuntime = [
   'src/ui/App.tsx',
   'src/domain/workflows.ts',
-  'functions/api/session.ts',
+  'functions/api/session.ts', 'functions/api/gmail/sync.ts', 'functions/api/provider/status.ts', 'functions/_middleware.ts',
   'functions/auth/google.ts',
   'functions/auth/callback/google.ts',
   'functions/_shared/auth.ts',
@@ -50,7 +50,7 @@ if (missingRuntime.length) {
   console.error('Runtime workflow fragments missing:', missingRuntime);
   process.exit(1);
 }
-const requiredSpecFragments = ['3021WPeek', 'venturedeals.joinwestpeek.com', 'Add to West Peek Network', '#wpnetwork', 'Secrets / Configuration Plan', 'Cloudflare Secret Push Rule', 'Handwrytten', 'Simply Noted', 'AI prepares', 'No one-click approval'];
+const requiredSpecFragments = ['stored in owner password manager', 'venturedeals.joinwestpeek.com', 'Add to West Peek Network', '#wpnetwork', 'Secrets / Configuration Plan', 'Cloudflare Secret Push Rule', 'Handwrytten', 'Simply Noted', 'AI prepares', 'No one-click approval'];
 const missingSpec = requiredSpecFragments.filter((fragment) => !cumulative.includes(fragment));
 if (missingSpec.length) {
   console.error('Cumulative spec missing fragments:', missingSpec);

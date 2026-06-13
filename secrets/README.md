@@ -9,7 +9,7 @@ secrets/network-os.local.env.gpg
 Password/passphrase:
 
 ```text
-3021WPeek
+stored in owner password manager
 ```
 
 The password is intentionally not embedded in decrypt scripts.

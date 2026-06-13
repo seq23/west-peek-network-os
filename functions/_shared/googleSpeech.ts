@@ -1,3 +1,5 @@
+import { signGoogleServiceAccountJwt } from './googlePrivateKey';
+
 export interface GoogleSpeechEnv {
   GOOGLE_SERVICE_ACCOUNT_EMAIL?: string;
   GOOGLE_PRIVATE_KEY?: string;
@@ -61,7 +63,7 @@ async function getServiceAccountToken(env: GoogleSpeechEnv): Promise<string> {
     exp: now + 3600,
     iat: now
   };
-  const jwt = await signJwt(claim, env.GOOGLE_PRIVATE_KEY || '');
+  const jwt = await signGoogleServiceAccountJwt(claim, env.GOOGLE_PRIVATE_KEY);
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -73,35 +75,13 @@ async function getServiceAccountToken(env: GoogleSpeechEnv): Promise<string> {
   return payload.access_token;
 }
 
-async function signJwt(claim: Record<string, unknown>, pem: string): Promise<string> {
-  const header = { alg: 'RS256', typ: 'JWT' };
-  const encodedHeader = base64Url(JSON.stringify(header));
-  const encodedClaim = base64Url(JSON.stringify(claim));
-  const data = new TextEncoder().encode(`${encodedHeader}.${encodedClaim}`);
-  const key = await importPrivateKey(pem);
-  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, data);
-  return `${encodedHeader}.${encodedClaim}.${base64UrlBytes(new Uint8Array(signature))}`;
-}
-
-async function importPrivateKey(pem: string) {
-  const beginMarker = '-----BEGIN ' + 'PRIVATE KEY-----';
-  const endMarker = '-----END ' + 'PRIVATE KEY-----';
-  const normalized = pem.replace(/\\n/g, '\n').replace(beginMarker, '').replace(endMarker, '').replace(/\s+/g, '');
-  const binary = Uint8Array.from(atob(normalized), (char) => char.charCodeAt(0));
-  return crypto.subtle.importKey('pkcs8', binary, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
-}
-
-function base64Url(input: string) {
-  return base64UrlBytes(new TextEncoder().encode(input));
+function base64UrlToStandard(input: string) {
+  const converted = input.replace(/-/g, '+').replace(/_/g, '/');
+  return converted.padEnd(converted.length + (4 - converted.length % 4) % 4, '=');
 }
 
 function base64UrlBytes(input: Uint8Array) {
   let binary = '';
   for (const byte of input) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function base64UrlToStandard(input: string) {
-  const converted = input.replace(/-/g, '+').replace(/_/g, '/');
-  return converted.padEnd(converted.length + (4 - converted.length % 4) % 4, '=');
 }

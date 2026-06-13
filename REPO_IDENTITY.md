@@ -18,7 +18,7 @@ Initial app users:
 Internal launchpad:
 
 - `https://joinwestpeek.com/team`
-- Shared password: `3021WPeek`
+- Shared password: stored only in owner password manager; not committed to this repo.
 
 Team launchpad tools:
 

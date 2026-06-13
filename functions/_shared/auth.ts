@@ -69,7 +69,8 @@ export async function authenticatedUserEmail(request: Request, env: AuthEnv, opt
     sessionEmail = typeof payload?.email === 'string' ? payload.email.toLowerCase() : '';
   }
 
-  const headerEmail = options.allowHeaderFallback ? (request.headers.get('x-west-peek-user-email') || '').toLowerCase() : '';
+  const localHeaderFallbackAllowed = options.allowHeaderFallback === true && isLocalOperatorRequest(request);
+  const headerEmail = localHeaderFallbackAllowed ? (request.headers.get('x-west-peek-user-email') || '').toLowerCase() : '';
   const email = sessionEmail || headerEmail;
   if (!email || !approvedUsers.includes(email)) return '';
   return email;
@@ -132,4 +133,10 @@ function base64UrlDecode(input: string) {
   const padded = input.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - input.length % 4) % 4);
   const binary = atob(padded);
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+function isLocalOperatorRequest(request: Request) {
+  const url = new URL(request.url);
+  const host = url.hostname.toLowerCase();
+  return host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
 }

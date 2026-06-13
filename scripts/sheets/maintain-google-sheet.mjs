@@ -23,6 +23,7 @@ const TAB_HEADERS = {
   oauth_tokens: ['token_id', 'created_at', 'updated_at', 'provider', 'user_email', 'scope', 'token_type', 'expires_in', 'encrypted_payload', 'encryption_iv', 'encryption_algorithm', 'status'],
   events: ['event_id', 'created_at', 'updated_at', 'event_name', 'event_slug', 'event_date', 'location', 'owner_email', 'status', 'notes', 'public_form_enabled', 'public_form_url'],
   event_attendees: ['event_attendee_id', 'event_id', 'event_name', 'event_slug', 'created_at', 'updated_at', 'public_name', 'public_email', 'public_company', 'public_title', 'public_phone', 'public_linkedin', 'public_interest', 'private_context', 'private_voice_transcript', 'ai_summary', 'review_status', 'confidence', 'missing_fields', 'source_type', 'created_by', 'source_intake_id', 'consent_follow_up'],
+  provider_replay_guard: ['replay_id', 'created_at', 'provider', 'signature_hash', 'submitted_at', 'source_ip', 'status'],
   sheet_maintenance_log: ['run_id', 'created_at', 'tab', 'severity', 'issue_type', 'row_number', 'field', 'message', 'suggested_action']
 };
 

@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+import { read, failOrPass } from './_validation-utils.mjs';
+const failures = [];
+const helper = read('functions/_shared/googlePrivateKey.ts', failures);
+const sheets = read('functions/_shared/sheets.ts', failures);
+const speech = read('functions/_shared/googleSpeech.ts', failures);
+const tests = read('tests/e2e/google-private-key-contract.spec.ts', failures);
+const envDocs = read('ENVIRONMENT_VARIABLES.md') + '\n' + read('_env_contract.json') + '\n' + read('.env.example') + '\n' + read('.env.local.example') + '\n' + read('docs/security/GOOGLE_PRIVATE_KEY_FORMATS.md');
+if (!/GOOGLE_PRIVATE_KEY_INVALID_FORMAT/.test(helper)) failures.push('googlePrivateKey helper must export GOOGLE_PRIVATE_KEY_INVALID_FORMAT.');
+if (!/normalizeGooglePrivateKey/.test(helper)) failures.push('googlePrivateKey helper must normalize Google private keys.');
+if (!/service account JSON[\s\S]+private_key/i.test(helper)) failures.push('helper must accept service account JSON private_key.');
+if (!/replace\(\/\\\\n\/g, '\\n'\)/.test(helper) && !/replace\(\/\\\\n\/g/.test(helper)) failures.push('helper must normalize escaped newline PEM values.');
+if (!/isGooglePrivateKeyFormatError/.test(sheets) || !/GOOGLE_PRIVATE_KEY_INVALID_FORMAT/.test(sheets)) failures.push('sheetsUnavailable must map malformed Google private keys to a controlled error_code.');
+if (!/signGoogleServiceAccountJwt/.test(sheets)) failures.push('sheets.ts must use shared signGoogleServiceAccountJwt helper.');
+if (!/signGoogleServiceAccountJwt/.test(speech)) failures.push('googleSpeech.ts must use shared signGoogleServiceAccountJwt helper.');
+if (/atob\(normalized\)|importPrivateKey\(pem/.test(sheets + speech)) failures.push('Sheets/Speech must not contain duplicate raw atob private-key import code.');
+for (const phrase of ['escaped-newline','service-account JSON','public key','malformed']) if (!new RegExp(phrase, 'i').test(tests)) failures.push(`Google private-key tests must cover ${phrase}.`);
+if (!/GOOGLE_PRIVATE_KEY/.test(envDocs)) failures.push('Env docs/examples must include GOOGLE_PRIVATE_KEY.');
+if (/atob\(\) called with invalid base64/i.test(helper + sheets + speech)) failures.push('Repo must not encode raw atob runtime error text as operator-facing behavior.');
+failOrPass('validate-google-private-key-contract', failures);

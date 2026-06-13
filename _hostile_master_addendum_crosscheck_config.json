@@ -26,7 +26,18 @@
     "tests/e2e/public-event-and-pitchlab.spec.ts",
     "tests/e2e/provider-failure-auth-mobile-edge.spec.ts",
     "tests/e2e/live-gmail-trigger-ingestion.spec.ts",
-    "tests/e2e/network-os.live.spec.ts"
+    "tests/e2e/network-os.live.spec.ts",
+    "REAL_PROVIDER_LANE_MATRIX.md",
+    "USER_JOURNEY_TEST_MATRIX.md",
+    "TESTING_SEQUENCE.md",
+    "POSTDEPLOY_REAL_PROVIDER_RUNBOOK.md",
+    "SECURITY_MODEL.md",
+    "LIVE_PROVIDER_EVIDENCE_TEMPLATE.md",
+    "SECRET_EXCEPTION_LEDGER.md",
+    "functions/api/gmail/sync.ts",
+    "functions/api/provider/status.ts",
+    "functions/_middleware.ts",
+    "scripts/validate-provider-lanes.mjs"
   ],
   "expectedScripts": [
     "validate:everything",
@@ -41,7 +52,11 @@
     "env:restore",
     "env:remove",
     "cf:secrets:sync",
-    "cf:secrets:audit"
+    "cf:secrets:audit",
+    "validate:provider-lanes",
+    "test:e2e:public-pitchlab-real",
+    "test:e2e:maxdepth-headed",
+    "test:e2e:local-functions-headed"
   ],
   "requiredTokens": [
     [
@@ -83,6 +98,38 @@
     [
       "tests/e2e/live-gmail-trigger-ingestion.spec.ts",
       "LIVE_GMAIL_TRIGGER_E2E"
+    ],
+    [
+      "REAL_PROVIDER_LANE_MATRIX.md",
+      "Gmail trigger sync"
+    ],
+    [
+      "REAL_PROVIDER_LANE_MATRIX.md",
+      "Pitch Lab"
+    ],
+    [
+      "USER_JOURNEY_TEST_MATRIX.md",
+      "Sync Gmail triggers"
+    ],
+    [
+      "TESTING_SEQUENCE.md",
+      "PREDEPLOY"
+    ],
+    [
+      "POSTDEPLOY_REAL_PROVIDER_RUNBOOK.md",
+      "operator seed messages"
+    ],
+    [
+      "SECURITY_MODEL.md",
+      "Header spoofing"
+    ],
+    [
+      "functions/api/gmail/sync.ts",
+      "gmail.googleapis.com/gmail/v1/users/me/messages"
+    ],
+    [
+      "tests/e2e/public-event-and-pitchlab.spec.ts",
+      "x-pitch-lab-signature"
     ]
   ]
 }

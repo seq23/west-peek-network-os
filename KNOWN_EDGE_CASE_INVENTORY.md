@@ -37,3 +37,18 @@ Date: 2026-06-11
 |---|---|---|
 | Unauthenticated API call | 401/403/503 controlled JSON, no raw provider crash. | `provider-failure-auth-mobile-edge.spec.ts` |
 | Expired/revoked session | Safe denial, no private data. | `provider-failure-auth-mobile-edge.spec.ts` |
+
+## 2026-06-11 Real Provider Edge Cases
+
+- Gmail OAuth token exists but access token is expired; sync must refresh with refresh token or return reconnect-required.
+- Gmail seed message already imported; sync must skip duplicate `gmail_message_id`.
+- Gmail search returns messages without readable text body; sync must not crash.
+- Gmail trigger appears in subject only; sync must still detect.
+- Gmail trigger has only minimal text; intake row must preserve missing fields for human review.
+- Pitch Lab request has valid signature but stale timestamp; reject.
+- Pitch Lab request reuses exact signature; reject with replay guard.
+- Pitch Lab request uses old `x-west-peek-signature`; reject.
+- Pitch Lab profile lead includes pitch answers; reject privacy leak.
+- App shell requested without session cookie; redirect to OAuth instead of rendering private Settings.
+- Session request includes `x-west-peek-user-email`; production must not authenticate from header.
+- Secret scanner sees a committed password/passphrase literal; hard fail.

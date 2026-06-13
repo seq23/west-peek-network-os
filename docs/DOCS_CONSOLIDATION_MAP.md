@@ -55,4 +55,47 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `docs/secrets-and-cloudflare.md` | ACTIVE_VALIDATOR_REFERENCED | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/security-model.md` | ARCHIVED | Moved to docs/archive/superseded/docs__security-model.md | docs/ACTIVE_DOCS.md / active runbooks / root ledgers |
 | `docs/west-peek-routing-aside.md` | ARCHIVED | Moved to docs/archive/superseded/docs__west-peek-routing-aside.md | docs/ACTIVE_DOCS.md / active runbooks / root ledgers |
+| `LIVE_PROVIDER_EVIDENCE_TEMPLATE.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
+| `POSTDEPLOY_REAL_PROVIDER_RUNBOOK.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
+| `REAL_PROVIDER_LANE_MATRIX.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
+| `SECRET_EXCEPTION_LEDGER.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
+| `SECURITY_MODEL.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
+| `TESTING_SEQUENCE.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
+| `TIER_VALIDATION_MODEL.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
+| `USER_JOURNEY_TEST_MATRIX.md` | ACTIVE | Current active provider-proof/security/testing authority. | None |
+| `CHANGED_FILES_2026-06-11.md` | ACTIVE | Current delivery summary/proof report for this release. | None |
+| `VALIDATION_RUN_SUMMARY_2026-06-11.md` | ACTIVE | Current delivery summary/proof report for this release. | None |
 | `VALIDATOR_ADMISSION_REGISTER.md` | ACTIVE | Validator admission authority and operator register. | None |
+| `FINAL_TIER_PATCH_SUMMARY_2026-06-11.md` | ACTIVE | Final tier / master addendum compliance, testing, provider proof, or delivery summary artifact. | None |
+| `MASTER_ADDENDUM_COMPLIANCE_LEDGER.md` | ACTIVE | Final tier / master addendum compliance, testing, provider proof, or delivery summary artifact. | None |
+| `RUNTIME_CONTEXT_TRACE_MATRIX.md` | ACTIVE | Final tier / master addendum compliance, testing, provider proof, or delivery summary artifact. | None |
+
+## Final-tier release/test docs
+
+| Document | Status | Purpose |
+|---|---|---|
+| `TERMINAL_RELEASE_RUNBOOK.md` | ACTIVE | Terminal release/update/deploy/postdeploy/provider-proof runbook. |
+| `docs/evidence/GMAIL_SEED_MESSAGE_GUIDE.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/evidence/REPORT_SCHEMA.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/evidence/TIER_4_EVIDENCE_REQUIREMENTS.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/operations/DEPLOYMENT_AND_POSTDEPLOY_RUNBOOK.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/operations/LOCAL_UPDATER_RUNBOOK.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/operations/RELEASE_RUNBOOK.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/operations/TIER_4_OPERATOR_RUNBOOK.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/operations/TROUBLESHOOTING.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/providers/AI_OCR_VOICE_PROVIDER_RULES.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/providers/GOOGLE_OAUTH_AND_GMAIL.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/providers/GOOGLE_SHEETS_PERSISTENCE.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/providers/PITCHLAB_HANDOFF.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/providers/PROVIDER_FAILURE_HANDLING.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/security/AUTH_AND_SESSION_BOUNDARIES.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/security/GOOGLE_PRIVATE_KEY_FORMATS.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/security/SECRET_AND_ENV_POLICY.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/validation/POSTDEPLOY_VALIDATION.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/validation/PREDEPLOY_VALIDATION.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/validation/PROOF_LAYER_DEFINITIONS.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/validation/TIER_4_ULTIMATE_LIVE_PROOF.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/validation/VALIDATION_COMMANDS.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+| `docs/validation/VALIDATION_OVERVIEW.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |
+
+| `docs/validation/VALIDATOR_SIMPLIFICATION.md` | ACTIVE | Current Tier 4 / validation / provider / operator documentation. | None |

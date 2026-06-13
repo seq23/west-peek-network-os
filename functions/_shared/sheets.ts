@@ -1,4 +1,5 @@
 import { json } from './json';
+import { GOOGLE_PRIVATE_KEY_INVALID_FORMAT, isGooglePrivateKeyFormatError, signGoogleServiceAccountJwt } from './googlePrivateKey';
 
 export interface RuntimeEnv {
   GOOGLE_SHEET_ID?: string;
@@ -15,7 +16,8 @@ export const TAB_HEADERS = {
   relationship_touches: ['touch_id', 'created_at', 'updated_at', 'contact_id', 'contact_email', 'recipient_name', 'recipient_email', 'company', 'owner', 'reason', 'priority', 'due_date', 'status', 'method', 'card_type', 'card_title', 'draft_message', 'email_subject', 'email_body', 'approval_required', 'execution_allowed', 'internal_data_trace', 'created_by', 'updated_by', 'fulfillment_mode', 'fulfillment_status', 'vendor_name', 'vendor_url', 'vendor_fit', 'vendor_note', 'external_order_id', 'sent_at', 'fulfillment_notes'],
   oauth_tokens: ['token_id', 'created_at', 'updated_at', 'provider', 'user_email', 'scope', 'token_type', 'expires_in', 'encrypted_payload', 'encryption_iv', 'encryption_algorithm', 'status'],
   events: ['event_id', 'created_at', 'updated_at', 'event_name', 'event_slug', 'event_date', 'location', 'owner_email', 'status', 'notes', 'public_form_enabled', 'public_form_url'],
-  event_attendees: ['event_attendee_id', 'event_id', 'event_name', 'event_slug', 'created_at', 'updated_at', 'public_name', 'public_email', 'public_company', 'public_title', 'public_phone', 'public_linkedin', 'public_interest', 'private_context', 'private_voice_transcript', 'ai_summary', 'review_status', 'confidence', 'missing_fields', 'source_type', 'created_by', 'source_intake_id', 'consent_follow_up']
+  event_attendees: ['event_attendee_id', 'event_id', 'event_name', 'event_slug', 'created_at', 'updated_at', 'public_name', 'public_email', 'public_company', 'public_title', 'public_phone', 'public_linkedin', 'public_interest', 'private_context', 'private_voice_transcript', 'ai_summary', 'review_status', 'confidence', 'missing_fields', 'source_type', 'created_by', 'source_intake_id', 'consent_follow_up'],
+  provider_replay_guard: ['replay_id', 'created_at', 'provider', 'signature_hash', 'submitted_at', 'source_ip', 'status']
 } as const;
 
 export type SheetTab = keyof typeof TAB_HEADERS;
@@ -96,6 +98,15 @@ async function ensureTabHeaders(env: RuntimeEnv, token: string, tab: SheetTab) {
 }
 
 export function sheetsUnavailable(error: unknown) {
+  if (isGooglePrivateKeyFormatError(error)) {
+    return json({
+      ok: false,
+      error_code: GOOGLE_PRIVATE_KEY_INVALID_FORMAT,
+      error: 'Google private key could not be parsed. Re-sync GOOGLE_PRIVATE_KEY from the service account JSON private_key field.',
+      setup_required: true
+    }, { status: 503 });
+  }
+
   const detail = error instanceof Error ? error.message : 'Google Sheets persistence unavailable.';
   const status = detail.includes('429') || detail.includes('RATE_LIMIT') || detail.includes('RESOURCE_EXHAUSTED') ? 429 : 503;
   return json({ ok: false, error: detail, retry_hint: status === 429 ? 'Google Sheets quota is temporarily exhausted. Wait about 60 seconds before retrying.' : undefined }, { status });
@@ -116,7 +127,7 @@ async function getServiceAccountToken(env: RuntimeEnv): Promise<string> {
     exp: now + 3600,
     iat: now
   };
-  const jwt = await signJwt(claim, env.GOOGLE_PRIVATE_KEY || '');
+  const jwt = await signGoogleServiceAccountJwt(claim, env.GOOGLE_PRIVATE_KEY);
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -139,34 +150,6 @@ async function sheetsFetch(env: RuntimeEnv, token: string, path: string, init: R
 function rowsToObjects(values: string[][]) {
   const [header = [], ...rows] = values;
   return rows.map((row: string[]) => Object.fromEntries(header.map((key: string, index: number) => [key, row[index] || ''])));
-}
-
-async function signJwt(claim: Record<string, unknown>, pem: string): Promise<string> {
-  const header = { alg: 'RS256', typ: 'JWT' };
-  const encodedHeader = base64Url(JSON.stringify(header));
-  const encodedClaim = base64Url(JSON.stringify(claim));
-  const data = new TextEncoder().encode(`${encodedHeader}.${encodedClaim}`);
-  const key = await importPrivateKey(pem);
-  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, data);
-  return `${encodedHeader}.${encodedClaim}.${base64UrlBytes(new Uint8Array(signature))}`;
-}
-
-async function importPrivateKey(pem: string) {
-  const beginMarker = '-----BEGIN ' + 'PRIVATE KEY-----';
-  const endMarker = '-----END ' + 'PRIVATE KEY-----';
-  const normalized = pem.replace(/\\n/g, '\n').replace(beginMarker, '').replace(endMarker, '').replace(/\s+/g, '');
-  const binary = Uint8Array.from(atob(normalized), (char) => char.charCodeAt(0));
-  return crypto.subtle.importKey('pkcs8', binary, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
-}
-
-function base64Url(input: string) {
-  return base64UrlBytes(new TextEncoder().encode(input));
-}
-
-function base64UrlBytes(input: Uint8Array) {
-  let binary = '';
-  for (const byte of input) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 function serializeCell(value: unknown): string {

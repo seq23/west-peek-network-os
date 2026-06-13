@@ -52,7 +52,7 @@ Primary app: `https://network.joinwestpeek.com`.
 
 Internal Team area: `https://joinwestpeek.com/team`.
 
-Team area access: simple West Peek-branded shared password gate. Password: `3021WPeek`. Any person with the Team password can access the Team area and use the links/tools placed behind it.
+Team area access: simple West Peek-branded shared password gate. Password: stored only in owner password manager; not committed to this repo.. Any person with the Team password can access the Team area and use the links/tools placed behind it.
 
 Initial Team tools:
 
@@ -69,7 +69,7 @@ Do not add Venture Deals Calculator to the public venture nav by default.
 
 Founder Dilution Dashboard should be added to public venture nav. URL: `https://dilution.joinwestpeek.com`. Recommended nav label: Founder Dilution Dashboard. Short/mobile label: Dilution Dashboard.
 
-End-of-build routing/nav aside: create private Team area on joinwestpeek.com; Team area uses password 3021WPeek; add Network OS link; add Venture Deals Calculator link; do not add Network OS or Venture Deals Calculator to public venture nav by default; add Dilution Dashboard to public ventures nav.
+End-of-build routing/nav aside: create private Team area on joinwestpeek.com; Team area uses password stored in owner password manager; add Network OS link; add Venture Deals Calculator link; do not add Network OS or Venture Deals Calculator to public venture nav by default; add Dilution Dashboard to public ventures nav.
 
 ## 8. Users and identity model
 
@@ -342,7 +342,7 @@ Decision: local/operator setup uses one encrypted secrets bundle committed to th
 
 Encrypted file: `secrets/network-os.local.env.gpg`.
 
-Password: `3021WPeek`.
+Password: stored only in owner password manager; not committed to this repo..
 
 The repo includes decrypt script: `scripts/secrets/decrypt-local-env.sh`.
 

@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+import { removeGeneratedArtifacts, runRequired } from './_validation-utils.mjs';
+removeGeneratedArtifacts();
+await runRequired('npm run validate:no-generated-artifacts');
+await runRequired('npm run validate:artifact-manifest-current');
+await runRequired('npm run typecheck');
+await runRequired('npm run validate:all');
+await runRequired('npm run test:e2e:google-private-key-contract');
+await runRequired('npm run validate:google-private-key-contract');
+await runRequired('npm run validate:no-raw-atob-errors');
+await runRequired('npm run validate:oauth-connect-contract');
+await runRequired('npm run validate:provider-error-contract');
+await runRequired('npm run validate:tier4-live-proof-contract');
+await runRequired('npm run validate:tier4-lane-registry');
+await runRequired('npm run validate:tier4-report-schema');
+await runRequired('npm run validate:docs-match-package-scripts');
+await runRequired('npm run validate:repo-matrix-consistency');
+await runRequired('npm run validate:no-localhost-defaults');
+await runRequired('npm run validate:tier-docs-current');
+await runRequired('npm run validate:tier4-docs-complete');
+await runRequired('npm run validate:validator-admission');
+await runRequired('npm run validate:docs-consolidation');
+await runRequired('npm run validate:e2e-coverage');
+await runRequired('npm run validate:final-tier-contract');
+await runRequired('npm run tier4:dry-run-blocked');
+removeGeneratedArtifacts();
+await runRequired('npm run validate:no-generated-artifacts');
+console.log('validate:predeploy:full: PASS');

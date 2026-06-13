@@ -40,7 +40,7 @@ for (const fragment of [
   'fetchSheetSnapshot',
   'Capture to Intake Queue',
   'Added to Google Sheets',
-  'Open live spreadsheet',
+  'live spreadsheet link is intentionally kept in operator docs',
     'EventsPage',
   'public form link',
   'updateSheetTouchFulfillment',

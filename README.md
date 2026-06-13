@@ -1,64 +1,26 @@
 # West Peek Network OS
 
-Private internal relationship intelligence app for adding people to the **West Peek Network**.
+Private relationship intelligence, Gmail-trigger intake, Google Sheets persistence, public event intake, Pitch Lab handoff, and review-only AI/OCR/voice assistance.
 
-## Locked identity
-
-- Repo: `west-peek-network-os`
-- App URL: `https://network.joinwestpeek.com`
-- Internal Team launchpad: `https://joinwestpeek.com/team`
-- Team password: `3021WPeek`
-- Team tools: Network OS and Venture Deals Calculator
-- Venture Deals Calculator URL: `https://venturedeals.joinwestpeek.com`
-- Public venture nav tool: `https://dilution.joinwestpeek.com`
-- Initial users: `sequoia@westpeek.ventures`, `scooter@westpeek.ventures`
-
-## Product language
-
-Use **Add to West Peek Network**. Avoid front-facing language like “add to CRM,” “add to database,” or “add lead.”
-
-## Canonical Gmail trigger
-
-Primary trigger: `#wpnetwork`
-
-Accepted aliases:
-
-- `#addtowestpeek`
-- `#westpeeknetwork`
-
-Trigger emails create Intake Queue records first. They do not create final contacts until human review.
-
-## Local operator flow
-
-```bash
-./scripts/secrets/decrypt-local-env.sh
-./scripts/secrets/check-secrets.sh
-npm run dev
-```
-
-Use the approved West Peek vault passphrase for the encrypted secrets bundle. The vault passphrase value is not embedded in repo scripts or docs.
-
-## Cloudflare secret push
-
-```bash
-./scripts/secrets/decrypt-local-env.sh
-./scripts/secrets/check-secrets.sh
-./scripts/secrets/push-cloudflare-secrets.sh
-```
-
-One-time manual steps still include Wrangler login, Pages project/repo connection if missing, custom domain setup, and Google OAuth redirect URL configuration.
-
-## Validation
-
-```bash
-npm run validate:all
-NODE_OPTIONS="--max-old-space-size=3072" npm run build 2>&1 | tee logs/build.log
-npm run test:e2e
-```
-
-This baseline artifact is structurally checked by default. External provider execution requires configured secrets and provider setup.
+## Validation command map
 
 
-## Phase 7 Pitch Lab handoff
+- `npm run validate:predeploy:full` — source/static/build/contract/docs hygiene and Tier 4-ready dry-run proof.
+- `npm run validate:postdeploy:strict` — Tier 3 deployed smoke/safety check with explicit deployed URL.
+- `npm run tier4:ultimate-live-proof` — Tier 4 postdeploy live provider + data proof.
+- `npm run release:proof` — wrapper that runs predeploy, then postdeploy if a deployed URL is provided, then Tier 4 only when `TIER4_ULTIMATE_LIVE_PROOF=1` is set.
 
-Added signed `/api/intake/pitch-lab` receiver. It creates pending intake rows only and never auto-creates contacts. See `docs/PITCH_LAB_HANDOFF_CONTRACT.md`.
+
+Tier 4 is postdeploy only. Predeploy proves the repo is Tier 4-ready; it does not prove live Gmail/OAuth/Sheets success.
+
+See `docs/validation/VALIDATION_COMMANDS.md` and `docs/operations/TIER_4_OPERATOR_RUNBOOK.md`.
+
+## Validation simplification
+
+Use bundled gates, not one-off validator whack-a-mole:
+
+- Predeploy: `npm run validate:predeploy:full`
+- Postdeploy: `POSTDEPLOY_BASE_URL=<url> PLAYWRIGHT_BASE_URL=<url> SMOKE_BASE_URL=<url> npm run validate:postdeploy:strict`
+- Tier 4: `POSTDEPLOY_BASE_URL=<url> PLAYWRIGHT_BASE_URL=<url> SMOKE_BASE_URL=<url> TIER4_ULTIMATE_LIVE_PROOF=1 WEST_PEEK_E2E_RUN_ID="wpno-tier4-$(date +%Y%m%d%H%M%S)" npm run tier4:ultimate-live-proof`
+
+Legacy exact-token hostile-audit validation is archived and does not block release.

@@ -11,6 +11,7 @@ export default defineConfig({
     trace: 'on',
     screenshot: 'only-on-failure',
     video: process.env.PLAYWRIGHT_VIDEO === '1' ? 'retain-on-failure' : 'off',
+    storageState: process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE || undefined,
     launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
       ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] }
       : undefined

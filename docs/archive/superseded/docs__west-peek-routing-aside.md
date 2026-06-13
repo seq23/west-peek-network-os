@@ -5,7 +5,7 @@
 Internal Team area:
 
 - `https://joinwestpeek.com/team`
-- shared password: `3021WPeek`
+- shared password: `stored in owner password manager`
 
 Inside Team:
 
