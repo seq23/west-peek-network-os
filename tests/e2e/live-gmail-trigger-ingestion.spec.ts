@@ -32,8 +32,15 @@ test.describe('LIVE Gmail trigger ingestion proof — real provider lane', () =>
 
     await page.reload();
     await page.getByRole('navigation', { name: /Primary/i }).getByRole('button', { name: /^Intake Queue$/i }).click();
-    await expect(page.getByRole('main')).toContainText(new RegExp(runId!, 'i'));
-    await expect(page.getByRole('main')).toContainText(/#wpnetwork|#wpdealflow|#dealflow|pending_human_review|human review/i);
-    await expect(page.getByRole('main')).not.toContainText(/email sent|intro sent|executed automatically|execution_allowed[^\n]+true/i);
+    const currentRunGmailCard = page
+      .locator('article[data-testid^="intake-"]')
+      .filter({ hasText: new RegExp(runId!, 'i') })
+      .filter({ hasText: /Gmail Trigger/i })
+      .first();
+
+    await expect(currentRunGmailCard).toBeVisible();
+    await expect(currentRunGmailCard).toContainText(new RegExp(runId!, 'i'));
+    await expect(currentRunGmailCard).toContainText(/#wpnetwork|#wpdealflow|#dealflow|pending_human_review|human review/i);
+    await expect(currentRunGmailCard).not.toContainText(/email sent|intro sent|executed automatically|execution_allowed[^\n]+true/i);
   });
 });
