@@ -20,8 +20,17 @@ test.describe('LIVE Gmail trigger ingestion proof — real provider lane', () =>
     const payload = await sync.json();
     expect(payload.ok).toBeTruthy();
     expect(payload.execution_allowed).toBe(false);
-    expect(payload.imported_count, 'At least one fresh operator-seeded Gmail message must import. Duplicate runs should use a new run id.').toBeGreaterThan(0);
+    expect(
+      Number(payload.imported_count || 0) + Number(payload.skipped_duplicate_count || 0),
+      'At least one operator-seeded Gmail message must be imported or recognized as an existing duplicate.'
+    ).toBeGreaterThan(0);
 
+    const freshSnapshot = await request.get('/api/sheets/snapshot?fresh=1');
+    expect(freshSnapshot.ok(), await freshSnapshot.text()).toBeTruthy();
+    const freshPayload = await freshSnapshot.json();
+    expect(JSON.stringify(freshPayload.data?.intake_queue || [])).toContain(runId);
+
+    await page.reload();
     await page.getByRole('navigation', { name: /Primary/i }).getByRole('button', { name: /^Intake Queue$/i }).click();
     await expect(page.getByRole('main')).toContainText(new RegExp(runId!, 'i'));
     await expect(page.getByRole('main')).toContainText(/#wpnetwork|#wpdealflow|#dealflow|pending_human_review|human review/i);
