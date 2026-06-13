@@ -11,7 +11,7 @@ Preserve the Google-authenticated Playwright storage state outside the repositor
 - Encrypted external vault: `~/AI_AUTH_VAULTS/west-peek-network-os/playwright-storage-state.json.gpg`
 - Disposable repo-local state: `.auth/playwright-storage-state.json`
 
-Both paths may be overridden with `AUTH_STATE_VAULT_PATH` and `AUTH_STATE_LOCAL_PATH`.
+Both paths may be overridden with `AUTH_STATE_VAULT_PATH` and `AUTH_STATE_LOCAL_PATH`. The production cookie-domain validator defaults to `network.joinwestpeek.com` and may be overridden with `AUTH_STATE_EXPECTED_DOMAIN` only when the canonical production domain intentionally changes.
 
 ## Commands
 
@@ -27,7 +27,7 @@ Both paths may be overridden with `AUTH_STATE_VAULT_PATH` and `AUTH_STATE_LOCAL_
 
 Run `npm run auth:capture`. Complete Google sign-in in the Playwright browser, wait for the authenticated dashboard, and close the browser. Then run `npm run auth:backup` to create the external encrypted canonical copy.
 
-The capture command defaults to `https://west-peek-network-os.pages.dev`. Override only with an explicit deployed HTTPS URL using `AUTH_CAPTURE_URL`.
+The capture command defaults to `https://network.joinwestpeek.com`. Override only with an explicit deployed HTTPS URL using `AUTH_CAPTURE_URL`.
 
 ## Security laws
 
@@ -45,6 +45,11 @@ The capture command defaults to `https://west-peek-network-os.pages.dev`. Overri
 
 `~/run_hallmark_audit.sh <repo> --base-url <url> --storage-state .auth/playwright-storage-state.json`
 
-Default URL: `https://west-peek-network-os.pages.dev`.
+Default URL: `https://network.joinwestpeek.com`.
 Override with `HALLMARK_BASE_URL`.
 Additional Hallmark runner arguments may be appended after `--`, for example targeted `--route` options. The wrapper blocks if the installed Hallmark runner does not advertise `--storage-state` support.
+
+
+## Canonical host law
+
+Production OAuth-backed capture, authenticated Hallmark, and Tier 4 default to `https://network.joinwestpeek.com` because the OAuth redirect URI and state cookie must share the same host. The `pages.dev` URL may be used for anonymous deployment smoke, but not as the default origin for production OAuth capture.

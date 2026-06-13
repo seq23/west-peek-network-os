@@ -5,7 +5,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/common.sh"
 require_command node
 require_command npx
 
-AUTH_CAPTURE_URL="${AUTH_CAPTURE_URL:-https://west-peek-network-os.pages.dev}"
+AUTH_CAPTURE_URL="${AUTH_CAPTURE_URL:-https://network.joinwestpeek.com}"
 AUTH_CAPTURE_OVERWRITE="${AUTH_CAPTURE_OVERWRITE:-0}"
 
 case "$AUTH_CAPTURE_URL" in
