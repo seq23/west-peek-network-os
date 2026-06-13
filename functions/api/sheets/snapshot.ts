@@ -32,7 +32,7 @@ export async function onRequestGet({ request, env }: Context) {
 
     // One batchGet request replaces eight tab reads and avoids per-tab header reads.
     const raw = await batchReadTabs(env, TABS);
-    const data = Object.fromEntries(TABS.map((tab) => [tab, latestById(raw[tab] || [], IDS[tab])]));
+    const data = Object.fromEntries(TABS.map((tab) => [tab, latestById(raw[tab] || [], IDS[tab]).filter((row) => String(row.proof_status || '') !== 'proof_cleaned')]));
     const payload = { ok: true, persistence: 'google_sheets', source: 'google_sheets_batch', freshness_requested: forceFresh, cache_age_ms: 0, refreshed_at: new Date().toISOString(), user_email: user.email, data };
     snapshotCache = { userEmail: user.email, payload, expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS };
     return json(payload, { headers: { 'cache-control': 'private, no-store, max-age=0' } });

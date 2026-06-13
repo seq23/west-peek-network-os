@@ -12,7 +12,7 @@ const required = [
   'functions/api/intake/review.ts', 'functions/api/sheets/snapshot.ts',
   'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx',
   'functions/_shared/googleSpeech.ts',
-  'functions/_shared/media.ts', 'functions/api/intake/media/create.ts', 'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx', 'functions/_shared/anthropic.ts', 'functions/_shared/googleSpeech.ts', 'functions/_shared/media.ts', 'functions/_shared/sheets.ts'
+  'functions/_shared/media.ts', 'functions/api/intake/media/create.ts', 'functions/api/touches/thank-you/create.ts', 'functions/api/touches/fulfillment/update.ts', 'functions/api/events/create.ts', 'functions/api/events/context/create.ts', 'functions/e/[slug].ts', 'src/ui/Events.tsx', 'functions/_shared/anthropic.ts', 'functions/_shared/googleSpeech.ts', 'functions/_shared/media.ts', 'functions/_shared/sheets.ts', 'functions/api/proof-fixtures/cleanup.ts', 'scripts/auth-state/cleanup-tier4.sh', 'scripts/testing/fixtures/cleanup-live-tier4.mjs', 'TIER4_PROOF_FIXTURE_CLEANUP.md'
 ];
 const missing = required.filter((file) => !fs.existsSync(path.join(root, file)));
 if (missing.length) {

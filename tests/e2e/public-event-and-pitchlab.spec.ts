@@ -3,12 +3,13 @@ import { expect, test } from '@playwright/test';
 
 const deployedOnly = () => Boolean(process.env.PLAYWRIGHT_DEPLOYED === '1' || process.env.PLAYWRIGHT_BASE_URL?.startsWith('https://'));
 
-function pitchLabHeaders(body: string, secret: string, submittedAt = new Date().toISOString()) {
+function pitchLabHeaders(body: string, secret: string, submittedAt = new Date().toISOString(), runId = process.env.WEST_PEEK_E2E_RUN_ID || '') {
   const signature = crypto.createHmac('sha256', secret).update(`${submittedAt}.${body}`).digest('base64url');
   return {
     'content-type': 'application/json',
     'x-pitch-lab-submitted-at': submittedAt,
-    'x-pitch-lab-signature': signature
+    'x-pitch-lab-signature': signature,
+    ...(runId ? { 'x-west-peek-proof-run-id': runId } : {})
   };
 }
 
@@ -73,7 +74,7 @@ test.describe('public event and Pitch Lab intake critical lanes', () => {
     test.skip(!deployedOnly(), 'Signed Pitch Lab handoff requires deployed Functions runtime and configured shared secret.');
     const secret = process.env.PITCH_LAB_SHARED_SECRET;
     test.skip(!secret, 'PITCH_LAB_SHARED_SECRET is required for deployed signature proof.');
-    const runId = `${Date.now()}`;
+    const runId = process.env.WEST_PEEK_E2E_RUN_ID || `wpno-tier4-${Date.now()}`;
 
     const profileBody = JSON.stringify(profilePayload(runId));
     const bad = await request.post('/api/intake/pitch-lab-profile', { data: profileBody, headers: { 'content-type': 'application/json', 'x-pitch-lab-submitted-at': new Date().toISOString(), 'x-pitch-lab-signature': 'bad-signature' } });

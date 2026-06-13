@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "West Peek Network OS — private internal relationship intelligence app for adding people to the West Peek Network.",
+  "description": "West Peek Network OS \u2014 private internal relationship intelligence app for adding people to the West Peek Network.",
   "scripts": {
     "build": "tsc -b && vite build",
     "cf:secrets:audit": "node scripts/cloudflare-secret-audit.mjs",
@@ -31,7 +31,7 @@
     "test:pitchlab-profile-lead": "node tests/domain/pitch-lab-profile-lead.mjs",
     "typecheck": "tsc --noEmit",
     "validate:9c": "npm run test:pitchlab-handoff",
-    "validate:all": "npm run validate:structure && npm run validate:provider-lanes && npm run validate:secrets && npm run validate:google-private-key-contract && npm run validate:no-raw-atob-errors && npm run validate:oauth-connect-contract && npm run validate:provider-error-contract && npm run validate:tier4-live-proof-contract && npm run validate:tier4-lane-registry && npm run validate:tier4-report-schema && npm run validate:docs-match-package-scripts && npm run validate:repo-matrix-consistency && npm run validate:tier-docs-current && npm run validate:tier4-docs-complete && npm run test:domain && npm run test:pitchlab-handoff && npm run test:pitchlab-profile-lead && npm run test:event-database-intake && npm run build && npm run validate:playwright:maxdepth",
+    "validate:all": "npm run validate:structure && npm run validate:provider-lanes && npm run validate:secrets && npm run validate:google-private-key-contract && npm run validate:no-raw-atob-errors && npm run validate:oauth-connect-contract && npm run validate:provider-error-contract && npm run validate:tier4-live-proof-contract && npm run validate:tier4-lane-registry && npm run validate:tier4-report-schema && npm run validate:tier4-cleanup-contract && npm run validate:docs-match-package-scripts && npm run validate:repo-matrix-consistency && npm run validate:tier-docs-current && npm run validate:tier4-docs-complete && npm run test:domain && npm run test:pitchlab-handoff && npm run test:pitchlab-profile-lead && npm run test:event-database-intake && npm run build && npm run validate:playwright:maxdepth",
     "validate:docs-consolidation": "node scripts/validate-docs-consolidation.mjs",
     "validate:e2e-coverage": "node scripts/validate-e2e-coverage-matrix.mjs",
     "validate:env": "node scripts/validate-env.mjs",
@@ -130,7 +130,10 @@
     "tier4:authenticated": "bash scripts/auth-state/run-tier4.sh",
     "hallmark:authenticated": "bash scripts/auth-state/run-hallmark.sh",
     "validate:auth-state-vault": "node scripts/validate-auth-state-vault-contract.mjs",
-    "auth:capture": "bash scripts/auth-state/capture.sh"
+    "auth:capture": "bash scripts/auth-state/capture.sh",
+    "tier4:cleanup:preview": "TIER4_CLEANUP_DRY_RUN=1 bash scripts/auth-state/cleanup-tier4.sh",
+    "tier4:cleanup": "bash scripts/auth-state/cleanup-tier4.sh",
+    "validate:tier4-cleanup-contract": "node scripts/validate-tier4-cleanup-contract.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

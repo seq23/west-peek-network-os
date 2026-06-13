@@ -86,3 +86,38 @@ This baseline adds external encrypted authenticated-state backup/restore plus sh
 - Extended the auth-state contract validator so backup/restore cannot be considered complete without a first-run capture path.
 - Verified synthetic Playwright capture, overwrite refusal, session/domain/expiration validation, atomic install, file mode `0600`, shell syntax, TypeScript, vault contract, and package/documentation parity.
 - The real Google OAuth interaction remains local operator proof.
+
+## Tier 4 production fixture cleanup lifecycle
+
+- Added authenticated guarded production cleanup endpoint: `functions/api/proof-fixtures/cleanup.ts`.
+- Added `npm run tier4:cleanup:preview -- <run-id>` and `npm run tier4:cleanup -- <run-id>`.
+- Added proof lifecycle columns to canonical Google Sheets schemas.
+- Cleanup is exact-run, append-only, soft-terminal, and fresh-readback verified.
+- Cleaned proof fixtures are excluded from application snapshots.
+- Carried forward the deployed stale-browser-cache correction and scoped Gmail Tier 4 guardrail assertion.
+- Added `TIER4_PROOF_FIXTURE_CLEANUP.md` and an executable cleanup contract validator.
+
+Changed files:
+- `package.json`
+- `functions/_shared/sheets.ts`
+- `functions/_shared/pitchLabIntake.ts`
+- `functions/api/sheets/snapshot.ts`
+- `functions/api/proof-fixtures/cleanup.ts`
+- `src/services/sheetsClient.ts`
+- `tests/e2e/live-gmail-trigger-ingestion.spec.ts`
+- `tests/e2e/public-event-and-pitchlab.spec.ts`
+- `scripts/auth-state/cleanup-tier4.sh`
+- `scripts/testing/fixtures/cleanup-live-tier4.mjs`
+- `scripts/validate-tier4-cleanup-contract.mjs`
+- `scripts/validate-structure.mjs`
+- `TIER4_PROOF_FIXTURE_CLEANUP.md`
+
+Validation status:
+- ZIP integrity: pending packaging
+- JavaScript syntax: passed
+- Shell syntax: passed
+- TypeScript transpile syntax: passed
+- cleanup contract validator: passed
+- structure validator: passed
+- full local dependency-backed validation: required through updater
+- deployed cleanup behavior: required after updater deployment

@@ -152,7 +152,11 @@ export async function requirePitchLabSignature(request: Request, env: PitchLabIn
       signature_hash: signatureHash,
       submitted_at: submittedAt,
       source_ip: request.headers.get('cf-connecting-ip') || '',
-      status: 'accepted'
+      status: 'accepted',
+      proof_run_id: request.headers.get('x-west-peek-proof-run-id') || '',
+      proof_fixture: Boolean(request.headers.get('x-west-peek-proof-run-id')),
+      proof_status: request.headers.get('x-west-peek-proof-run-id') ? 'active' : '',
+      proof_created_at: request.headers.get('x-west-peek-proof-run-id') ? new Date().toISOString() : ''
     });
   } catch (error) {
     return { ok: false, response: json({ ok: false, error_code: 'REPLAY_GUARD_UNAVAILABLE', message: error instanceof Error ? error.message : 'Replay guard unavailable.' }, { status: 503 }) };
