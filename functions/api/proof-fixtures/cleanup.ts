@@ -3,7 +3,7 @@ import { json, readJson } from '../../_shared/json';
 import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
-type Body = { run_id?: string; confirm?: string; dry_run?: boolean };
+type Body = { run_id?: string; confirm?: string; dry_run?: boolean; tab?: string; limit?: number; verify_only?: boolean };
 
 const CONFIRM = 'CLEAN_TIER4_PROOF_FIXTURES';
 const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
@@ -12,6 +12,8 @@ const ID_KEYS: Partial<Record<SheetTab, string>> = {
   notifications: 'notification_id', ai_suggestions: 'suggestion_id', events: 'event_id', event_attendees: 'event_attendee_id',
   provider_replay_guard: 'replay_id'
 };
+const DEFAULT_LIMIT = 15;
+const MAX_LIMIT = 20;
 
 export async function onRequestPost({ request, env }: Context) {
   try {
@@ -21,36 +23,52 @@ export async function onRequestPost({ request, env }: Context) {
     if (!/^wpno-tier4-[A-Za-z0-9._:-]+$/.test(runId)) return json({ ok: false, error: 'A valid wpno-tier4 run_id is required.' }, { status: 400 });
     if (body.confirm !== CONFIRM) return json({ ok: false, error: `confirm must equal ${CONFIRM}.` }, { status: 400 });
 
-    const now = new Date().toISOString();
-    const matched: Record<string, number> = {};
-    const cleaned: Record<string, number> = {};
-    const ids: Record<string, string[]> = {};
+    const requestedTab = String(body.tab || '').trim();
+    if (!requestedTab || !TABS.includes(requestedTab as SheetTab)) {
+      return json({ ok: false, error: `tab must be one of: ${TABS.join(', ')}` }, { status: 400 });
+    }
+    const tab = requestedTab as SheetTab;
+    const limit = Math.min(MAX_LIMIT, Math.max(1, Number.isFinite(Number(body.limit)) ? Math.floor(Number(body.limit)) : DEFAULT_LIMIT));
+    const idKey = ID_KEYS[tab];
+    if (!idKey) return json({ ok: false, error: `No stable ID key configured for ${tab}.` }, { status: 500 });
 
-    for (const tab of TABS) {
-      const rows = await readTab(env, tab, { ensureHeaders: false });
-      const latest = latestByStableId(rows, ID_KEYS[tab] || '');
-      const candidates = latest.filter((row) => isTargetFixture(row, runId));
-      matched[tab] = candidates.length;
-      cleaned[tab] = 0;
-      ids[tab] = [];
-      for (const row of candidates) {
-        const idKey = ID_KEYS[tab];
-        if (!idKey || !row[idKey]) continue;
-        ids[tab].push(String(row[idKey]));
-        if (body.dry_run) continue;
+    const rows = await readTab(env, tab, { ensureHeaders: false });
+    const latest = latestByStableId(rows, idKey);
+    const active = latest.filter((row) => isTargetFixture(row, runId));
+    const selected = body.verify_only ? [] : active.slice(0, limit);
+    const now = new Date().toISOString();
+    const ids = selected.map((row) => String(row[idKey] || '')).filter(Boolean);
+
+    let cleaned = 0;
+    if (!body.dry_run && !body.verify_only) {
+      for (const row of selected) {
         await appendRecord(env, tab, cleanupVersion(tab, row, runId, user.email, now));
-        cleaned[tab] += 1;
+        cleaned += 1;
       }
     }
 
-    // Read back and prove no active matching fixture remains.
-    const remaining: Record<string, number> = {};
-    for (const tab of TABS) {
-      const rows = await readTab(env, tab, { ensureHeaders: false });
-      remaining[tab] = latestByStableId(rows, ID_KEYS[tab] || '').filter((row) => isTargetFixture(row, runId) && String(row.proof_status || '') !== 'proof_cleaned').length;
+    let remaining = active.length;
+    if (!body.dry_run && !body.verify_only) {
+      const readback = await readTab(env, tab, { ensureHeaders: false });
+      remaining = latestByStableId(readback, idKey).filter((row) => isTargetFixture(row, runId)).length;
     }
-    const remainingTotal = Object.values(remaining).reduce((sum, value) => sum + value, 0);
-    return json({ ok: remainingTotal === 0 || body.dry_run === true, run_id: runId, dry_run: body.dry_run === true, matched, cleaned, remaining, ids, cleanup_status: body.dry_run ? 'preview_only' : remainingTotal === 0 ? 'verified' : 'incomplete', execution_allowed: false });
+
+    return json({
+      ok: true,
+      run_id: runId,
+      tab,
+      dry_run: body.dry_run === true,
+      verify_only: body.verify_only === true,
+      matched: active.length,
+      selected: selected.length,
+      cleaned,
+      remaining,
+      has_more: remaining > 0,
+      ids,
+      limit,
+      cleanup_status: body.dry_run ? 'preview_only' : remaining === 0 ? 'verified' : 'in_progress',
+      execution_allowed: false
+    });
   } catch (error) {
     return sheetsUnavailable(error);
   }
@@ -79,7 +97,6 @@ function cleanupVersion(tab: SheetTab, row: Record<string, unknown>, runId: stri
 }
 
 function latestByStableId(rows: Array<Record<string, unknown>>, idKey: string) {
-  if (!idKey) return rows;
   const map = new Map<string, Record<string, unknown>>();
   for (const row of rows) {
     const id = String(row[idKey] || '').trim();

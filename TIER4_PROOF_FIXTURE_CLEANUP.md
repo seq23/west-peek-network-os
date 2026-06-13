@@ -49,3 +49,15 @@ TIER 4 PRODUCTION FIXTURE CLEANUP VERIFIED
 6. Run the final authenticated Hallmark capture.
 
 A new Tier 4 run creates a new run ID and requires its own cleanup. Never reuse a cleanup command with a guessed or partial ID.
+
+## Settings control
+
+Authenticated operators can use **Settings → Tier 4 test-data cleanup**. The operator must enter the exact run ID, preview matches, confirm cleanup, and wait for verified zero-remaining readback. The browser and terminal flows both use bounded per-tab batches and are safe to rerun after interruption.
+
+## Hostile-review hardening
+
+- Every mutation request is bounded to one Sheet tab and at most 15 fixture versions.
+- Both browser and terminal flows stop if a batch reports active rows but writes zero cleanup versions, preventing infinite loops.
+- Both flows perform explicit post-mutation verification requests for every canonical cleanup tab, including tabs that previewed zero records.
+- Browser success is not displayed unless the final aggregate verification reports zero active fixtures for the exact run ID.
+- Interrupted or partially completed cleanup is idempotent because latest rows already marked `proof_cleaned` are excluded from subsequent candidate sets.

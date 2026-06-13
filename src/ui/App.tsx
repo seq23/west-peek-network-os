@@ -475,6 +475,10 @@ function SettingsPanel({
   const [gmailSyncBusy, setGmailSyncBusy] = useState(false);
   const [gmailSyncStatus, setGmailSyncStatus] = useState('');
   const [refreshBusy, setRefreshBusy] = useState(false);
+  const [cleanupRunId, setCleanupRunId] = useState('');
+  const [cleanupBusy, setCleanupBusy] = useState(false);
+  const [cleanupPreview, setCleanupPreview] = useState<Record<string, number> | null>(null);
+  const [cleanupStatus, setCleanupStatus] = useState('');
 
   async function guardedSessionRefresh() {
     if (refreshBusy) return;
@@ -522,6 +526,68 @@ function SettingsPanel({
     }
   }
 
+  async function callCleanup(tab: string, dryRun: boolean, verifyOnly = false) {
+    const response = await fetch('/api/proof-fixtures/cleanup', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ run_id: cleanupRunId.trim(), confirm: 'CLEAN_TIER4_PROOF_FIXTURES', dry_run: dryRun, verify_only: verifyOnly, tab, limit: 15 })
+    });
+    const payload = await response.json() as { ok?: boolean; matched?: number; cleaned?: number; remaining?: number; error?: string };
+    if (!response.ok || !payload.ok) throw new Error(payload.error || `Cleanup failed for ${tab}.`);
+    return payload;
+  }
+
+  async function previewProofCleanup() {
+    if (cleanupBusy) return;
+    if (!session.authenticated) { setCleanupStatus('Authentication required.'); return; }
+    if (!/^wpno-tier4-[A-Za-z0-9._:-]+$/.test(cleanupRunId.trim())) { setCleanupStatus('Enter the exact wpno-tier4 run ID.'); return; }
+    setCleanupBusy(true);
+    setCleanupStatus('Previewing exact-run production fixtures...');
+    try {
+      const tabs = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
+      const counts: Record<string, number> = {};
+      for (const tab of tabs) counts[tab] = Number((await callCleanup(tab, true)).matched || 0);
+      setCleanupPreview(counts);
+      const total = Object.values(counts).reduce((sum, value) => sum + value, 0);
+      setCleanupStatus(`Preview complete: ${total} active proof fixtures matched this exact run.`);
+    } catch (error) {
+      setCleanupStatus(error instanceof Error ? error.message : 'Cleanup preview failed.');
+    } finally { setCleanupBusy(false); }
+  }
+
+  async function executeProofCleanup() {
+    if (cleanupBusy || !cleanupPreview) return;
+    const total = Object.values(cleanupPreview).reduce((sum, value) => sum + value, 0);
+    if (!window.confirm(`Clean ${total} Tier 4 proof fixtures for ${cleanupRunId.trim()}? Only this exact run ID will be affected.`)) return;
+    setCleanupBusy(true);
+    setCleanupStatus('Cleaning production proof fixtures in bounded batches...');
+    try {
+      const tabs = Object.keys(cleanupPreview);
+      let cleanedTotal = 0;
+      for (const tab of tabs) {
+        let remaining = cleanupPreview[tab] || 0;
+        while (remaining > 0) {
+          const result = await callCleanup(tab, false);
+          const cleaned = Number(result.cleaned || 0);
+          const nextRemaining = Number(result.remaining || 0);
+          if (nextRemaining > 0 && cleaned === 0) throw new Error(`Cleanup made no progress for ${tab}; stopping to avoid an infinite loop.`);
+          cleanedTotal += cleaned;
+          remaining = nextRemaining;
+        }
+      }
+      const verification: Record<string, number> = {};
+      for (const tab of tabs) verification[tab] = Number((await callCleanup(tab, false, true)).remaining || 0);
+      const remainingTotal = Object.values(verification).reduce((sum, value) => sum + value, 0);
+      if (remainingTotal !== 0) throw new Error(`Cleanup verification failed: ${remainingTotal} active fixtures remain.`);
+      setCleanupPreview(null);
+      setCleanupStatus(`Cleanup verified: ${cleanedTotal} fixture versions written; zero active fixtures remain for this run.`);
+      await onRefresh();
+    } catch (error) {
+      setCleanupStatus(error instanceof Error ? error.message : 'Cleanup failed. Rerun preview; the operation is idempotent.');
+    } finally { setCleanupBusy(false); }
+  }
+
   async function runSheetMaintenance() {
     if (maintenanceBusy) return;
     if (!session.authenticated) {
@@ -559,6 +625,7 @@ function SettingsPanel({
       <div className="card settings-operations"><h3>Google Sheets data</h3><p><strong>{sheetStatus}</strong></p><p className="muted">Refresh pulls the latest saved contacts, intake, approvals, touchpoints, notifications, events, and attendees from the live spreadsheet. It does not modify spreadsheet rows and explicitly bypasses the short snapshot cache.</p><button className="btn" type="button" disabled={refreshBusy || !session.authenticated} onClick={guardedSheetRefresh}>{refreshBusy ? 'Refreshing from Sheets…' : 'Refresh from Google Sheets'}</button></div>
       <div className="card settings-operations"><h3>Gmail intake sync</h3><p className="muted">Personal mailboxes import only canonical trigger messages. When <strong>info@westpeek.ventures</strong> is connected as its own Google account, inbound inbox messages are treated as founder/deal-flow intake without requiring a hashtag. Every message still requires human review and must pass duplicate protection.</p><div className="notice subtle">The shared inbox must be connected separately. A team member signing in does not automatically monitor another mailbox.</div><button className="btn primary" type="button" disabled={gmailSyncBusy || !session.authenticated} onClick={runGmailSync}>{gmailSyncBusy ? 'Syncing Gmail…' : 'Sync connected Gmail'}</button>{gmailSyncStatus && <p className="operation-result" aria-live="polite">{gmailSyncStatus}</p>}</div>
       <div className="card settings-operations"><h3>Sheet maintenance</h3><p className="muted">Runs a non-destructive structural check. It creates missing tabs, restores required headers, normalizes supported status and boolean values, fills missing timestamps where safe, and reports possible duplicates. It does not delete or merge records.</p><button className="btn" type="button" disabled={maintenanceBusy || !session.authenticated} onClick={() => { if (window.confirm('Run non-destructive Sheet maintenance? This may create missing tabs, restore required headers, normalize supported values, fill safe missing timestamps, and write an audit report. It will not delete or merge records.')) void runSheetMaintenance(); }}>{maintenanceBusy ? 'Running maintenance…' : 'Run Sheet Maintenance'}</button>{maintenanceStatus && <p className="operation-result" role="status" aria-live="polite">{maintenanceStatus}</p>}</div>
+      <div className="card settings-operations"><h3>Tier 4 test-data cleanup</h3><p className="muted">Removes only proof fixtures tied to one exact <code>wpno-tier4-*</code> run ID. Preview is required before cleanup. Records are archived or marked proof-cleaned in Google Sheets and disappear from active app views after verified readback.</p><label><span className="muted">Exact Tier 4 run ID</span><input value={cleanupRunId} onChange={(event) => { setCleanupRunId(event.target.value); setCleanupPreview(null); }} placeholder="wpno-tier4-YYYYMMDDTHHMMSSZ" autoComplete="off" /></label><div className="actions"><button className="btn" type="button" disabled={cleanupBusy || !session.authenticated} onClick={() => void previewProofCleanup()}>{cleanupBusy ? 'Working…' : 'Preview test data'}</button><button className="btn primary" type="button" disabled={cleanupBusy || !cleanupPreview || !session.authenticated} onClick={() => void executeProofCleanup()}>Clean previewed test data</button></div>{cleanupPreview && <p className="muted">Matched: {Object.values(cleanupPreview).reduce((sum, value) => sum + value, 0)} active fixtures.</p>}{cleanupStatus && <p className="operation-result" role="status" aria-live="polite">{cleanupStatus}</p>}</div>
       <div className="card"><h3>Operator Login launchpads</h3><p>joinwestpeek.com/operator<br />westpeek.ventures/operator</p><p className="muted">Team-area access is managed outside this repo. No shared password or passphrase is stored or displayed here.</p></div>
       <div className="card">
         <h3>Google Sheets</h3>

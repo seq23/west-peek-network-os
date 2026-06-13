@@ -121,3 +121,18 @@ Validation status:
 - structure validator: passed
 - full local dependency-backed validation: required through updater
 - deployed cleanup behavior: required after updater deployment
+
+## Hostile-reviewed bounded cleanup correction
+
+- Replaced single-invocation production cleanup with one-tab bounded batches to stay below Cloudflare Worker subrequest limits.
+- Added Settings preview, explicit confirmation, bounded execution, no-progress abort, and final all-tab zero-remaining verification.
+- Added the same no-progress and explicit verification behavior to the terminal cleanup runner.
+- Verified `npm run validate:all`, `npm run typecheck`, production build, cleanup contract, and validator admission in the artifact workspace.
+- Deployed Cloudflare execution and real Google Sheets cleanup remain local postdeployment proof requirements.
+
+## Current hostile-reviewed cleanup baseline
+
+- ZIP: `west-peek-network-os-main_BASELINE_06-13-26_5a8249ca.zip`
+- Repo root: `west-peek-network-os`
+- Revision basis: deterministic source-tree digest (8 hex characters)
+- Status: structurally checked; deployed cleanup validation required
