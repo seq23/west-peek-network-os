@@ -100,3 +100,4 @@ Purpose: single operator entrypoint that prevents doc sprawl. If a document is n
 - `../WP_NETWORK_OS_HALLMARK_UX_ADDENDUM_2026-06-13.md`
 - `WP_NETWORK_OS_CANONICAL_TESTING_RELEASE_PROOF_MASTER_PLAN_2026-06-13.md`
 - `WP_NETWORK_OS_REPO_SPECIFIC_TEST_IMPLEMENTATION_ADDENDUM_2026-06-13.md`
+- `AUTH_STATE_VAULT.md` — authenticated browser-state vault, Tier 4 restore, and Hallmark authenticated capture workflow.

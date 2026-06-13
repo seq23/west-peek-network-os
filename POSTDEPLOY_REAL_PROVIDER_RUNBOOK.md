@@ -41,3 +41,17 @@ For each provider lane, record:
 - result
 
 Use `LIVE_PROVIDER_EVIDENCE_TEMPLATE.md`.
+
+## Fast authenticated-state restoration
+
+Before Tier 4 or authenticated Hallmark evidence collection:
+
+- `npm run auth:restore`
+- `npm run auth:status`
+
+Then use:
+
+- `npm run tier4:authenticated`
+- `npm run hallmark:authenticated`
+
+After a newly authenticated state is created or refreshed, run `npm run auth:backup` so the external encrypted canonical vault survives future snapshot updates.

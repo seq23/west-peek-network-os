@@ -118,3 +118,4 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `docs/WP_NETWORK_OS_CANONICAL_TESTING_RELEASE_PROOF_MASTER_PLAN_2026-06-13.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
 | `docs/WP_NETWORK_OS_REPO_SPECIFIC_TEST_IMPLEMENTATION_ADDENDUM_2026-06-13.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
 | `tests/fixtures/README.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
+| `AUTH_STATE_VAULT.md` | ACTIVE | External encrypted authenticated browser-state backup/restore and shared Tier 4/Hallmark execution authority. | None |

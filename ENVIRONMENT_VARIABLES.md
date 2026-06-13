@@ -86,3 +86,10 @@ This bypasses the short-lived snapshot cache so Tier 4 can prove immediate Googl
 - `SHEETS_PROVIDER=local-adapter`
 
 These values are valid only in local/test runtime. Fixture or test-auth activation on a production/non-local hostname must hard-fail.
+
+## Auth-state vault controls
+
+- `AUTH_STATE_VAULT_PATH` — optional external encrypted auth-state path override.
+- `AUTH_STATE_LOCAL_PATH` — optional disposable repo-local storage-state path override.
+- `HALLMARK_RUNNER` — optional Hallmark runner path override.
+- `HALLMARK_BASE_URL` — optional Hallmark target URL override; defaults to the deployed Pages URL.

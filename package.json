@@ -122,7 +122,14 @@
     "release:live-proof": "npm run tier4:ultimate-live-proof",
     "test:provider-architecture": "node --experimental-strip-types tests/integration/provider-architecture.mjs",
     "test:gauntlet:local": "node --experimental-strip-types tests/integration/local-master-gauntlet.mjs",
-    "test:web-contracts:mocked": "node --experimental-strip-types tests/integration/mock-web-contracts.mjs"
+    "test:web-contracts:mocked": "node --experimental-strip-types tests/integration/mock-web-contracts.mjs",
+    "auth:status": "bash scripts/auth-state/status.sh",
+    "auth:backup": "bash scripts/auth-state/backup.sh",
+    "auth:restore": "bash scripts/auth-state/restore.sh",
+    "auth:remove-local": "bash scripts/auth-state/remove-local.sh",
+    "tier4:authenticated": "bash scripts/auth-state/run-tier4.sh",
+    "hallmark:authenticated": "bash scripts/auth-state/run-hallmark.sh",
+    "validate:auth-state-vault": "node scripts/validate-auth-state-vault-contract.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

@@ -146,3 +146,7 @@ Future Reversal Conditions: None. Proof-layer honesty is permanent; only individ
 
 The post-remediation Hallmark findings are applied as reusable route-level UX laws, not dashboard-only cosmetic fixes. All operational routes must expose identity, context, state, and next action; secondary mobile content may collapse; tablet/mobile navigation must use an explicit menu; and the West Peek black/white/cream/orange brand remains authoritative.
 
+
+## 2026-06-13 — External authenticated browser-state vault
+
+Decision: preserve Google-authenticated Playwright storage state as encrypted ciphertext outside the repo, with repo-owned atomic backup/restore/status wrappers. The disposable `.auth/` copy may be deleted by snapshot updates and recreated on demand. Tier 4 and Hallmark use the same validated state. This avoids repeated OAuth while preventing committed cookies or session material.
