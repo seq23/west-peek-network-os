@@ -200,3 +200,27 @@ A dedicated privileged maintenance console may replace terminal-only execution i
 ## Authenticated Product Usability Addendum — 2026-06-13
 
 This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.
+
+### Decision ID: ADM-2026-06-14-TRIGGER-SHEETS-01
+* **Date:** 2026-06-14
+* **Status:** Accepted
+* **Context:** Gmail hashtag capture stopped producing visible Google Sheets records while parser, fixture, and source-presence tests remained green. Runtime header repair could reorder labels without migrating data, and cleanup allowed broad physical-row deletion.
+* **Decision:** Make Sheets schema validation fail closed; prohibit silent header mutation; require append readback; query Gmail aliases independently with pagination; restrict cleanup to exact registered proof fixtures; require real deployed Gmail-to-Sheets mutation/readback/dedupe/cleanup proof before COMPLETE.
+* **Alternatives Considered:** Preserve self-healing header rewrites; repair headers in place; retain historical fuzzy cleanup; continue treating mocked trigger tests as release proof.
+* **Reasoning:** Silent repair can corrupt logical column meaning, fuzzy deletion can remove unrelated rows, and mocked tests cannot prove provider delivery or persistence.
+* **Tradeoffs:** Schema drift now blocks writes and requires an explicit reset or versioned migration. Live release proof requires authenticated provider access.
+* **Risks Accepted:** A malformed workbook becomes unavailable until deliberately repaired; this is safer than silent corruption.
+* **Validation Impact:** `validate:sheets-schema-contract`, `test:trigger-sheet-safety`, `validate:tier4-cleanup-contract`, local prepush, and deployed provider proof are mandatory.
+* **Future Reversal Conditions:** Only if a transactional, versioned migration system can prove data relocation, rollback, and readback without silent mutation.
+
+### Decision ID: ADM-2026-06-14-TIER4-HISTORICAL-CLEANUP-01
+* **Date:** 2026-06-14
+* **Status:** Accepted
+* **Context:** Operators may need to remove all Tier 4 proof data without knowing old run IDs. The previous historical script used broad textual signatures and was unsafe; removing it entirely left no usable historical purge path.
+* **Decision:** Support an authenticated `all_registered_tier4` cleanup scope that selects only rows with `proof_fixture=true`, a canonical `wpno-tier4-*` run ID, a nonempty `proof_test_id`, and a stable record ID. Require dry-run manifest parity before execution and verify unrelated IDs are unchanged after physical deletion.
+* **Alternatives Considered:** Keep historical cleanup unsupported; restore fuzzy text matching; require manual run-ID discovery.
+* **Reasoning:** Explicit fixture metadata provides safe ownership without requiring the operator to remember historical run IDs.
+* **Tradeoffs:** Unregistered legacy test rows cannot be automatically identified and require workbook reset or deliberate one-time migration.
+* **Risks Accepted:** A malformed row missing fixture metadata will be preserved rather than risk deleting real data.
+* **Validation Impact:** Cleanup contract validator, TypeScript, integration contract tests, live authenticated dry-run and execution readback.
+* **Future Reversal Conditions:** Replace only if fixture ownership moves to a dedicated database registry with stronger transactional guarantees.

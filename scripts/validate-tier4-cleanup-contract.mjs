@@ -1,33 +1,15 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
-const failures = [];
-const read = (file) => { if (!fs.existsSync(file)) { failures.push(`missing ${file}`); return ''; } return fs.readFileSync(file, 'utf8'); };
-const pkg = JSON.parse(read('package.json') || '{}');
-const endpoint = read('functions/api/proof-fixtures/cleanup.ts');
-const runner = read('scripts/testing/fixtures/cleanup-live-tier4.mjs');
-const wrapper = read('scripts/auth-state/cleanup-tier4.sh');
-const sheets = read('functions/_shared/sheets.ts');
-const snapshot = read('functions/api/sheets/snapshot.ts');
-const docs = read('TIER4_PROOF_FIXTURE_CLEANUP.md');
-const app = read('src/ui/App.tsx');
-const historicalRunner = read('scripts/testing/fixtures/cleanup-historical-tier4.mjs');
-const historicalWrapper = read('scripts/auth-state/cleanup-historical-tier4.sh');
-const cleanupMap = read('docs/CLEANUP_OPERATIONS.md');
-const physicalRunner = read('scripts/testing/fixtures/physical-delete-tier4.mjs');
-const physicalWrapper = read('scripts/auth-state/physical-delete-tier4.sh');
-for (const script of ['tier4:cleanup:preview','tier4:cleanup','tier4:cleanup:historical:preview','tier4:cleanup:historical','tier4:physical-delete:preview','tier4:physical-delete']) if (!pkg.scripts?.[script]) failures.push(`package script missing ${script}`);
-for (const fragment of ['CLEAN_TIER4_PROOF_FIXTURES','CLEAN_ALL_HISTORICAL_TIER4_FIXTURES','PHYSICALLY_DELETE_TIER4_PROOF_ROWS','physical_delete','deletePhysicalRows','readTabPhysicalRows','proof_cleaned','requireAuthenticatedUser','legacyTier4','isHistoricalTier4Fixture','verify_only','MAX_LIMIT']) if (!endpoint.includes(fragment)) failures.push(`cleanup endpoint missing ${fragment}`);
-for (const fragment of ['storageState','cleanup_status','verified','verify_only','made no progress','for (const tab of tabs)','while (remaining > 0)']) if (!runner.includes(fragment)) failures.push(`cleanup runner missing ${fragment}`);
-for (const fragment of ['restore.sh','validate_auth_state','WEST_PEEK_E2E_RUN_ID']) if (!wrapper.includes(fragment)) failures.push(`cleanup wrapper missing ${fragment}`);
-for (const fragment of ['proof_run_id','proof_fixture','proof_status','proof_cleaned_at']) if (!sheets.includes(fragment)) failures.push(`Sheets schema missing ${fragment}`);
-for (const fragment of ['Tier 4 test-data cleanup','Preview test data','Clean previewed test data','verify_only: verifyOnly','made no progress','Cleanup verification failed']) if (!app.includes(fragment)) failures.push(`Settings cleanup UI missing ${fragment}`);
-for (const fragment of ["scope: 'historical'",'CLEAN_ALL_HISTORICAL_TIER4_FIXTURES','made no progress','remaining_total','HISTORICAL TIER 4 PRODUCTION FIXTURE CLEANUP VERIFIED']) if (!historicalRunner.includes(fragment)) failures.push(`historical cleanup runner missing ${fragment}`);
-for (const fragment of ['restore.sh','validate_auth_state','cleanup-historical-tier4.mjs']) if (!historicalWrapper.includes(fragment)) failures.push(`historical cleanup wrapper missing ${fragment}`);
-for (const fragment of ["mode: 'physical_delete'",'PHYSICALLY_DELETE_TIER4_PROOF_ROWS','physically_deleted_verified','made no progress','verify_only','for (const tab of tabs)','while (remaining > 0)']) if (!physicalRunner.includes(fragment)) failures.push(`physical-delete runner missing ${fragment}`);
-for (const fragment of ['restore.sh','validate_auth_state','WEST_PEEK_E2E_RUN_ID','physical-delete-tier4.mjs']) if (!physicalWrapper.includes(fragment)) failures.push(`physical-delete wrapper missing ${fragment}`);
-for (const fragment of ['Historical Tier 4 sweep','strong Tier 4 signatures','terminal-only','does not physically delete']) if (!docs.includes(fragment)) failures.push(`cleanup docs missing historical contract ${fragment}`);
-for (const fragment of ['Exact Tier 4 run','Historical Tier 4 residue','Local-only cleanup']) if (!cleanupMap.includes(fragment)) failures.push(`cleanup operations map missing ${fragment}`);
-if (!snapshot.includes("proof_status || '') !== 'proof_cleaned'")) failures.push('snapshot does not hide cleaned proof rows');
-for (const fragment of ['Preview','Verified cleanup','append-only','exact run ID','Guarded physical deletion','TIER 4 PHYSICAL ROW DELETION VERIFIED','irreversible']) if (!docs.includes(fragment)) failures.push(`cleanup docs missing ${fragment}`);
-if (failures.length) { console.error('Tier 4 cleanup contract failures:\n- '+failures.join('\n- ')); process.exit(1); }
-console.log('validate:tier4-cleanup-contract: PASS');
+const endpoint = fs.readFileSync('functions/api/proof-fixtures/cleanup.ts','utf8');
+const exactClient = fs.readFileSync('scripts/testing/fixtures/cleanup-live-tier4.mjs','utf8');
+const historicalClient = fs.readFileSync('scripts/testing/fixtures/cleanup-historical-tier4.mjs','utf8');
+const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
+const failures=[];
+for (const fragment of ['proof_fixture','proof_run_id','proof_test_id','CLEANUP_EXPECTED_IDS_MISMATCH','CLEANUP_EXPECTED_MANIFEST_MISMATCH','DELETE_EXACT_REGISTERED_PROOF_FIXTURES','DELETE_ALL_REGISTERED_TIER4_PROOF_FIXTURES','unrelated_rows_preserved','all_registered_tier4']) if(!endpoint.includes(fragment)) failures.push(`missing endpoint guard ${fragment}`);
+for (const forbidden of ['Tier Four Founder','tier4-network-','CLEAN_ALL_HISTORICAL_TIER4_FIXTURES','includes(String(record']) if(endpoint.includes(forbidden)) failures.push(`unsafe fuzzy cleanup fragment remains ${forbidden}`);
+for (const script of ['tier4:cleanup:preview','tier4:cleanup','tier4:cleanup:latest:preview','tier4:cleanup:latest','tier4:cleanup:historical:preview','tier4:cleanup:historical']) if(!pkg.scripts?.[script]) failures.push(`missing package script ${script}`);
+for (const token of ['scope: \'exact_run\'','execute_confirm: executeConfirm','expected_ids: expectedIds']) if(!exactClient.includes(token)) failures.push(`exact client contract missing ${token}`);
+for (const token of ['scope: \'all_registered_tier4\'','execute_confirm: executeConfirm','expected_fixtures: manifest','proof_fixture=true']) if(!historicalClient.includes(token)) failures.push(`historical client contract missing ${token}`);
+if(pkg.scripts?.['tier4:physical-delete']) failures.push('unsafe tier4:physical-delete package script remains');
+if(failures.length){console.error(failures.join('\n'));process.exit(1)}
+console.log('validate:tier4-cleanup-contract PASS — exact-run and all-registered historical cleanup are dry-run-first, manifest-locked, and fixture-owned.');

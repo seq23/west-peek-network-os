@@ -11,3 +11,13 @@ Static validators prove contracts. Browser/provider lanes prove behavior only wh
 ## Authenticated browser-state vault admission — 2026-06-13
 
 `validate:auth-state-vault` is an admitted security/recoverability contract. It verifies the external encrypted vault architecture and shared Tier 4/Hallmark wiring. It does not claim that a live session exists or remains valid.
+
+
+## Trigger and Sheets Regression Admissions (2026-06-14)
+
+The following production-risk validators are admitted as HARD FAIL gates:
+
+- `test:hostile-trigger-sheet-regressions` — registered in `_validator_admission_register.json` and `_repo_validation_matrix.json`.
+- `test:trigger-sheet-safety` — registered in `_validator_admission_register.json` and `_repo_validation_matrix.json`.
+- `validate:sheets-schema-contract` — registered in `_validator_admission_register.json` and `_repo_validation_matrix.json`.
+- `validate:trigger-sheet-proof` — registered in `_validator_admission_register.json` and `_repo_validation_matrix.json`.

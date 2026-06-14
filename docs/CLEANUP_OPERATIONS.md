@@ -1,53 +1,49 @@
-# Cleanup Operations Map
+# Cleanup Operations
 
-This document is the operator index for every cleanup mechanism in West Peek Network OS.
+## Supported Tier 4 cleanup lanes
 
-## Production data cleanup
+### Latest completed run
 
-### Exact Tier 4 run
+Preview:
 
-Use after each live Tier 4 run:
+`npm run tier4:cleanup:latest:preview`
 
-```bash
-npm run tier4:cleanup:preview -- <exact-run-id>
-npm run tier4:cleanup -- <exact-run-id>
-```
+Execute:
 
-### Historical Tier 4 residue
+`npm run tier4:cleanup:latest`
 
-Use only when legacy test records from multiple runs remain:
+### Known exact run
 
-```bash
-npm run tier4:cleanup:historical:preview
-npm run tier4:cleanup:historical
-```
+Preview:
 
-Historical cleanup is terminal-only and uses strong Tier 4 markers. It is not a generic delete-all-test-looking-data operation.
+`npm run tier4:cleanup:preview -- wpno-tier4-<run-id>`
 
-### Ordinary operator records
+Execute:
 
-Use the app's record-specific lifecycle controls. Contacts archive/restore, intake dismiss/review, events revoke/restore, and other supported record controls are business operations, not proof-fixture cleanup.
+`npm run tier4:cleanup -- wpno-tier4-<run-id>`
 
-## Local-only cleanup
+### All registered historical Tier 4 fixtures
 
-`fixtures:cleanup:expired` updates the repo-local proof ledger. It cannot clean Google Sheets provider rows.
+Use this when the run ID is unknown or several old Tier 4 runs remain.
 
-The snapshot updater may delete `.auth/`, reports, build outputs, and other generated local files. That is filesystem hygiene, not production data cleanup. Restore auth state from the encrypted external vault when authenticated proof is needed.
+Preview first:
 
-## Non-negotiable rules
+`npm run tier4:cleanup:historical:preview`
 
-- preview before broad historical cleanup
-- preserve real records
-- never use fuzzy words such as `founder`, `event`, `Pitch Lab`, or `Gmail` alone as deletion selectors
-- require fresh readback and zero remaining before success
-- do not physically delete Sheet history
-- do not claim UI cleanup until the deployed app refreshes from the cleaned snapshot
+Then execute:
 
-See `TIER4_PROOF_FIXTURE_CLEANUP.md` for the full contract.
+`npm run tier4:cleanup:historical`
 
-## Network OS Tier 4 cleanup entry points
+Historical cleanup physically deletes only rows satisfying every condition:
 
-- Most recent run: `npm run tier4:cleanup:latest:preview`, then `npm run tier4:cleanup:latest`.
-- Known exact run: `npm run tier4:cleanup:preview -- <run-id>`, then `npm run tier4:cleanup -- <run-id>`.
-- Historical recovery: `npm run tier4:cleanup:historical:preview`, then `npm run tier4:cleanup:historical`.
-- Full safety contract: [`../TIER4_PROOF_FIXTURE_CLEANUP.md`](../TIER4_PROOF_FIXTURE_CLEANUP.md).
+- `proof_fixture=true`
+- `proof_run_id` matches `wpno-tier4-*`
+- `proof_test_id` is present
+- the tab has a configured stable record ID and the row contains it
+- the execution manifest exactly matches the immediately preceding preview
+
+It never selects rows by contact name, founder name, email, company, labels, dates, arbitrary prefixes, or fuzzy text. After deletion it rereads each tab, verifies zero registered Tier 4 fixtures remain, and verifies unrelated stable record IDs did not change.
+
+## Workbook reset is separate
+
+`sheets:reset-empty-workbook` clears all governed workbook values, including non-test data and OAuth rows. It is not a Tier 4 cleanup command and should only be used for an intentionally empty workbook reset.

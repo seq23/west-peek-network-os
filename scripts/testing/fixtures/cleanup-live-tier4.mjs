@@ -7,49 +7,46 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || process.env.POSTDEPLOY_BASE_U
 const storageState = process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE || '.auth/playwright-storage-state.json';
 const dryRun = process.env.TIER4_CLEANUP_DRY_RUN === '1';
 const tabs = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
-const confirm = 'CLEAN_TIER4_PROOF_FIXTURES';
-const limit = 15;
+const executeConfirm = 'DELETE_EXACT_REGISTERED_PROOF_FIXTURES';
 if (!/^wpno-tier4-[A-Za-z0-9._:-]+$/.test(runId)) throw new Error('Set WEST_PEEK_E2E_RUN_ID to the exact wpno-tier4 run being cleaned.');
 if (!baseURL.startsWith('https://')) throw new Error('Cleanup requires an explicit deployed HTTPS URL.');
 if (!fs.existsSync(storageState)) throw new Error(`Authenticated storage state not found: ${storageState}`);
 
 const context = await request.newContext({ baseURL, storageState });
-const totals = { matched: {}, cleaned: {}, remaining: {} };
+const totals = { matched: {}, deleted: {}, remaining: {} };
 try {
   for (const tab of tabs) {
-    let first = true;
-    let remaining = 0;
-    let cleaned = 0;
-    let matched = 0;
-    do {
-      const response = await context.post('/api/proof-fixtures/cleanup', { data: { run_id: runId, confirm, dry_run: dryRun, tab, limit } });
-      const text = await response.text();
-      if (!response.ok()) throw new Error(`Cleanup endpoint failed ${response.status()} for ${tab}: ${text}`);
-      const result = JSON.parse(text);
-      if (first) matched = Number(result.matched || 0);
-      const batchCleaned = Number(result.cleaned || 0);
-      const nextRemaining = Number(result.remaining || 0);
-      if (!dryRun && nextRemaining > 0 && batchCleaned === 0) throw new Error(`Cleanup made no progress for ${tab}; stopping to avoid an infinite loop.`);
-      cleaned += batchCleaned;
-      remaining = nextRemaining;
-      first = false;
-      if (dryRun) break;
-    } while (remaining > 0);
-    if (!dryRun) {
-      const verifyResponse = await context.post('/api/proof-fixtures/cleanup', { data: { run_id: runId, confirm, dry_run: false, verify_only: true, tab, limit } });
-      const verifyText = await verifyResponse.text();
-      if (!verifyResponse.ok()) throw new Error(`Cleanup verification endpoint failed ${verifyResponse.status()} for ${tab}: ${verifyText}`);
-      const verifyResult = JSON.parse(verifyText);
-      remaining = Number(verifyResult.remaining || 0);
+    const previewResponse = await context.post('/api/proof-fixtures/cleanup', { data: { scope: 'exact_run', run_id: runId, dry_run: true, tab } });
+    const previewText = await previewResponse.text();
+    if (!previewResponse.ok()) throw new Error(`Cleanup preview failed ${previewResponse.status()} for ${tab}: ${previewText}`);
+    const preview = JSON.parse(previewText);
+    const expectedIds = Array.isArray(preview.proposed) ? preview.proposed.map((item) => String(item.record_id || '')).filter(Boolean) : [];
+    totals.matched[tab] = expectedIds.length;
+
+    if (dryRun || expectedIds.length === 0) {
+      totals.deleted[tab] = 0;
+      totals.remaining[tab] = expectedIds.length;
+      continue;
     }
-    totals.matched[tab] = matched;
-    totals.cleaned[tab] = cleaned;
-    totals.remaining[tab] = remaining;
+
+    const executeResponse = await context.post('/api/proof-fixtures/cleanup', { data: {
+      scope: 'exact_run', run_id: runId, dry_run: false, tab, execute_confirm: executeConfirm, expected_ids: expectedIds
+    } });
+    const executeText = await executeResponse.text();
+    if (!executeResponse.ok()) throw new Error(`Cleanup execution failed ${executeResponse.status()} for ${tab}: ${executeText}`);
+    const executed = JSON.parse(executeText);
+    totals.deleted[tab] = Number(executed.deleted || 0);
+
+    const verifyResponse = await context.post('/api/proof-fixtures/cleanup', { data: { scope: 'exact_run', run_id: runId, dry_run: true, tab } });
+    const verifyText = await verifyResponse.text();
+    if (!verifyResponse.ok()) throw new Error(`Cleanup verification failed ${verifyResponse.status()} for ${tab}: ${verifyText}`);
+    const verified = JSON.parse(verifyText);
+    totals.remaining[tab] = Number(verified.matched || 0);
   }
 
   const remainingTotal = Object.values(totals.remaining).reduce((sum, value) => sum + Number(value || 0), 0);
   const result = { ok: dryRun || remainingTotal === 0, run_id: runId, dry_run: dryRun, ...totals, remaining_total: remainingTotal, cleanup_status: dryRun ? 'preview_only' : remainingTotal === 0 ? 'verified' : 'incomplete', execution_allowed: false };
   console.log(JSON.stringify(result, null, 2));
-  if (!dryRun && result.cleanup_status !== 'verified') throw new Error('Cleanup readback was not verified.');
+  if (!dryRun && remainingTotal !== 0) throw new Error('Cleanup readback was not verified.');
   console.log(dryRun ? 'TIER 4 CLEANUP PREVIEW COMPLETE' : 'TIER 4 PRODUCTION FIXTURE CLEANUP VERIFIED');
 } finally { await context.dispose(); }
