@@ -8,5 +8,8 @@ elif npm run | grep -q 'tier4:cleanup'; then
   echo "ERROR: WEST_PEEK_E2E_RUN_ID is required for exact Network OS Tier 4 cleanup." >&2
   exit 1
 fi
+if [[ -n "${TIER4_HISTORICAL_DELETE_CONFIRM:-}" ]]; then
+  npm run tier4:cleanup:historical
+fi
 printf '{"verdict":"PASS","run_id":"%s","note":"Exact registered Tier 4 proof fixtures were cleaned and verified."}\n' "${WEST_PEEK_E2E_RUN_ID:-N/A}" > artifacts/diagnostics/cleanup/summary.json
 echo 'release:cleanup PASS'

@@ -10,5 +10,5 @@
   "local_browser_validation": "NOT_EXECUTED",
   "required_local_command": "npm run release:prepush:local",
   "status": "FIRST-COMMAND-READY",
-  "repair_note": "AI Helper E2E now validates safety fields in API response and human-readable approval state in UI."
+  "repair_note": "Historical Tier 4 cleanup now finds explicit Tier 4 markers in any populated cell, physically deletes only preview-locked marked rows, preserves unrelated records, and restores blank spreadsheet capacity to at least 1,000 rows per governed tab."
 }

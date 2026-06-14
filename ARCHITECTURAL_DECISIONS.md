@@ -251,3 +251,9 @@ This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT
 * **Risks Accepted:** Operator must understand the confirmation phrase is destructive to blank row spacing, though not to populated records.
 * **Validation Impact:** Cleanup contract, Tier 4 live-proof contract, TypeScript, build, and reopened-artifact checks must pass.
 * **Future Reversal Conditions:** Replace with provider-native row ownership metadata if Google Sheets exposes attributable blank-row provenance.
+
+## 2026-06-14 — Historical Tier 4 marker cleanup and spreadsheet row-capacity restoration
+
+Legacy Tier 4 workflows created populated test rows before proof ownership fields were consistently written. Exact registry cleanup therefore could truthfully find zero registered fixtures while visible Tier 4 data remained. A previous blank-row compaction attempt deleted unused spreadsheet capacity instead of test records and is prohibited.
+
+The admitted recovery path is dry-run-first `all_tier4_markers` cleanup. It scans all populated cells for explicit Tier 4 markers, locks execution to the exact preview manifest, requires `DELETE_ALL_TIER4_MARKED_ROWS`, physically deletes matched populated rows with Google Sheets `deleteDimension`, preserves unrelated stable IDs, verifies zero marker matches remain, and restores each governed tab to at least 1,000 physical rows with `appendDimension`. Blank rows are never selected merely because they are blank.

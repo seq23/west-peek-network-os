@@ -1,23 +1,27 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json, readJson } from '../../_shared/json';
-import { compactBlankPhysicalRows, deletePhysicalRows, readTabPhysicalRows, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
+import { deletePhysicalRows, ensureMinimumPhysicalRows, readTabPhysicalRows, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
 type ExpectedFixture = { record_id?: string; proof_run_id?: string; proof_test_id?: string };
+type ExpectedMarkedRow = { row_number?: number; record_id?: string; marker_fields?: string[]; row_fingerprint?: string };
 type Body = {
-  scope?: 'exact_run' | 'all_registered_tier4' | 'compact_blank_rows';
+  scope?: 'exact_run' | 'all_registered_tier4' | 'all_tier4_markers';
   run_id?: string;
   tab?: string;
   dry_run?: boolean;
   execute_confirm?: string;
   expected_ids?: string[];
   expected_fixtures?: ExpectedFixture[];
+  expected_marked_rows?: ExpectedMarkedRow[];
 };
 
 const EXACT_CONFIRM = 'DELETE_EXACT_REGISTERED_PROOF_FIXTURES';
-const HISTORICAL_CONFIRM = 'DELETE_ALL_REGISTERED_TIER4_PROOF_FIXTURES';
-const COMPACT_CONFIRM = 'DELETE_PHYSICAL_BLANK_DATA_ROWS';
+const REGISTERED_HISTORICAL_CONFIRM = 'DELETE_ALL_REGISTERED_TIER4_PROOF_FIXTURES';
+const MARKER_HISTORICAL_CONFIRM = 'DELETE_ALL_TIER4_MARKED_ROWS';
 const TIER4_RUN_PATTERN = /^wpno-tier4-[A-Za-z0-9._:-]+$/;
+const TIER4_MARKER = /(^|[^a-z0-9])(?:wpno[\s_-]*)?tier[\s_-]*4([^a-z0-9]|$)/i;
+const MINIMUM_GRID_ROWS = 1000;
 const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
 const ID_KEYS: Partial<Record<SheetTab, string>> = {
   contacts: 'contact_id', intake_queue: 'intake_id', relationship_touches: 'touch_id', approvals: 'approval_id',
@@ -29,7 +33,11 @@ export async function onRequestPost({ request, env }: Context) {
   try {
     await requireAuthenticatedUser(request, env);
     const body = await readJson<Body>(request);
-    const scope = body.scope === 'all_registered_tier4' ? 'all_registered_tier4' : body.scope === 'compact_blank_rows' ? 'compact_blank_rows' : 'exact_run';
+    const scope = body.scope === 'all_tier4_markers'
+      ? 'all_tier4_markers'
+      : body.scope === 'all_registered_tier4'
+        ? 'all_registered_tier4'
+        : 'exact_run';
     const runId = String(body.run_id || '').trim();
     const tab = String(body.tab || '').trim() as SheetTab;
     const dryRun = body.dry_run !== false;
@@ -38,16 +46,80 @@ export async function onRequestPost({ request, env }: Context) {
       return json({ ok: false, error_code: 'CLEANUP_RUN_ID_INVALID', error: 'A valid exact wpno-tier4 run_id is required.' }, { status: 400 });
     }
     if (!TABS.includes(tab)) return json({ ok: false, error_code: 'CLEANUP_TAB_INVALID', error: `tab must be one of: ${TABS.join(', ')}` }, { status: 400 });
-    if (scope === 'compact_blank_rows') {
-      if (dryRun) return json({ ok: true, mode: 'dry_run', scope, tab, confirmation_required: COMPACT_CONFIRM, execution_allowed: false });
-      if (body.execute_confirm !== COMPACT_CONFIRM) return json({ ok: false, error_code: 'CLEANUP_CONFIRMATION_REQUIRED', error: `execute_confirm must equal ${COMPACT_CONFIRM}.` }, { status: 400 });
-      const compacted = await compactBlankPhysicalRows(env, tab);
-      return json({ ok: true, mode: 'execute', scope, tab, ...compacted, physical_rows_deleted: compacted.deleted, execution_allowed: false });
-    }
+
     const idKey = ID_KEYS[tab];
     if (!idKey) return json({ ok: false, error_code: 'CLEANUP_ID_KEY_MISSING', error: `No stable ID key configured for ${tab}.` }, { status: 500 });
 
     const physicalRows = await readTabPhysicalRows(env, tab);
+
+    if (scope === 'all_tier4_markers') {
+      const proposed = physicalRows
+        .map(({ rowNumber, record }) => ({
+          row_number: rowNumber,
+          record_id: String(record[idKey] || '').trim(),
+          marker_fields: tier4MarkerFields(record),
+          row_fingerprint: fingerprintRecord(record)
+        }))
+        .filter((item) => item.marker_fields.length > 0);
+
+      if (proposed.some((item) => !item.record_id)) {
+        return json({ ok: false, error_code: 'CLEANUP_STABLE_ID_MISSING', error: 'Every Tier 4-marked row must have a stable record ID before physical deletion.', proposed }, { status: 409 });
+      }
+
+      if (dryRun) {
+        return json({
+          ok: true,
+          mode: 'dry_run',
+          scope,
+          tab,
+          proposed,
+          matched: proposed.length,
+          confirmation_required: MARKER_HISTORICAL_CONFIRM,
+          selection_rule: 'case-insensitive Tier 4 marker in any populated cell: tier 4, tier4, tier-4, tier_4, or wpno-tier4 variants',
+          minimum_grid_rows_after_execute: MINIMUM_GRID_ROWS,
+          execution_allowed: false
+        });
+      }
+
+      if (body.execute_confirm !== MARKER_HISTORICAL_CONFIRM) {
+        return json({ ok: false, error_code: 'CLEANUP_CONFIRMATION_REQUIRED', error: `execute_confirm must equal ${MARKER_HISTORICAL_CONFIRM}.` }, { status: 400 });
+      }
+
+      const expected = normalizeMarkedRows(body.expected_marked_rows || []);
+      const actual = normalizeMarkedRows(proposed);
+      if (JSON.stringify(expected) !== JSON.stringify(actual)) {
+        return json({ ok: false, error_code: 'CLEANUP_EXPECTED_MARKER_MANIFEST_MISMATCH', error: 'Execution requires the exact Tier 4 marker manifest returned by the immediately preceding dry run.', expected_marked_rows: expected, proposed_marked_rows: actual }, { status: 409 });
+      }
+
+      const selectedIds = new Set(proposed.map((item) => item.record_id));
+      const beforeUnrelated = physicalRows.map(({ record }) => String(record[idKey] || '').trim()).filter((id) => id && !selectedIds.has(id)).sort();
+      const deleted = await deletePhysicalRows(env, tab, proposed.map((item) => item.row_number));
+      const capacity = await ensureMinimumPhysicalRows(env, tab, MINIMUM_GRID_ROWS);
+      const readback = await readTabPhysicalRows(env, tab);
+      const remainingMarked = readback.filter(({ record }) => tier4MarkerFields(record).length > 0);
+      const afterUnrelated = readback.map(({ record }) => String(record[idKey] || '').trim()).filter((id) => id && !selectedIds.has(id)).sort();
+
+      if (remainingMarked.length) return json({ ok: false, error_code: 'CLEANUP_PARTIAL', error: 'Tier 4 marker cleanup left marked rows behind.', remaining: remainingMarked }, { status: 500 });
+      if (JSON.stringify(beforeUnrelated) !== JSON.stringify(afterUnrelated)) {
+        return json({ ok: false, error_code: 'CLEANUP_UNRELATED_ROW_CHANGED', error: 'Cleanup changed unrelated rows; operation is unsafe.' }, { status: 500 });
+      }
+
+      return json({
+        ok: true,
+        mode: 'execute',
+        scope,
+        tab,
+        deleted: deleted.deleted,
+        deleted_marked_rows: actual,
+        remaining: 0,
+        unrelated_rows_preserved: true,
+        blank_row_capacity_restored: capacity.rows_added,
+        row_count_after: capacity.row_count_after,
+        minimum_grid_rows: MINIMUM_GRID_ROWS,
+        execution_allowed: false
+      });
+    }
+
     const owned = physicalRows.filter(({ record }) => scope === 'all_registered_tier4'
       ? isRegisteredTier4Fixture(record)
       : isExactOwnedFixture(record, runId));
@@ -59,14 +131,14 @@ export async function onRequestPost({ request, env }: Context) {
     }));
 
     if (proposed.some((item) => !item.record_id || !item.proof_test_id || !TIER4_RUN_PATTERN.test(item.proof_run_id))) {
-      return json({ ok: false, error_code: 'CLEANUP_FIXTURE_REGISTRY_INCOMPLETE', error: 'Every deletable fixture must have an exact stable record ID, valid wpno-tier4 proof_run_id, and proof_test_id.', proposed }, { status: 409 });
+      return json({ ok: false, error_code: 'CLEANUP_FIXTURE_REGISTRY_INCOMPLETE', error: 'Every registered fixture must have an exact stable record ID, valid wpno-tier4 proof_run_id, and proof_test_id.', proposed }, { status: 409 });
     }
 
     if (dryRun) {
       return json({ ok: true, mode: 'dry_run', scope, run_id: scope === 'exact_run' ? runId : null, tab, proposed, matched: proposed.length, deleted: 0, execution_allowed: false });
     }
 
-    const requiredConfirm = scope === 'all_registered_tier4' ? HISTORICAL_CONFIRM : EXACT_CONFIRM;
+    const requiredConfirm = scope === 'all_registered_tier4' ? REGISTERED_HISTORICAL_CONFIRM : EXACT_CONFIRM;
     if (body.execute_confirm !== requiredConfirm) {
       return json({ ok: false, error_code: 'CLEANUP_CONFIRMATION_REQUIRED', error: `execute_confirm must equal ${requiredConfirm}.` }, { status: 400 });
     }
@@ -74,7 +146,7 @@ export async function onRequestPost({ request, env }: Context) {
     if (scope === 'all_registered_tier4') {
       const expected = normalizeManifest(body.expected_fixtures || []);
       const actual = normalizeManifest(proposed);
-      if (!expected.length || JSON.stringify(expected) !== JSON.stringify(actual)) {
+      if (JSON.stringify(expected) !== JSON.stringify(actual)) {
         return json({ ok: false, error_code: 'CLEANUP_EXPECTED_MANIFEST_MISMATCH', error: 'Historical execution requires the exact fixture manifest returned by the immediately preceding dry run.', expected_fixtures: expected, proposed_fixtures: actual }, { status: 409 });
       }
     } else {
@@ -106,6 +178,33 @@ export async function onRequestPost({ request, env }: Context) {
     if (error instanceof Error && /SHEETS_|Google Sheets/.test(error.message)) return sheetsUnavailable(error);
     return json({ ok: false, error: error instanceof Error ? error.message : 'Fixture cleanup failed.' }, { status: 503 });
   }
+}
+
+function tier4MarkerFields(record: Record<string, unknown>) {
+  return Object.entries(record)
+    .filter(([, value]) => TIER4_MARKER.test(String(value ?? '')))
+    .map(([key]) => key)
+    .sort();
+}
+
+function fingerprintRecord(record: Record<string, unknown>) {
+  const text = JSON.stringify(Object.keys(record).sort().map((key) => [key, String(record[key] ?? '')]));
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, '0');
+}
+
+function normalizeMarkedRows(items: ExpectedMarkedRow[]) {
+  return items.map((item) => ({
+    row_number: Number(item.row_number || 0),
+    record_id: String(item.record_id || '').trim(),
+    marker_fields: [...new Set((item.marker_fields || []).map((value) => String(value).trim()).filter(Boolean))].sort(),
+    row_fingerprint: String(item.row_fingerprint || '').trim()
+  })).filter((item) => item.row_number >= 2 && item.record_id && item.marker_fields.length && item.row_fingerprint)
+    .sort((a, b) => a.row_number - b.row_number || a.record_id.localeCompare(b.record_id));
 }
 
 function isExactOwnedFixture(record: Record<string, unknown>, runId: string) {

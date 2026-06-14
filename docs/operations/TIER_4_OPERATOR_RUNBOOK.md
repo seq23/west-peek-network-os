@@ -53,6 +53,28 @@ The Tier 4 orchestrator loads only the missing `PITCH_LAB_SHARED_SECRET`, `ANTHR
 
 To compact fully blank physical rows after exact fixture cleanup, supply the exact phrase:
 
-`TIER4_PHYSICAL_DELETE_CONFIRM=DELETE_PHYSICAL_BLANK_DATA_ROWS`
+`TIER4_HISTORICAL_DELETE_CONFIRM=DELETE_ALL_TIER4_MARKED_ROWS`
 
 The pass preserves headers and every nonblank row. It is never implied by ordinary cleanup.
+
+## Historical Tier 4 marker cleanup and row-capacity restoration
+
+Use this only when old Tier 4 rows exist without complete `proof_run_id`, `proof_test_id`, and `proof_fixture` registration. The preview scans every populated cell in every governed tab, case-insensitively, for Tier 4 markers including `tier 4`, `tier4`, `tier-4`, `tier_4`, and `wpno-tier4` variants. It returns an exact row manifest and performs no mutation.
+
+Preview:
+
+```bash
+npm run tier4:cleanup:historical:preview
+```
+
+Physical deletion requires the exact phrase:
+
+`DELETE_ALL_TIER4_MARKED_ROWS`
+
+Execute:
+
+```bash
+TIER4_HISTORICAL_DELETE_CONFIRM="DELETE_ALL_TIER4_MARKED_ROWS" npm run tier4:cleanup:historical
+```
+
+The execute path uses Google Sheets `deleteDimension` on only the rows in the immediately preceding manifest, verifies no Tier 4 marker remains, verifies unrelated stable record IDs are unchanged, and restores each governed tab to at least 1,000 physical rows so normal blank spreadsheet capacity remains available. It never deletes blank rows merely because they are blank.

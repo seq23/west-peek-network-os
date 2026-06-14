@@ -155,6 +155,33 @@ export async function deletePhysicalRows(env: RuntimeEnv, tab: SheetTab, rowNumb
 }
 
 
+
+export async function ensureMinimumPhysicalRows(env: RuntimeEnv, tab: SheetTab, minimumRows = 1000) {
+  assertSheetsConfigured(env);
+  if (!Number.isInteger(minimumRows) || minimumRows < 2) throw new Error(`Invalid minimum row count: ${minimumRows}`);
+  const token = await getServiceAccountToken(env);
+  const metadataResponse = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}?includeGridData=false&fields=sheets.properties`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!metadataResponse.ok) throw new Error(`Google Sheets metadata read failed: ${metadataResponse.status} ${await metadataResponse.text()}`);
+  const metadata = await metadataResponse.json() as { sheets?: Array<{ properties?: { sheetId?: number; title?: string; gridProperties?: { rowCount?: number } } }> };
+  const sheet = metadata.sheets?.find((candidate) => candidate.properties?.title === tab);
+  const sheetId = sheet?.properties?.sheetId;
+  const rowCount = Number(sheet?.properties?.gridProperties?.rowCount || 0);
+  if (!Number.isInteger(sheetId) || rowCount < 1) throw new Error(`Google Sheets tab metadata not found for ${tab}.`);
+  if (rowCount >= minimumRows) return { rows_added: 0, row_count_before: rowCount, row_count_after: rowCount };
+
+  const rowsToAdd = minimumRows - rowCount;
+  const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}:batchUpdate`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requests: [{ appendDimension: { sheetId, dimension: 'ROWS', length: rowsToAdd } }] })
+  });
+  if (!response.ok) throw new Error(`Google Sheets row-capacity restore failed for ${tab}: ${response.status} ${await response.text()}`);
+  return { rows_added: rowsToAdd, row_count_before: rowCount, row_count_after: minimumRows };
+}
+
 export async function compactBlankPhysicalRows(env: RuntimeEnv, tab: SheetTab) {
   assertSheetsConfigured(env);
   const token = await getServiceAccountToken(env);

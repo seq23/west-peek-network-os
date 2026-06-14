@@ -83,7 +83,7 @@ No mock, fixture, source scan, successful toast, or HTTP 200 substitutes for thi
 
 The initial repair removed broad historical cleanup because the old implementation selected rows through fuzzy test names and prefixes. That removal created an operational gap: an operator may need to purge several old Tier 4 runs without knowing their IDs.
 
-The supported replacement is `all_registered_tier4` cleanup. It is not fuzzy historical matching. It selects only explicitly registered proof fixtures with a valid `wpno-tier4-*` run ID, nonempty test ID, and stable record ID. Preview returns the exact deletion manifest; execution must submit that same manifest and the dedicated confirmation token. Unrelated rows are fingerprinted before and after deletion.
+Two historical paths exist. `all_registered_tier4` remains the strict registry-owned path. For legacy rows created before proof registration was reliable, `all_tier4_markers` performs confirmation-gated, dry-run-first matching across every populated cell for explicit Tier 4 markers (`tier 4`, `tier4`, `tier-4`, `tier_4`, and `wpno-tier4` variants). Execution must submit the exact preview manifest and `DELETE_ALL_TIER4_MARKED_ROWS`, physically deletes only those populated rows with `deleteDimension`, verifies unrelated stable IDs are unchanged, and restores each governed tab to at least 1,000 physical rows. Blank rows are never deletion targets.
 
 Regression rule: historical cleanup is allowed only when it remains fixture-owned, dry-run-first, exact-manifest-locked, and readback-verified.
 
