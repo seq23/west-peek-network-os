@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 const liveEnabled = () => process.env.LIVE_GMAIL_TRIGGER_E2E === '1';
+const seedMode = () => (process.env.TIER4_GMAIL_SEED_MODE || (process.env.TIER4_GMAIL_SEED_ACCESS_TOKEN ? 'api' : 'manual')).toLowerCase();
 const aliases = [
   ['#wpnetwork','network'],['#addtowestpeek','network'],['#westpeeknetwork','network'],['#wpdealflow','deal_flow'],['#dealflow','deal_flow']
 ] as const;
@@ -38,10 +39,17 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
     const beforeHeaders = beforePayload.schema_fingerprints || beforePayload.headers || null;
     const unrelatedBefore = (beforePayload.data?.intake_queue || []).filter((r:any)=>r.proof_run_id !== runId).map((r:any)=>r.intake_id).sort();
 
+    const mode = seedMode();
+    expect(['manual','api']).toContain(mode);
     const seeded: Array<{ alias:string; intent:string; gmailId:string; marker:string }> = [];
     for (const [alias,intent] of aliases) {
-      const marker = `${runId}-${alias.slice(1)}-${Date.now()}`;
-      seeded.push({ alias, intent, gmailId: await seedGmail(alias, marker), marker });
+      const marker = `${runId}-${alias.slice(1)}`;
+      const gmailId = mode === 'api' ? await seedGmail(alias, marker) : '';
+      seeded.push({ alias, intent, gmailId, marker });
+    }
+    if (mode === 'manual') {
+      console.log(`MANUAL_GMAIL_SEED_REQUIRED run_id=${runId}`);
+      console.log('Send exactly one message per supported alias using docs/evidence/GMAIL_SEED_MESSAGE_GUIDE.md before continuing.');
     }
 
     const sync = await request.post('/api/gmail/sync', { data: { query: runId, max_results: 25, run_id: runId } });
@@ -49,7 +57,7 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
     const syncPayload = await sync.json();
     expect(syncPayload.ok).toBeTruthy();
     expect(syncPayload.execution_allowed).toBe(false);
-    for (const item of seeded) expect(syncPayload.inspected_message_ids).toContain(item.gmailId);
+    if (mode === 'api') for (const item of seeded) expect(syncPayload.inspected_message_ids).toContain(item.gmailId);
     expect(syncPayload.imported_records).toHaveLength(aliases.length);
     for (const record of syncPayload.imported_records) {
       expect(record.gmail_message_id).toBeTruthy();
@@ -68,7 +76,11 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
     const rows = snapPayload.data?.intake_queue || [];
     const created:any[] = [];
     for (const item of seeded) {
-      const matches = rows.filter((r:any)=>r.gmail_message_id===item.gmailId || String(r.raw_text||'').includes(item.marker));
+      const matches = rows.filter((r:any)=>
+        (item.gmailId && r.gmail_message_id===item.gmailId) ||
+        (r.proof_run_id===runId && r.source_trigger===item.alias) ||
+        String(r.raw_text||'').includes(item.marker)
+      );
       expect(matches, `${item.alias} must create exactly one row`).toHaveLength(1);
       const row = matches[0]; created.push(row);
       expect(row.source_trigger).toBe(item.alias);
@@ -80,7 +92,9 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
       expect(row.proof_run_id).toBe(runId);
       expect(row.proof_fixture).toBe('true');
       expect(row.proof_test_id).toBeTruthy();
-      const importedRecord = syncPayload.imported_records.find((r:any)=>r.gmail_message_id===item.gmailId);
+      const importedRecord = syncPayload.imported_records.find((r:any)=>
+        (item.gmailId && r.gmail_message_id===item.gmailId) || r.source_trigger===item.alias
+      );
       expect(importedRecord?.intake_id).toBe(row.intake_id);
       expect(importedRecord?.source_trigger).toBe(row.source_trigger);
       expect(importedRecord?.trigger_intent).toBe(row.trigger_intent);

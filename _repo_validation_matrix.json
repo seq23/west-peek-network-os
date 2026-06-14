@@ -518,10 +518,10 @@
       "tier": "tier4",
       "category": "real_gmail_provider",
       "severity": "STRONG WARNING",
-      "productionRisk": "Tier 4 live proof incomplete or deployed provider/data lane unproven.",
+      "productionRisk": "Live Gmail trigger ingestion could be falsely blocked by an undocumented send-token dependency or remain unproven while local trigger tests pass.",
       "proofLayer": "TIER 4 LIVE PROVIDER + DATA PROOF",
-      "whatItProves": "A hard Tier 4 live lane selected by the ultimate live proof model.",
-      "whatItDoesNotProve": "Does not prove lanes outside this command.",
+      "whatItProves": "With deployed Gmail/OAuth/Sheets and either canonical manual seeding or optional API seeding, proves all five aliases create exactly one pending-review row, survive exact readback, dedupe on rerun, and clean up safely.",
+      "whatItDoesNotProve": "Does not prove future provider availability or any live lane outside the supplied deployment, run ID, authenticated state, and selected seed mode.",
       "failureHandling": "Juniper investigates and normally repairs before release; local work may continue when proof is environment-bound.",
       "ownerDecisionNeeded": "YES if intentionally accepting a narrower proof scope.",
       "blockerPolicy": "HARD FAIL FOR COMPLETE WHEN APPLICABLE; does not block local structural validation without live inputs."
