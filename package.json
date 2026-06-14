@@ -93,7 +93,7 @@
     "postdeploy:no-raw-crash-pages": "node scripts/postdeploy-no-raw-crash-pages.mjs",
     "tier4:prereq-postdeploy-strict": "npm run validate:postdeploy:strict",
     "tier4:oauth-connect-live": "npm run test:e2e:tier4-ultimate-live",
-    "tier4:gmail-trigger-ingestion-live": "npm run test:e2e:live-gmail:real",
+    "tier4:gmail-trigger-ingestion-live": "npm run release:gmail-forward-only-proof",
     "tier4:google-sheets-readwrite-live": "node scripts/tier4_google_sheets_readwrite_live.mjs",
     "tier4:human-review-workflow-live": "node scripts/tier4_human_review_workflow_live.mjs",
     "tier4:contact-workflow-live": "node scripts/tier4_contact_workflow_live.mjs",
@@ -185,7 +185,9 @@
     "tier4:cleanup:historical": "bash scripts/auth-state/cleanup-historical-tier4.sh",
     "test:hostile-trigger-sheet-regressions": "node tests/integration/hostile-trigger-sheet-regressions.mjs",
     "validate:trigger-sheet-proof": "npm run test:trigger-sheet-safety && npm run test:hostile-trigger-sheet-regressions",
-    "sheets:migrate-schema": "node scripts/sheets/migrate-schema.mjs"
+    "sheets:migrate-schema": "node scripts/sheets/migrate-schema.mjs",
+    "gmail:forward-only:generate-seeds": "node scripts/testing/generate-forward-only-gmail-seeds.mjs",
+    "test:gmail-forward-only-seed-generator": "node tests/integration/forward-only-gmail-seed-generator.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

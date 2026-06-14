@@ -1510,6 +1510,34 @@
       "failureHandling": "Juniper repairs and reruns. Selected lifecycle stage remains blocked.",
       "ownerDecisionNeeded": "YES if failing or if a validator/doc needs retirement/reclassification.",
       "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk."
+    },
+    {
+      "name": "gmail:forward-only:generate-seeds",
+      "command": "node scripts/testing/generate-forward-only-gmail-seeds.mjs",
+      "tier": "2",
+      "category": "provider-proof-input",
+      "severity": "HARD FAIL",
+      "productionRisk": "Invalid or ambiguous Gmail proof seeds can invalidate forward-only runtime evidence or contaminate production intake.",
+      "proofLayer": "LOCAL INTEGRATION",
+      "whatItProves": "Generates eight deterministic reviewable manual Gmail seed messages and runtime environment values without expanding production OAuth scope.",
+      "whatItDoesNotProve": "Does not prove deployed Gmail ingestion, Cloudflare execution, Sheets persistence, or cleanup.",
+      "failureHandling": "Repair generator or contract and rerun before packaging.",
+      "ownerDecisionNeeded": "NO",
+      "blockerPolicy": "Blocks Gmail lifecycle artifact delivery."
+    },
+    {
+      "name": "test:gmail-forward-only-seed-generator",
+      "command": "node tests/integration/forward-only-gmail-seed-generator.mjs",
+      "tier": "2",
+      "category": "provider-proof-input",
+      "severity": "HARD FAIL",
+      "productionRisk": "Invalid or ambiguous Gmail proof seeds can invalidate forward-only runtime evidence or contaminate production intake.",
+      "proofLayer": "LOCAL INTEGRATION",
+      "whatItProves": "Proves approved-mailbox enforcement, seven normal seeds, one Tier 4 rejection seed, exact run-id propagation, and runtime env output.",
+      "whatItDoesNotProve": "Does not prove deployed Gmail ingestion, Cloudflare execution, Sheets persistence, or cleanup.",
+      "failureHandling": "Repair generator or contract and rerun before packaging.",
+      "ownerDecisionNeeded": "NO",
+      "blockerPolicy": "Blocks Gmail lifecycle artifact delivery."
     }
   ],
   "validatorAdmissionRegister": "_validator_admission_register.json",

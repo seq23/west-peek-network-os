@@ -281,3 +281,15 @@ The admitted recovery path is dry-run-first `all_tier4_markers` cleanup. It scan
 * **Risks Accepted:** Gmail indexing can add bounded wait time; provider outages remain external blockers.
 * **Validation Impact:** `npm run release:gmail-forward-only-proof` is required after Gmail ingestion lifecycle changes.
 * **Future Reversal Conditions:** Replace only when a stronger provider-native automated proof covers the same normal-mode lifecycle without broadening production permissions.
+
+### Decision ID: ADM-2026-06-14-GMAIL-COMBINED-PROOF
+* **Date:** 2026-06-14
+* **Status:** Accepted
+* **Context:** Separate manual Gmail trigger-alias and forward-only lifecycle proofs required duplicate operator email seeding and created avoidable release friction.
+* **Decision:** One eight-message manual packet now covers all five canonical aliases, two extra deal-flow messages for pagination volume, and one Tier 4 rejection case. The combined forward-only proof satisfies the Tier 4 Gmail ingestion lane.
+* **Alternatives Considered:** Keep two manual seed runs; require a temporary Gmail send token; reduce lifecycle coverage.
+* **Reasoning:** One deterministic packet minimizes operator effort without weakening provider, classification, batching, persistence, cleanup, or dedupe proof.
+* **Tradeoffs:** The combined test is broader and failures require reading alias and lifecycle diagnostics together.
+* **Risks Accepted:** A single provider outage blocks both alias and lifecycle proof at once.
+* **Validation Impact:** Generator integration test, TypeScript collection, validation registry parity, local prepush, and deployed provider execution are required.
+* **Future Reversal Conditions:** Split only if the combined proof becomes nondeterministic or platform limits require independent runs.

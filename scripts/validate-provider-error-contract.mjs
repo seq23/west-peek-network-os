@@ -28,7 +28,7 @@ if (!cleanup.includes("provider === 'gmail_ingestion_ledger' || provider === 'gm
 if (!gmail.includes('mailboxLockId = lock.lockId;\n      if (!lock.acquired)')) failures.push('Losing Gmail lock races must release their own lock event instead of leaving a phantom active lock.');
 if (!cleanup.includes('wpno-(?:tier4|runtime-gmail)')) failures.push('Exact cleanup must admit runtime Gmail proof rows without widening historical Tier 4 cleanup.');
 const runtimeProof = read('tests/e2e/live-gmail-forward-only-runtime.spec.ts', failures);
-for (const fragment of ['LIVE Gmail forward-only production lifecycle', 'Eight matching messages must force at least one real Gmail continuation page', 'GMAIL_BACKFILL_CONFIRMATION_REQUIRED', 'ledgerAfterCleanup', 'reimported']) if (!runtimeProof.includes(fragment)) failures.push(`Live forward-only runtime proof missing ${fragment}`);
+for (const fragment of ['LIVE Gmail combined trigger and forward-only production lifecycle', 'Eight matching messages must force at least one real Gmail continuation page', '#wpnetwork', '#addtowestpeek', '#westpeeknetwork', '#wpdealflow', '#dealflow', 'GMAIL_BACKFILL_CONFIRMATION_REQUIRED', 'ledgerAfterCleanup', 'reimported']) if (!runtimeProof.includes(fragment)) failures.push(`Live forward-only runtime proof missing ${fragment}`);
 
 if (!/REPLAY_DETECTED/.test(pitchProfile + pitchPacket + pitchShared)) failures.push('Pitch Lab handoff must include replay detection.');
 failOrPass('validate-provider-error-contract', failures);

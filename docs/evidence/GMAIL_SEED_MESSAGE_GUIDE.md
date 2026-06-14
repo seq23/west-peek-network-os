@@ -1,60 +1,27 @@
 # Gmail Seed Message Guide
 
-Status: CANONICAL TIER 4 INPUT GUIDE
+Status: CANONICAL MANUAL INPUT GUIDE
 
-The production application intentionally uses Gmail read-only scope. Tier 4 supports two explicit seeding modes.
+## Current canonical workflow
 
-## Mode A — Manual seed (default and least privilege)
+Use the combined Gmail trigger and forward-only runtime proof documented in:
 
-Set `TIER4_GMAIL_SEED_MODE=manual`. No Gmail send token is required.
+`docs/runbooks/GMAIL_FORWARD_ONLY_RUNTIME_PROOF.md`
 
-Choose one run ID matching `wpno-tier4-*`. Send exactly five separate messages to the connected mailbox, one for each alias. Each message must contain the same run ID and exactly one canonical alias.
+Generate one eight-message packet:
 
-Required subject pattern:
-
-`WP Network Tier 4 <RUN_ID> <ALIAS>`
-
-Required body pattern:
-
-```text
-<ALIAS>
-WEST_PEEK_E2E_RUN_ID=<RUN_ID>
-Name: Tier 4 <RUN_ID> <ALIAS>
-Email: <RUN_ID>-<ALIAS_WITHOUT_HASH>@example.com
-Company: Tier 4 Proof
-Context: <RUN_ID>-<ALIAS_WITHOUT_HASH>
+```bash
+npm run gmail:forward-only:generate-seeds -- sequoia@westpeek.ventures
 ```
 
-Create one message for each alias:
+That single packet covers all five trigger aliases, pagination, forward-only watermarking, cursor persistence, permanent dedupe, Tier 4 rejection, exact cleanup, and no re-import.
 
-- `#wpnetwork`
-- `#addtowestpeek`
-- `#westpeeknetwork`
-- `#wpdealflow`
-- `#dealflow`
+Do not run a second manual Gmail seed exercise after the combined proof passes.
 
-Do not put multiple aliases in the same manual proof message. The separate hostile suite covers multi-alias determinism.
+## Legacy narrow diagnostic
 
-Run the proof with the exact same `WEST_PEEK_E2E_RUN_ID`. The live test queries Gmail by run ID, proves exactly one row per alias, verifies classification, pending human review, exact Sheet readback, second-run dedupe, exact cleanup, unrelated-row preservation, and unchanged schema fingerprints.
-
-## Mode B — API seed (optional automation)
-
-Set `TIER4_GMAIL_SEED_MODE=api` and provide:
-
-- `TIER4_GMAIL_SEED_ACCESS_TOKEN` with temporary `gmail.send` scope
-- `TIER4_GMAIL_SEED_TO` equal to the connected mailbox
-
-This token is used only by the proof runner to create the five messages. It does not expand the production application's read-only Gmail scope.
+`test:e2e:live-gmail:real` remains available for historical five-alias diagnostics only. It is not the canonical lifecycle proof and is not required in addition to the combined proof.
 
 ## Hard boundary
 
-The test must fail when the selected mode lacks its required inputs. A missing API token must not block manual mode. Manual mode must not claim that the test created the messages itself.
-
-## Retry and interrupted-run behavior
-
-The live proof is resumable. If a prior attempt already created some or all exact-run fixtures, rerun with the same `WEST_PEEK_E2E_RUN_ID`. The sync may legitimately report fewer than five new imports, including zero, while reporting the remainder as duplicates. The test must reconstruct and verify exactly one row per alias from the Sheet, then continue through second-sync dedupe and exact cleanup. Do not send duplicate manual emails merely because a prior test stopped after persistence.
-
-
-## Proof registration requirement
-
-Every Gmail row created with a `WEST_PEEK_E2E_RUN_ID` matching `wpno-tier4-*` must persist `proof_run_id`, `proof_test_id`, `proof_fixture=true`, `proof_status=active`, and `proof_created_at` in the initial append. A pre-existing row missing any of those fields is unregistered and must not be adopted, relabeled, or deleted by proof cleanup. For an unused workbook, use the authenticated workbook reset, reconnect Gmail, resend the five messages with a new run ID, and rerun the proof.
+Production Gmail OAuth remains read-only. Manual seeding requires no Gmail send API token. API seeding may exist as an optional automation lane but is never required for the operator workflow.
