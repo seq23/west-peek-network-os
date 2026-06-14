@@ -59,3 +59,16 @@ The empty-workbook reset is not cleanup. It clears all governed data and rebuild
 Use latest or exact-run cleanup when the run is known. Use historical cleanup only when the operator needs to remove all registered Tier 4 fixtures across multiple or unknown runs.
 
 Successful historical execution must report `remaining_total: 0`.
+
+
+## Physical blank-row compaction
+
+Exact and historical fixture cleanup delete registered records with Google Sheets `deleteDimension`. Fully blank row shells cannot be attributed to a run because the values API returns no ownership metadata. They may be physically compacted only when the operator explicitly supplies this confirmation phrase:
+
+`DELETE_PHYSICAL_BLANK_DATA_ROWS`
+
+Run exact cleanup with physical compaction by setting:
+
+`TIER4_PHYSICAL_DELETE_CONFIRM=DELETE_PHYSICAL_BLANK_DATA_ROWS`
+
+The compaction pass preserves row 1 and every nonblank row, deletes only fully blank rows beneath the header, and reports `blank_rows_deleted` per governed tab. Without the exact phrase, compaction does not run.

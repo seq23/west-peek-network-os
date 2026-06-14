@@ -43,3 +43,16 @@ The orchestrator enforces a minimum 65-second gap between Sheets-heavy live lane
 - provider configured or controlled unavailable state
 
 `BLOCKED` means evidence or live environment is missing. `TIER 4 PASSED` means every hard live lane passed.
+
+
+## Local secret loading and Pitch Lab proof
+
+The Tier 4 orchestrator loads only the missing `PITCH_LAB_SHARED_SECRET`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, and `AI_PROVIDER` values from the gitignored `.env.local`. Secret values are never printed. This prevents the Pitch Lab lane from becoming unproven merely because the operator did not manually `source .env.local` in the current shell.
+
+## Physical blank-row deletion confirmation
+
+To compact fully blank physical rows after exact fixture cleanup, supply the exact phrase:
+
+`TIER4_PHYSICAL_DELETE_CONFIRM=DELETE_PHYSICAL_BLANK_DATA_ROWS`
+
+The pass preserves headers and every nonblank row. It is never implied by ordinary cleanup.

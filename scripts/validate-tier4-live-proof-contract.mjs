@@ -51,6 +51,7 @@ for (const title of [
 if (!laneRunner.includes('playwright') || !laneRunner.includes('--grep')) {
   failures.push('Tier 4 Playwright lane runner must execute a named Playwright test.');
 }
+for (const phrase of ['loadSelectedLocalEnv','PITCH_LAB_SHARED_SECRET','localEnvLoadedKeys']) if (!orchestrator.includes(phrase)) failures.push(`Tier 4 orchestrator missing local secret loading contract: ${phrase}.`);
 for (const phrase of ['TIER4_SHEETS_COOLDOWN_MS', "sheetsCooldownMs < 60000", 'Google Sheets quota cooldown', 'sheetsHeavy: true']) {
   if (!orchestrator.includes(phrase)) failures.push(`Tier 4 orchestrator missing quota-safety contract: ${phrase}.`);
 }

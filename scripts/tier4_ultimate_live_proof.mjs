@@ -11,6 +11,25 @@ fs.mkdirSync(reportsDir, { recursive: true });
 const runId = process.env.WEST_PEEK_E2E_RUN_ID || `wpno-tier4-${new Date().toISOString().replace(/[:.]/g, '-')}`;
 const baseUrl = process.env.POSTDEPLOY_BASE_URL || process.env.PLAYWRIGHT_BASE_URL || process.env.SMOKE_BASE_URL || '';
 const startedAt = new Date();
+function loadSelectedLocalEnv() {
+  const envPath = path.join(root, '.env.local');
+  if (!fs.existsSync(envPath)) return [];
+  const loaded = [];
+  const selected = new Set(['PITCH_LAB_SHARED_SECRET', 'ANTHROPIC_API_KEY', 'ANTHROPIC_MODEL', 'AI_PROVIDER']);
+  for (const rawLine of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+    const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (!match || !selected.has(match[1]) || process.env[match[1]]) continue;
+    let value = match[2].trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+    process.env[match[1]] = value;
+    loaded.push(match[1]);
+  }
+  return loaded;
+}
+const localEnvLoadedKeys = loadSelectedLocalEnv();
+
 const sheetsCooldownMs = Number(process.env.TIER4_SHEETS_COOLDOWN_MS || '65000');
 if (!Number.isFinite(sheetsCooldownMs) || sheetsCooldownMs < 60000) {
   throw new Error('TIER4_SHEETS_COOLDOWN_MS must be a finite number >= 60000 to respect Google Sheets per-minute quotas.');
@@ -107,6 +126,7 @@ function buildReport(currentResults, resultOverride = '') {
     sheetsCooldownMs,
     oauthStorageStateUsed: Boolean(process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE),
     interactiveOAuthRequired: !(process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE),
+    localEnvLoadedKeys,
     result,
     counts: {
       total: currentResults.length,

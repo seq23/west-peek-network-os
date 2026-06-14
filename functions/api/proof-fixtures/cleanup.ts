@@ -1,11 +1,11 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json, readJson } from '../../_shared/json';
-import { deletePhysicalRows, readTabPhysicalRows, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
+import { compactBlankPhysicalRows, deletePhysicalRows, readTabPhysicalRows, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
 type ExpectedFixture = { record_id?: string; proof_run_id?: string; proof_test_id?: string };
 type Body = {
-  scope?: 'exact_run' | 'all_registered_tier4';
+  scope?: 'exact_run' | 'all_registered_tier4' | 'compact_blank_rows';
   run_id?: string;
   tab?: string;
   dry_run?: boolean;
@@ -16,6 +16,7 @@ type Body = {
 
 const EXACT_CONFIRM = 'DELETE_EXACT_REGISTERED_PROOF_FIXTURES';
 const HISTORICAL_CONFIRM = 'DELETE_ALL_REGISTERED_TIER4_PROOF_FIXTURES';
+const COMPACT_CONFIRM = 'DELETE_PHYSICAL_BLANK_DATA_ROWS';
 const TIER4_RUN_PATTERN = /^wpno-tier4-[A-Za-z0-9._:-]+$/;
 const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
 const ID_KEYS: Partial<Record<SheetTab, string>> = {
@@ -28,7 +29,7 @@ export async function onRequestPost({ request, env }: Context) {
   try {
     await requireAuthenticatedUser(request, env);
     const body = await readJson<Body>(request);
-    const scope = body.scope === 'all_registered_tier4' ? 'all_registered_tier4' : 'exact_run';
+    const scope = body.scope === 'all_registered_tier4' ? 'all_registered_tier4' : body.scope === 'compact_blank_rows' ? 'compact_blank_rows' : 'exact_run';
     const runId = String(body.run_id || '').trim();
     const tab = String(body.tab || '').trim() as SheetTab;
     const dryRun = body.dry_run !== false;
@@ -37,6 +38,12 @@ export async function onRequestPost({ request, env }: Context) {
       return json({ ok: false, error_code: 'CLEANUP_RUN_ID_INVALID', error: 'A valid exact wpno-tier4 run_id is required.' }, { status: 400 });
     }
     if (!TABS.includes(tab)) return json({ ok: false, error_code: 'CLEANUP_TAB_INVALID', error: `tab must be one of: ${TABS.join(', ')}` }, { status: 400 });
+    if (scope === 'compact_blank_rows') {
+      if (dryRun) return json({ ok: true, mode: 'dry_run', scope, tab, confirmation_required: COMPACT_CONFIRM, execution_allowed: false });
+      if (body.execute_confirm !== COMPACT_CONFIRM) return json({ ok: false, error_code: 'CLEANUP_CONFIRMATION_REQUIRED', error: `execute_confirm must equal ${COMPACT_CONFIRM}.` }, { status: 400 });
+      const compacted = await compactBlankPhysicalRows(env, tab);
+      return json({ ok: true, mode: 'execute', scope, tab, ...compacted, physical_rows_deleted: compacted.deleted, execution_allowed: false });
+    }
     const idKey = ID_KEYS[tab];
     if (!idKey) return json({ ok: false, error_code: 'CLEANUP_ID_KEY_MISSING', error: `No stable ID key configured for ${tab}.` }, { status: 500 });
 

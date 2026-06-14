@@ -154,6 +154,57 @@ export async function deletePhysicalRows(env: RuntimeEnv, tab: SheetTab, rowNumb
   return { deleted: uniqueRows.length };
 }
 
+
+export async function compactBlankPhysicalRows(env: RuntimeEnv, tab: SheetTab) {
+  assertSheetsConfigured(env);
+  const token = await getServiceAccountToken(env);
+  const metadataResponse = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}?includeGridData=false&fields=sheets.properties`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!metadataResponse.ok) throw new Error(`Google Sheets metadata read failed: ${metadataResponse.status} ${await metadataResponse.text()}`);
+  const metadata = await metadataResponse.json() as { sheets?: Array<{ properties?: { sheetId?: number; title?: string; gridProperties?: { rowCount?: number } } }> };
+  const sheet = metadata.sheets?.find((candidate) => candidate.properties?.title === tab);
+  const sheetId = sheet?.properties?.sheetId;
+  const rowCount = Number(sheet?.properties?.gridProperties?.rowCount || 0);
+  if (!Number.isInteger(sheetId) || rowCount < 1) throw new Error(`Google Sheets tab metadata not found for ${tab}.`);
+
+  const range = encodeURIComponent(`${tab}!A:ZZ`);
+  const valuesResponse = await sheetsFetch(env, token, `values/${range}`);
+  if (!valuesResponse.ok) throw new Error(`Google Sheets physical-row read failed for ${tab}: ${valuesResponse.status} ${await valuesResponse.text()}`);
+  const payload = await valuesResponse.json() as { values?: string[][] };
+  const values = payload.values || [];
+  const header = values[0] || [];
+  assertHeaderArray(tab, header);
+
+  const nonBlankRows = new Set<number>();
+  for (let index = 1; index < values.length; index += 1) {
+    if ((values[index] || []).some((cell) => String(cell || '').trim() !== '')) nonBlankRows.add(index + 1);
+  }
+  const blankRows: number[] = [];
+  for (let rowNumber = 2; rowNumber <= rowCount; rowNumber += 1) {
+    if (!nonBlankRows.has(rowNumber)) blankRows.push(rowNumber);
+  }
+  if (!blankRows.length) return { deleted: 0, remaining_nonblank_rows: nonBlankRows.size, row_count_before: rowCount, row_count_after: rowCount };
+
+  const ranges: Array<{ startIndex: number; endIndex: number }> = [];
+  let start = blankRows[0];
+  let previous = blankRows[0];
+  for (const rowNumber of blankRows.slice(1)) {
+    if (rowNumber === previous + 1) { previous = rowNumber; continue; }
+    ranges.push({ startIndex: start - 1, endIndex: previous });
+    start = previous = rowNumber;
+  }
+  ranges.push({ startIndex: start - 1, endIndex: previous });
+  ranges.sort((a, b) => b.startIndex - a.startIndex);
+  const requests = ranges.map((range) => ({ deleteDimension: { range: { sheetId, dimension: 'ROWS', ...range } } }));
+  const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}:batchUpdate`, {
+    method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ requests })
+  });
+  if (!response.ok) throw new Error(`Google Sheets blank-row compaction failed for ${tab}: ${response.status} ${await response.text()}`);
+  return { deleted: blankRows.length, remaining_nonblank_rows: nonBlankRows.size, row_count_before: rowCount, row_count_after: rowCount - blankRows.length };
+}
+
 export async function batchReadTabs(env: RuntimeEnv, tabs: SheetTab[]) {
   assertSheetsConfigured(env);
   const token = await getServiceAccountToken(env);

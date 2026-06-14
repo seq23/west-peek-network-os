@@ -238,3 +238,16 @@ This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT
 *   **Validation Impact:** Existing `validate:tier4-live-proof-contract` must enforce the cooldown variable, minimum bound, Sheets-heavy lane declarations, and visible cooldown logging.
 *   **Future Reversal Conditions:** Replace fixed spacing only after remote Sheets access is batched/cached sufficiently and live evidence proves the full suite remains below provider quotas.
 
+
+
+### Decision ID: ADM-2026-06-14-03
+* **Date:** 2026-06-14
+* **Status:** Accepted
+* **Context:** Exact fixture cleanup could verify zero owned records while fully blank physical Sheet row shells remained; Pitch Lab proof could become unproven when `.env.local` existed but was not sourced.
+* **Decision:** Add explicit confirmation-gated blank-row physical compaction using `deleteDimension`, and load only selected missing Tier 4 provider keys from gitignored `.env.local`.
+* **Alternatives Considered:** Broad workbook reset; fuzzy historical deletion; requiring manual shell sourcing forever.
+* **Reasoning:** Preserves all nonblank data, keeps destructive compaction operator-authorized, and removes avoidable secret-loading friction without printing secrets.
+* **Tradeoffs:** Compaction removes intentional fully blank spacer rows beneath headers when explicitly confirmed.
+* **Risks Accepted:** Operator must understand the confirmation phrase is destructive to blank row spacing, though not to populated records.
+* **Validation Impact:** Cleanup contract, Tier 4 live-proof contract, TypeScript, build, and reopened-artifact checks must pass.
+* **Future Reversal Conditions:** Replace with provider-native row ownership metadata if Google Sheets exposes attributable blank-row provenance.
