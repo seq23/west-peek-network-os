@@ -20,8 +20,8 @@ const routeContracts = [
   { label: 'Touchpoints', heading: /^Intentional follow-through$/ },
   { label: 'Approvals', heading: /^Approvals Needed$/ },
   { label: 'Notifications', heading: /^Calm reminders, not approvals$/ },
-  { label: 'AI Smoke Test', heading: /^AI Suggestions Ready for Review$/ },
-  { label: 'How to Add People', heading: /^Capture people the way they actually show up\.$/ },
+  { label: 'AI Helper', heading: /^Ask Claude for a reviewable next step$/ },
+  { label: 'App Instructions', heading: /^Capture people the way they actually show up\.$/ },
   { label: 'Settings', heading: /^Connections and operator settings$/ }
 ];
 

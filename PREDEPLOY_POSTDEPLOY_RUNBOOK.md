@@ -13,3 +13,17 @@ Run `npm run release:live-proof` only with the approved vault lifecycle and expl
 ## Authenticated Product Usability Addendum — 2026-06-13
 
 This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.
+
+## Canonical deployed closure
+
+Run `npm run release:close-lifecycle` after GitHub Actions and deployment are green. The enforced order is:
+
+1. `release:postpush`
+2. `release:live-proof`
+3. populated authenticated click audit
+4. exact cleanup
+5. post-cleanup authenticated click audit
+6. final report
+
+The populated audit must use the same proof-run ID as Tier 4 and is the only authenticated audit before cleanup.
+

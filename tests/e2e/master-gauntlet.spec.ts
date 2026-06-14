@@ -160,7 +160,7 @@ test.describe('West Peek Network OS master gauntlet', () => {
   test('capstone: trigger lifecycle proves review-only network and deal-flow intake without automatic execution', async ({ page }) => {
     const h = await boot(page);
 
-    await nav(page, 'How to Add People');
+    await nav(page, 'App Instructions');
     await expect(page.getByRole('main')).toContainText(/#wpnetwork|#addtowestpeek|#westpeeknetwork|#wpdealflow|#dealflow/i);
     await expect(page.getByRole('main')).toContainText(/Human Review Required|Execution Allowed|Nothing sends automatically|does not silently send/i);
 

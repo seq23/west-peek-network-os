@@ -134,3 +134,12 @@ The checklist must be derived from executable updater, environment-doctor, prepu
 ## Network OS Test Environment Requirement
 
 `.env.test.example` is mandatory because `scripts/testing/environment-doctor.mjs`, `run-container-playwright.sh`, and `with-test-env.mjs` require `.env.test` or `.env.test.example`.
+
+## Browser-Unavailable Container Rule
+
+- [ ] Run `npm run test:environment-doctor` once.
+- [ ] If Chromium cannot run, do not repeatedly install it.
+- [ ] Run `npm run validate:container-snapshot-fallback`.
+- [ ] Confirm the fallback report inventories snapshot/screenshot evidence.
+- [ ] Label the artifact `STRUCTURALLY CHECKED — LOCAL BROWSER VALIDATION REQUIRED`.
+- [ ] Require the local updater to run `release:prepush` and generate current browser screenshots.

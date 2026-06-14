@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "repo": "west-peek-network-os",
+  "required_current_strings": [
+    "AI Helper",
+    "Ask AI Helper"
+  ],
+  "forbidden_stale_strings": [
+    "AI Suggestions Ready for Review",
+    "Run AI Helper request",
+    "Requires Google session"
+  ]
+}

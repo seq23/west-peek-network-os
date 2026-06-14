@@ -25,8 +25,8 @@ const navItems: Array<{ page: Page; label: string; icon: React.ReactNode }> = [
   { page: 'touches', label: 'Touchpoints', icon: <ContactRound size={17} /> },
   { page: 'approvals', label: 'Approvals', icon: <CheckCircle2 size={17} /> },
   { page: 'notifications', label: 'Notifications', icon: <Bell size={17} /> },
-  { page: 'ai', label: 'AI Smoke Test', icon: <Sparkles size={17} /> },
-  { page: 'instructions', label: 'How to Add People', icon: <BookOpen size={17} /> },
+  { page: 'ai', label: 'AI Helper', icon: <Sparkles size={17} /> },
+  { page: 'instructions', label: 'App Instructions', icon: <BookOpen size={17} /> },
   { page: 'settings', label: 'Settings', icon: <Settings size={17} /> }
 ];
 
@@ -274,7 +274,7 @@ export function App() {
         {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('touch', id, action); }} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
         {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('approval', id, action); }} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
         {page === 'notifications' && <NotificationsPage rows={data.notifications} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('notification', id, action); }} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
-        {page === 'ai' && <AiReview rows={data.aiSuggestions} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('ai_suggestion', id, action); }} />}
+        {page === 'ai' && <AiReview rows={data.aiSuggestions} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('ai_suggestion', id, action); }} onCreated={async () => { await reloadSheetsSnapshot('AI Helper created a pending approval and notification.', true); setPage('approvals'); }} />}
         {page === 'settings' && <SettingsPanel
           sheetStatus={sheetStatus}
           session={session}
@@ -418,7 +418,7 @@ function ApprovalsPage({ rows, mutationKey, onLifecycle, onApprove, onReject }: 
     <Header eyebrow="Approvals" title="Approvals Needed" subtitle="Pending decisions appear first; completed decisions remain in History." />
     <RouteGuide purpose="Make explicit decisions on sensitive or external actions." primaryAction="Review the payload and approve or reject." secondary="Use History to audit completed decisions." caution="Approval never means automatic payment, sending, or vendor execution." />
     <div className="filter-bar"><div className="segmented"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button><button className={view === 'archived' ? 'active' : ''} onClick={() => setView('archived')}>Archived</button></div><span className="result-count">{visible.length} records</span></div>
-    <div className="list">{visible.length === 0 ? <div className="empty-state"><h3>{view === 'pending' ? 'No approvals need a decision' : 'No decided approvals yet'}</h3></div> : visible.map((a) => { const busy = mutationKey?.startsWith(`approval:${a.approval_id}:`); return <article className="card record-card" key={a.approval_id}><div className="record-header"><div><div className="kicker">{humanize(a.approval_type)} • {humanize(a.risk_level)} risk{a.created_at ? ` • ${relativeWhen(a.created_at)}` : ''}</div><h3>{humanize(a.status)}</h3><p className="muted">Assigned to {a.assigned_to}{a.requested_by ? ` • Requested by ${a.requested_by}` : ''}</p></div><span className={`badge ${a.risk_level === 'high' ? 'warn' : ''}`}>{humanize(a.risk_level)} risk</span></div><p className="record-summary">{clippedText(a.suggested_payload, 1200)}</p>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onApprove(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:approve` ? 'Approving…' : 'Approve'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onReject(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:reject` ? 'Rejecting…' : 'Reject'}</button></footer>}{view === 'history' && a.status !== 'cancelled' && <footer className="action-footer"><button className="btn danger" disabled={Boolean(busy)} onClick={() => { if (window.confirm('Archive this approval record from active history?')) onLifecycle(a.approval_id, 'archive'); }}>Archive record</button></footer>}{view === 'archived' && <footer className="action-footer"><button className="btn" disabled={Boolean(busy)} onClick={() => onLifecycle(a.approval_id, 'restore')}>Restore record</button></footer>}</article>})}</div>
+    <div className="list">{visible.length === 0 ? <div className="empty-state"><h3>{view === 'pending' ? 'No approvals need a decision' : 'No decided approvals yet'}</h3></div> : visible.map((a) => { const busy = mutationKey?.startsWith(`approval:${a.approval_id}:`); return <article className="card record-card" key={a.approval_id}><div className="record-header"><div><div className="kicker">{humanize(a.approval_type)} • {humanize(a.risk_level)} risk{a.created_at ? ` • ${relativeWhen(a.created_at)}` : ''}</div><h3>{humanize(a.status)}</h3><p className="muted">Assigned to {a.assigned_to}{a.requested_by ? ` • Requested by ${a.requested_by}` : ''}</p></div><span className={`badge ${a.risk_level === 'high' ? 'warn' : ''}`}>{humanize(a.risk_level)} risk</span></div><p className="record-summary">{clippedText(parseSuggestedPayload(a.suggested_payload).summary || a.suggested_payload, 700)}</p><details><summary>View full recommendation</summary><p>{clippedText(parseSuggestedPayload(a.suggested_payload).followUp || a.suggested_payload, 1400)}</p></details>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onApprove(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:approve` ? 'Approving…' : 'Approve'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onReject(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:reject` ? 'Rejecting…' : 'Reject'}</button></footer>}{view === 'history' && a.status !== 'cancelled' && <footer className="action-footer"><button className="btn danger" disabled={Boolean(busy)} onClick={() => { if (window.confirm('Archive this approval record from active history?')) onLifecycle(a.approval_id, 'archive'); }}>Archive record</button></footer>}{view === 'archived' && <footer className="action-footer"><button className="btn" disabled={Boolean(busy)} onClick={() => onLifecycle(a.approval_id, 'restore')}>Restore record</button></footer>}</article>})}</div>
   </>;
 }
 
@@ -432,42 +432,53 @@ function NotificationsPage({ rows, mutationKey, onLifecycle, onRead }: { rows: N
   </>;
 }
 
-function AiReview({ rows, mutationKey, onLifecycle }: { rows: AiSuggestionRecord[]; mutationKey: string | null; onLifecycle: (id: string, action: 'archive' | 'restore') => void }) {
-  const [result, setResult] = useState<string>('No live Claude smoke test has run in this browser session. Sign in with Google first, then run this once when you want to spend a tiny live API call.');
+function parseSuggestedPayload(value: unknown) {
+  const normalized = displayText(value, '');
+  try {
+    const parsed = JSON.parse(String(value || '{}')) as Record<string, unknown>;
+    return {
+      summary: displayText(parsed.summary, ''),
+      followUp: displayText(parsed.suggested_follow_up, ''),
+      method: displayText(parsed.suggested_touch_method, ''),
+      priority: displayText(parsed.suggested_priority, ''),
+      tags: Array.isArray(parsed.suggested_tags) ? parsed.suggested_tags.map((item) => displayText(item)).filter(Boolean) : []
+    };
+  } catch {
+    return { summary: normalized, followUp: '', method: '', priority: '', tags: [] as string[] };
+  }
+}
+
+function AiReview({ rows, mutationKey, onLifecycle, onCreated }: { rows: AiSuggestionRecord[]; mutationKey: string | null; onLifecycle: (id: string, action: 'archive' | 'restore') => void; onCreated: () => Promise<void> }) {
+  const [request, setRequest] = useState('Summarize this relationship context and recommend a thoughtful next step.');
+  const [result, setResult] = useState('Ask Claude to summarize, classify, draft, or recommend a next step. Every response becomes a reviewable approval; nothing executes automatically.');
   const [busy, setBusy] = useState(false);
 
-  async function runSmokeTest() {
+  async function runHelper() {
+    const rawText = request.trim();
+    if (!rawText) { setResult('Enter a request or relationship context first.'); return; }
     setBusy(true);
-    setResult('Calling /api/ai/suggestions/create...');
+    setResult('Claude is preparing a reviewable suggestion...');
     try {
       const response = await fetch('/api/ai/suggestions/create', {
-        credentials: 'same-origin',
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          raw_text: '#wpnetwork\nName: Jordan Miles\nCompany: Apex Family Office\nContext: Met at dinner. Wants to review late-stage venture deal flow. Needs a thoughtful email follow-up this week.\nOwner: Sequoia\nNeeds Touch: Yes\nTouch: Email\nPriority: High',
-          source_entity_type: 'intake_queue',
-          source_entity_id: 'browser_smoke_test',
-          requested_by: 'sequoia@westpeek.ventures',
-          suggestion_type: 'follow_up_recommendation'
-        })
+        credentials: 'same-origin', method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ raw_text: rawText, source_entity_type: 'adhoc', source_entity_id: `ai_helper_${Date.now()}`, suggestion_type: 'follow_up_recommendation' })
       });
-      const payload = await response.json();
-      setResult(JSON.stringify(payload, null, 2));
-    } catch (error) {
-      setResult(error instanceof Error ? error.message : 'AI smoke test failed.');
-    } finally {
-      setBusy(false);
-    }
+      const payload = await response.json() as { ok?: boolean; error?: string; approval?: { approval_id?: string }; suggestion?: { reasoning_summary?: string } };
+      if (!response.ok || !payload.ok) throw new Error(payload.error || `AI Helper failed with HTTP ${response.status}`);
+      setResult(`Suggestion created and routed to Approvals${payload.approval?.approval_id ? ` (${payload.approval.approval_id})` : ''}. ${displayText(payload.suggestion?.reasoning_summary, '')}`);
+      await onCreated();
+    } catch (error) { setResult(error instanceof Error ? error.message : 'AI Helper request failed.'); }
+    finally { setBusy(false); }
   }
 
   return <>
-    <Header eyebrow="AI review" title="AI Suggestions Ready for Review" subtitle="AI prepares. Human approves. System never executes AI output without approval." />
-    <RouteGuide purpose="Test and inspect AI recommendations safely." primaryAction="Run one deliberate smoke test only when needed." secondary="Review the returned suggestion and guardrail fields." caution="This route may consume provider credit and never auto-executes." />
-    <div className="grid cols-2">
-      <div className="card"><h3>Live Claude suggestion route</h3><p>Runs one authenticated smoke test against the deployed Cloudflare Function and writes a pending_human_review ai_suggestions row to Google Sheets.</p><p className="muted">Requires Google session. Uses a real Anthropic API call, so it may consume a small amount of Claude API credit.</p><button className="btn primary" disabled={busy} onClick={runSmokeTest}>{busy ? 'Testing Claude...' : 'Run Claude smoke test'}</button><pre>{result}</pre></div>
-      <div className="card"><h3>Human-review guardrail</h3><p>The AI route returns <strong>human_review_required: true</strong> and <strong>execution_allowed: false</strong>. It does not send email, order gifts, merge contacts, delete records, or approve actions.</p><span className="badge warn">Pending human approval only</span></div>
-    </div><div className="list">{rows.filter((row) => row.status !== 'dismissed').map((row) => <article className="card record-card" key={row.suggestion_id}><div className="record-header"><div><div className="kicker">{humanize(row.suggestion_type)} • {humanize(row.status)}</div><h3>{clippedText(row.reasoning_summary, 120, 'AI suggestion')}</h3></div><span className="badge">{humanize(row.confidence)}</span></div><p className="record-summary">{clippedText(row.suggested_payload, 1000)}</p><footer className="action-footer"><button className="btn danger" disabled={Boolean(mutationKey)} onClick={() => onLifecycle(row.suggestion_id, 'archive')}>Dismiss suggestion</button></footer></article>)}</div>
+    <Header eyebrow="AI Helper" title="Ask Claude for a reviewable next step" subtitle="Claude prepares summaries, classifications, drafts, and recommendations. Every result routes to Approvals; nothing executes automatically." />
+    <RouteGuide purpose="Turn relationship context into a structured suggestion." primaryAction="Describe what you want Claude to prepare." secondary="Review the linked approval and notification after creation." caution="AI cannot send, pay, delete, merge, or approve on your behalf." />
+    <div className="grid cols-2 ai-helper-grid">
+      <div className="card ai-helper-request"><h3>Request</h3><label htmlFor="ai-helper-request">What should Claude help with?</label><textarea id="ai-helper-request" value={request} onChange={(event) => setRequest(event.target.value)} rows={9} maxLength={6000} placeholder="Paste relationship context and ask for a summary, follow-up draft, classification, or next-step recommendation." /><div className="helper-row"><span className="muted">{request.length}/6000</span><button className="btn primary" disabled={busy} onClick={runHelper}>{busy ? 'Preparing…' : 'Ask AI Helper'}</button></div><div className="operation-result" role="status">{result}</div></div>
+      <div className="card"><h3>What AI Helper can do</h3><ul className="clean-list"><li>Summarize long email or relationship context.</li><li>Recommend a follow-up and touch method.</li><li>Draft reviewable outreach language.</li><li>Suggest priority, tags, and classification.</li><li>Flag ambiguity for human review.</li></ul><h3>What it cannot do</h3><p>It cannot send email, order gifts, merge contacts, delete records, change ownership, or approve actions.</p><span className="badge warn">Human approval required</span></div>
+    </div>
+    <div className="list">{rows.filter((row) => row.status !== 'dismissed').map((row) => { const payload = parseSuggestedPayload(row.suggested_payload); return <article className="card record-card" key={row.suggestion_id}><div className="record-header"><div><div className="kicker">{humanize(row.suggestion_type)} • {humanize(row.status)}</div><h3>{clippedText(row.reasoning_summary, 160, 'AI suggestion')}</h3></div><span className="badge">{humanize(row.confidence)}</span></div><p className="record-summary">{clippedText(payload.summary || row.reasoning_summary, 560)}</p>{payload.followUp && <details><summary>View recommended follow-up</summary><p>{clippedText(payload.followUp, 1200)}</p><dl className="metadata"><dt>Method</dt><dd>{payload.method || '—'}</dd><dt>Priority</dt><dd>{payload.priority || '—'}</dd><dt>Tags</dt><dd>{payload.tags.join(', ') || '—'}</dd></dl></details>}<footer className="action-footer"><button className="btn danger" disabled={Boolean(mutationKey)} onClick={() => onLifecycle(row.suggestion_id, 'archive')}>Dismiss suggestion</button></footer></article>})}</div>
   </>;
 }
 

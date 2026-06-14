@@ -29,10 +29,11 @@
 `npm run release:close-lifecycle` executes this repo-specific sequence:
 
 1. `npm run release:postpush`
-2. `npm run release:live-proof`
-3. `npm run release:cleanup`
-4. `npm run release:postpush`
-5. `npm run release:report`
+2. `npm run release:live-proof` — Tier 4 postdeploy provider/data testing and controlled test-data population
+3. `npm run postdeploy:authenticated-click-audit` — populated-state audit against the matching Tier 4 run
+4. `npm run release:cleanup` — exact registered-fixture cleanup
+5. `npm run postdeploy:authenticated-click-audit` — post-cleanup integrity audit
+6. `npm run release:report`
 
 The orchestrator:
 
@@ -79,3 +80,19 @@ Before any baseline ZIP is applied, follow:
 `docs/runbooks/PRE_UPDATER_BASELINE_CHECKLIST.md`
 
 A failed required-file, secret, generated-artifact, ZIP-integrity, or root-layout check blocks updater execution.
+
+## 7. Locked lifecycle proof rules
+
+- There is no pre-Tier-4 authenticated route audit. The first authenticated audit runs only after Tier 4 has populated controlled production-shaped test data.
+- Desktop covers every authenticated route. Mobile covers the seven declared high-risk/data-heavy routes.
+- The populated audit must match the successful Tier 4 proof run ID and detect raw HTML, malformed encoding, JSON/debug leakage, unbounded long text, horizontal overflow, and column collisions.
+- The second authenticated audit runs only after exact cleanup and proves real data/UI integrity remains intact.
+
+## Container Browser Unavailable — Mandatory Snapshot/Screenshot Fallback
+
+When `test:environment-doctor` reports that Chromium cannot run in the assistant container, do not attempt repeated browser installation. Run `npm run validate:container-snapshot-fallback` and preserve its report. This fallback validates route/render contracts, production-shaped data normalization, critical UI flows, static Playwright coverage, package integrity, and inventories available screenshot evidence. It does not prove live DOM rendering or responsive layout. Final browser screenshots and full `release:prepush` remain mandatory in the local updater environment.
+
+
+## LOCKED SUITE LIFECYCLE ADDENDUM — 2026-06-14
+
+See `docs/runbooks/SUITE_RELEASE_LIFECYCLE_CONTRACT.md`. The final artifact must pass `release:prepush` before delivery; the updater is a confirmation gate, not the first defect-discovery environment.

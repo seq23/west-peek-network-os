@@ -1,0 +1,20 @@
+{
+  "schema_version": "2.0",
+  "repo": "west-peek-network-os",
+  "browser_surface": true,
+  "authentication_profile": "authenticated",
+  "container_prepush": "npm run release:prepush:container",
+  "local_prepush": "npm run release:prepush:local",
+  "prepush_router": "npm run release:prepush",
+  "local_browser_proof": "npm run release:local-visual-proof",
+  "postpush": "npm run release:postpush",
+  "live_proof": "npm run release:live-proof",
+  "populated_click_audits": [
+    "npm run postdeploy:authenticated-click-audit"
+  ],
+  "cleanup": "npm run release:cleanup",
+  "postcleanup_integrity": "npm run postcleanup:integrity",
+  "report": "npm run release:report",
+  "close_lifecycle": "npm run release:close-lifecycle",
+  "evidence_root": "~/repo-validation-evidence/<repo>/<run-id>/"
+}

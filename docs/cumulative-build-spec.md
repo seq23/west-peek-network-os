@@ -143,7 +143,7 @@ All in-the-moment captures still route to Intake Queue first.
 
 ## 14. Instructions page
 
-Route: `/instructions`. Dashboard link label: How to Add People.
+Route: `/instructions`. Dashboard link label: App Instructions.
 
 Purpose: teach West Peek users exactly how to add someone to the West Peek Network manually, from Gmail, and while emailing them in the moment.
 
@@ -157,9 +157,9 @@ Required examples include fast version, structured version, minimal version, Rel
 
 ## 15. Dashboard quick actions
 
-Dashboard must include: + Add to West Peek Network, Review Intake Queue, Approvals Needed, How to Add People.
+Dashboard must include: + Add to West Peek Network, Review Intake Queue, Approvals Needed, App Instructions.
 
-Dashboard widgets: New Intake, AI Suggestions Ready for Review, Approvals Needed, Notifications, Touches Due This Week, High-Value Contacts Needing Next Step, Recent Contacts, Recently Sent Touches, Likely Duplicates, Gmail Sync Status.
+Dashboard widgets: New Intake, AI Helper, Approvals Needed, Notifications, Touches Due This Week, High-Value Contacts Needing Next Step, Recent Contacts, Recently Sent Touches, Likely Duplicates, Gmail Sync Status.
 
 Tone: calm, operator-grade, no shame, no CRM sludge, no fake sales scoreboard.
 

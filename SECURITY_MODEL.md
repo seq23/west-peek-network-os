@@ -9,7 +9,7 @@ Private internal relationship intelligence app with public signed/public-intake 
 
 ## Private surfaces
 
-The React app shell, dashboard, settings, live spreadsheet hints, intake queue, contacts, touchpoints, approvals, notifications, AI smoke tools, and maintenance actions are private operator surfaces.
+The React app shell, dashboard, settings, live spreadsheet hints, intake queue, contacts, touchpoints, approvals, notifications, AI Helper tools, and maintenance actions are private operator surfaces.
 
 Unauthenticated browser visitors must not see the private app shell.
 

@@ -11,7 +11,10 @@ if (!base || !/^https:\/\//.test(base) || /localhost|127\.0\.0\.1|example\.com/i
 }
 const manifest = JSON.parse(await fs.readFile('config/deployed-route-manifest.json','utf8'));
 const routes = manifest.routes.filter(r => lane === 'all' || (lane === 'role' ? r.authMode === 'role-specific' : r.authMode === lane));
-const runId = process.env.PROOF_RUN_ID || `${manifest.repo}-${lane}-${new Date().toISOString().replace(/[-:.]/g,'')}`;
+const proofRunId = process.env.WEST_PEEK_E2E_RUN_ID || process.env.PROOF_RUN_ID || '';
+const auditPhase = process.env.CLICK_AUDIT_PHASE || 'standalone';
+await validateAuditPhase(auditPhase, proofRunId);
+const runId = process.env.CLICK_AUDIT_RUN_ID || `${proofRunId || manifest.repo}-${lane}-${auditPhase}-${new Date().toISOString().replace(/[-:.]/g,'')}`;
 const out = path.resolve('artifacts/diagnostics/click-audit', runId);
 await fs.mkdir(out,{recursive:true});
 if (!routes.length) {
@@ -25,6 +28,7 @@ if (lane === 'authenticated' || lane === 'role') runAuthStatus();
 const browser = await chromium.launch({headless: process.env.PLAYWRIGHT_HEADED !== '1'});
 const results=[];
 const viewports=[{name:'desktop',width:1280,height:800},{name:'mobile',width:375,height:667}];
+const ROUTE_TIMEOUT_MS=Number(process.env.CLICK_AUDIT_TIMEOUT_MS||12000);
 const globalConsole=[]; const globalHttp=[]; const globalFailed=[];
 
 try {
@@ -34,7 +38,7 @@ try {
       if(storageState) await validateStorageState(storageState,base);
       const context = await browser.newContext({viewport:{width:vp.width,height:vp.height}, ...(storageState ? {storageState} : {})});
       await context.tracing.start({screenshots:true,snapshots:true,sources:true});
-      for (const r of roleRoutes) {
+      for (const r of roleRoutes.filter((route)=>!route.viewports || route.viewports.includes(vp.name))) {
         const page=await context.newPage();
         const consoleErrors=[], failedRequests=[], httpErrors=[];
         page.on('console',m=>{if(m.type()==='error'){const x={routeId:r.id,text:m.text()};consoleErrors.push(x);globalConsole.push(x)}});
@@ -44,16 +48,31 @@ try {
         try {
           const resolved=resolvePath(r.path);
           const url=new URL(resolved,base).toString();
-          const resp=await page.goto(url,{waitUntil:'networkidle',timeout:Number(process.env.CLICK_AUDIT_TIMEOUT_MS||30000)});
+          const resp=await page.goto(url,{waitUntil:'networkidle',timeout:ROUTE_TIMEOUT_MS});
           if(!resp||resp.status()>=400) throw new Error(`HTTP ${resp?.status()??'none'}`);
           if((lane==='authenticated'||lane==='role')&&/\/login|\/auth\//i.test(new URL(page.url()).pathname)) throw new Error('AUTH_SESSION_EXPIRED: protected route fell back to auth wall');
-          await executeSafeActions(page,r);
+          await executeSafeActions(page,r,vp.name);
           await assertIdentity(page,r);
           await assertRenderableSurface(page,r);
           const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth);
           if(overflow) throw new Error('UI_DISPLAY_NORMALIZATION_FAILED: horizontal overflow');
           const body=await page.locator('body').innerText();
-          if(/<script|<div|�|\{\s*"[^"]+"\s*:/i.test(body)) throw new Error('UI_DISPLAY_NORMALIZATION_FAILED: raw payload marker');
+          const displayFindings=await page.evaluate(()=>{
+            const text=document.body.innerText;
+            const rawMarkup=/<(?:script|style|div|span|p|br|table|tr|td|html|body)(?:\s|>)/i.test(text);
+            const mojibake=/�|â€™|â€œ|â€|Â\s/.test(text);
+            const jsonBlob=/\{\s*"[^"]+"\s*:\s*(?:"|\[|\{|true|false|null|\d)/.test(text);
+            const longUnbounded=[...document.querySelectorAll('p,dd,pre,.record-summary')].filter((el)=>{
+              const value=(el.textContent||'').trim(); if(value.length<1200) return false;
+              const style=getComputedStyle(el); const parent=el.closest('details');
+              return !parent && style.overflow!=='auto' && style.maxHeight==='none' && !value.endsWith('…');
+            }).length;
+            const collisions=[...document.querySelectorAll('.record-card,.grid.cols-2>*')].filter((el)=>{
+              const rect=el.getBoundingClientRect(); return rect.right>document.documentElement.clientWidth+1 || rect.left<-1;
+            }).length;
+            return {rawMarkup,mojibake,jsonBlob,longUnbounded,collisions};
+          });
+          if(displayFindings.rawMarkup||displayFindings.mojibake||displayFindings.jsonBlob||displayFindings.longUnbounded||displayFindings.collisions) throw new Error(`UI_DISPLAY_NORMALIZATION_FAILED: ${JSON.stringify(displayFindings)}`);
           if(consoleErrors.length) throw new Error(`console: ${consoleErrors.map(x=>x.text).join(' | ')}`);
           if(failedRequests.length) throw new Error(`request failures: ${failedRequests.map(x=>x.url).join(' | ')}`);
           if(httpErrors.length) throw new Error(`HTTP subresource failures: ${httpErrors.map(x=>`${x.status} ${x.url}`).join(' | ')}`);
@@ -75,7 +94,7 @@ const visited=new Set(results.map(x=>`${x.routeId}:${x.viewport}`));
 const missing=[];
 for(const r of routes) for(const vp of (r.viewports||['desktop','mobile'])) if(!visited.has(`${r.id}:${vp}`)) missing.push({routeId:r.id,viewport:vp});
 if(missing.length) failures.push(...missing.map(x=>({...x,status:'FAIL',error:'manifest route/viewport not visited'})));
-const summary={runId,repo:manifest.repo,lane,targetUrl:base,routeCount:routes.length,expectedChecks,actualChecks:results.length,viewports,verdict:failures.length?'FAIL':'PASS',completionImpact:failures.length?'BLOCKS APPLICABLE RELEASE TIER':'APPLICABLE CLICK AUDIT PASSED',generatedAt:new Date().toISOString()};
+const summary={runId,proofRunId,auditPhase,repo:manifest.repo,lane,targetUrl:base,routeCount:routes.length,expectedChecks,actualChecks:results.length,viewports,verdict:failures.length?'FAIL':'PASS',completionImpact:failures.length?'BLOCKS APPLICABLE RELEASE TIER':'APPLICABLE CLICK AUDIT PASSED',generatedAt:new Date().toISOString()};
 await fs.writeFile(path.join(out,'summary.json'),JSON.stringify(summary,null,2));
 await fs.writeFile(path.join(out,'route-results.json'),JSON.stringify(results,null,2));
 await fs.writeFile(path.join(out,'console-errors.json'),JSON.stringify(globalConsole,null,2));
@@ -87,6 +106,21 @@ await fs.writeFile(path.join(out,'final-verdict.txt'),`${summary.verdict}\n`);
 console.log(`${lane} click audit: ${summary.verdict} (${results.length}/${expectedChecks} checks)`);
 process.exit(failures.length?1:0);
 
+
+async function validateAuditPhase(phase, proofRunId){
+  if(phase==='standalone') return;
+  if(!/^wpno-tier4-[A-Za-z0-9._:-]+$/.test(proofRunId)) throw new Error('PROOF_FIXTURE_MISSING: matching WEST_PEEK_E2E_RUN_ID is required');
+  if(phase==='populated'){
+    const report=JSON.parse(await fs.readFile('reports/tier4/tier4-ultimate-live-proof.json','utf8'));
+    if(report.runId!==proofRunId) throw new Error(`PROOF_FIXTURE_MISSING: Tier 4 report run ${report.runId} does not match ${proofRunId}`);
+    if(!String(report.result||'').startsWith('TIER 4 PASSED')) throw new Error(`PROOF_FIXTURE_MISSING: Tier 4 report is not passed: ${report.result}`);
+    if(report.proofSummary?.aiHelperApprovalNotificationCompleted!==true) throw new Error('PROOF_FIXTURE_MISSING: AI Helper approval/notification Tier 4 proof did not pass');
+  }
+  if(phase==='post-cleanup'){
+    const cleanup=JSON.parse(await fs.readFile('artifacts/diagnostics/cleanup/summary.json','utf8'));
+    if(cleanup.run_id!==proofRunId || cleanup.verdict!=='PASS') throw new Error('CLEANUP_PARTIAL: matching exact cleanup summary is required before post-cleanup audit');
+  }
+}
 
 async function validateStorageState(file,base){
   const raw=JSON.parse(await fs.readFile(file,'utf8'));
@@ -118,9 +152,9 @@ function resolvePath(p){
   return p.replace(/\[([^\]]+)\]|:([A-Za-z0-9_]+)/g,(_,a,b)=>{const key=a||b,env=vars[key]||`PROOF_${key.replace(/([A-Z])/g,'_$1').toUpperCase()}`;const value=process.env[env];if(!value)throw new Error(`PROOF_FIXTURE_MISSING: ${env} required for ${p}`);return encodeURIComponent(value)});
 }
 function isAllowedResponse(url,status,manifest){return (manifest.allowedHttpFailures||[]).some(x=>new RegExp(x.pattern).test(url)&&(!x.statuses||x.statuses.includes(status)))}
-async function executeSafeActions(page,r){
+async function executeSafeActions(page,r,viewport){
   for(const action of (r.safeActions||['navigate'])){
-    if(action==='navigate'&&r.navigationLabel){const rx=new RegExp(`^${escapeRx(r.navigationLabel)}$`);const ctl=page.getByRole('button',{name:rx}).or(page.getByRole('link',{name:rx})).first();await ctl.click();await page.waitForLoadState('networkidle');}
+    if(action==='navigate'&&r.navigationLabel){if(viewport==='mobile'){const menu=page.getByRole('button',{name:/^(Menu|Open menu)$/i}).first();if(await menu.count()){await menu.click({timeout:5000});}}const rx=new RegExp(`^${escapeRx(r.navigationLabel)}$`);const ctl=page.getByRole('button',{name:rx}).or(page.getByRole('link',{name:rx})).first();await ctl.click({timeout:ROUTE_TIMEOUT_MS});await page.waitForLoadState('networkidle',{timeout:ROUTE_TIMEOUT_MS}).catch(()=>{});}
     else if(action==='dismiss-banners'){const btn=page.getByRole('button',{name:/dismiss|close|got it/i}).first();if(await btn.count())await btn.click();}
     else if(action==='expand-details'){const btn=page.getByRole('button',{name:/details|more|expand/i}).first();if(await btn.count())await btn.click();}
     else if(action!=='navigate') throw new Error(`UNSUPPORTED_SAFE_ACTION: ${action}`);

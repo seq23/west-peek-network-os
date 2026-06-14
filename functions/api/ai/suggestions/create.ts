@@ -11,6 +11,7 @@ type CreateSuggestionBody = {
   source_entity_type?: string;
   source_entity_id?: string;
   suggestion_type?: string;
+  proof_run_id?: string;
 };
 
 type TraceStage = {
@@ -63,6 +64,8 @@ export async function onRequestPost({ request, env }: Context) {
   trace.push({ stage: 'input_validation', status: 'passed', detail: `${rawText.length} chars accepted for ${sourceEntityType}/${suggestionType}` });
 
   const now = new Date().toISOString();
+  const proofRunId = cleanProofRunId(body.proof_run_id || request.headers.get('x-west-peek-proof-run-id') || '');
+  const proofMeta = proofRunId ? { proof_run_id: proofRunId, proof_fixture: true, proof_status: 'active', proof_created_at: now, proof_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() } : {};
 
   try {
     const ai = await createRelationshipSuggestion(env, {
@@ -97,16 +100,60 @@ export async function onRequestPost({ request, env }: Context) {
       reviewed_at: '',
       applied_entity_type: '',
       applied_entity_id: '',
-      created_by_agent: 'claude_relationship_assistant'
+      created_by_agent: 'claude_relationship_assistant',
+      ...proofMeta
+    };
+
+    const approval = {
+      approval_id: `approval_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+      created_at: now,
+      updated_at: now,
+      approval_type: 'ai_suggestion_review',
+      source_entity_type: 'ai_suggestion',
+      source_entity_id: suggestion.suggestion_id,
+      requested_by: user.email,
+      assigned_to: 'Sequoia',
+      relationship_owner: 'Sequoia',
+      status: 'pending',
+      risk_level: 'medium',
+      suggested_payload: suggestion.suggested_payload,
+      approved_by: '',
+      approved_at: '',
+      rejected_by: '',
+      rejected_at: '',
+      ...proofMeta
+    };
+    const notification = {
+      notification_id: `notification_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+      created_at: now,
+      updated_at: now,
+      recipient_email: user.email,
+      notification_type: 'ai_suggestion_ready',
+      channel: 'in_app',
+      subject: 'AI Helper suggestion needs review',
+      body_preview: ai.summary,
+      entity_type: 'approval',
+      entity_id: approval.approval_id,
+      priority: 'Normal',
+      status: 'unread',
+      sent_at: now,
+      read_at: '',
+      resolved_at: '',
+      failure_reason: '',
+      ...proofMeta
     };
 
     await appendRecord(env, 'ai_suggestions', suggestion);
-    trace.push({ stage: 'persistence', status: 'passed', detail: 'pending_human_review row appended to ai_suggestions' });
+    await appendRecord(env, 'approvals', approval);
+    await appendRecord(env, 'notifications', notification);
+    trace.push({ stage: 'persistence', status: 'passed', detail: 'AI suggestion, linked pending approval, and unread in-app notification appended' });
     trace.push({ stage: 'execution_guardrail', status: 'passed', detail: 'no email, gift, merge, delete, ownership change, or approval executed' });
 
     return json({
       ok: true,
       suggestion,
+      approval,
+      notification,
       provider: 'anthropic',
       model: env.ANTHROPIC_MODEL || 'claude-3-5-haiku-latest',
       trace_id: traceId,
@@ -146,6 +193,11 @@ function normalizeAllowed(value: string | undefined, allowed: Set<string>, fallb
 
 function cleanIdentifier(value: string | undefined) {
   return String(value || '').trim().replace(/[^a-zA-Z0-9_:-]/g, '').slice(0, 120);
+}
+
+function cleanProofRunId(value: string) {
+  const normalized = String(value || '').trim();
+  return /^wpno-tier4-[A-Za-z0-9._:-]+$/.test(normalized) ? normalized.slice(0, 180) : '';
 }
 
 function redactProviderError(message: string) {

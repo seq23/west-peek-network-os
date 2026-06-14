@@ -4,7 +4,7 @@ test.describe('live production smoke — no provider mocks', () => {
   test('production app shell renders current sidebar and settings surface', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('navigation', { name: /Primary/i })).toBeVisible();
-    for (const label of ['Dashboard', 'Events', 'Add Person', 'Capture Studio', 'Thank-You', 'Intake Queue', 'West Peek Network', 'Touchpoints', 'Approvals', 'Notifications', 'AI Smoke Test', 'How to Add People', 'Settings']) {
+    for (const label of ['Dashboard', 'Events', 'Add Person', 'Capture Studio', 'Thank-You', 'Intake Queue', 'West Peek Network', 'Touchpoints', 'Approvals', 'Notifications', 'AI Helper', 'App Instructions', 'Settings']) {
       await expect(page.getByRole('navigation', { name: /Primary/i }).getByRole('button', { name: new RegExp(`^${label}$`, 'i') })).toBeVisible();
     }
     await page.getByRole('navigation', { name: /Primary/i }).getByRole('button', { name: /^Settings$/i }).click();

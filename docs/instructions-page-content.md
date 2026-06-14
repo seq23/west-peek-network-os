@@ -2,7 +2,7 @@
 
 Route: `/instructions`
 
-Dashboard link label: **How to Add People**
+Dashboard link label: **App Instructions**
 
 The instructions page must teach users how to add people to the West Peek Network without forcing them to understand the whole system first.
 

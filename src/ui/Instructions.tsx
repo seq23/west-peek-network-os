@@ -156,7 +156,7 @@ Due: This week`
 
 export function Instructions() {
   return <>
-    <Header eyebrow="How to Add People" title="Capture people the way they actually show up." subtitle="Event form links, conference email, reply thread, forwarded email, notes, cards, screenshots, voice notes, and thank-you touches all land in review first. Capture can be partial; enrichment comes later." />
+    <Header eyebrow="App Instructions" title="Capture people the way they actually show up." subtitle="Event form links, conference email, reply thread, forwarded email, notes, cards, screenshots, voice notes, and thank-you touches all land in review first. Capture can be partial; enrichment comes later." />
     <RouteGuide purpose="Choose the lowest-friction capture route for the situation." primaryAction="Start with the quick decision guide, then copy the exact example you need." caution="Every route lands in review before becoming final or executable." />
 
     <div className="grid cols-2">

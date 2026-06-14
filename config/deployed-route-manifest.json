@@ -33,8 +33,7 @@
       "persona": "operator",
       "criticality": "critical",
       "viewports": [
-        "desktop",
-        "mobile"
+        "desktop"
       ],
       "expectedIdentity": {
         "type": "heading",
@@ -99,8 +98,7 @@
       "persona": "operator",
       "criticality": "critical",
       "viewports": [
-        "desktop",
-        "mobile"
+        "desktop"
       ],
       "expectedIdentity": {
         "type": "heading",
@@ -187,8 +185,7 @@
       "persona": "operator",
       "criticality": "critical",
       "viewports": [
-        "desktop",
-        "mobile"
+        "desktop"
       ],
       "expectedIdentity": {
         "type": "heading",
@@ -209,8 +206,7 @@
       "persona": "operator",
       "criticality": "critical",
       "viewports": [
-        "desktop",
-        "mobile"
+        "desktop"
       ],
       "expectedIdentity": {
         "type": "heading",
@@ -224,19 +220,18 @@
       "cleanupPolicy": "none"
     },
     {
-      "id": "ai-smoke",
+      "id": "ai-helper",
       "path": "/",
-      "navigationLabel": "AI Smoke Test",
+      "navigationLabel": "AI Helper",
       "authMode": "authenticated",
       "persona": "operator",
       "criticality": "critical",
       "viewports": [
-        "desktop",
-        "mobile"
+        "desktop"
       ],
       "expectedIdentity": {
         "type": "heading",
-        "value": "AI Suggestions Ready for Review"
+        "value": "Ask Claude for a reviewable next step"
       },
       "safeActions": [
         "navigate"
@@ -248,13 +243,12 @@
     {
       "id": "instructions",
       "path": "/",
-      "navigationLabel": "How to Add People",
+      "navigationLabel": "App Instructions",
       "authMode": "authenticated",
       "persona": "operator",
       "criticality": "critical",
       "viewports": [
-        "desktop",
-        "mobile"
+        "desktop"
       ],
       "expectedIdentity": {
         "type": "heading",

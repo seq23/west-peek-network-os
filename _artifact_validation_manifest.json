@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "repo": "west-peek-network-os",
+  "profile": "container",
+  "release_prepush_container": "PASS",
+  "ui_test_parity": "PASS",
+  "browser_suite_contract": "PASS",
+  "artifact_source_parity": "PASS",
+  "reopened_container_validation": "PASS",
+  "local_browser_validation": "NOT_EXECUTED",
+  "required_local_command": "npm run release:prepush:local",
+  "status": "FIRST-COMMAND-READY",
+  "repair_note": "AI Helper E2E now validates safety fields in API response and human-readable approval state in UI."
+}

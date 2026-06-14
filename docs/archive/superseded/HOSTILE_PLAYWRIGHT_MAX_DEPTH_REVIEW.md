@@ -27,7 +27,7 @@ Covered:
 - Capture Studio image OCR route
 - Capture Studio voice route
 - Thank-you drafting
-- AI Smoke Test UI and pending human-review suggestion
+- AI Helper UI and pending human-review suggestion
 - Settings refresh connection status
 - Settings refresh from Google Sheets
 - Settings sheet maintenance

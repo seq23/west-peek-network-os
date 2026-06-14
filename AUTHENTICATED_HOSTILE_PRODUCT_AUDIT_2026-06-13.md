@@ -39,7 +39,7 @@ Provider/user text was rendered as literal HTML markup in dashboard cards and re
 ### 5. AI suggestions had no operator review inventory
 **Severity:** High
 
-The UI exposed an AI smoke-test button but did not surface persisted `ai_suggestions` rows for review or dismissal.
+The UI exposed an AI Helper button but did not surface persisted `ai_suggestions` rows for review or dismissal.
 
 **Correction:** Added AI suggestions to the live Sheet snapshot model and rendered pending suggestions with a dismiss lifecycle action.
 

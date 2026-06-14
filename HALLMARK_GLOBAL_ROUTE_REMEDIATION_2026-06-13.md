@@ -31,7 +31,7 @@ The West Peek visual system remains black/ink, white/cream, and orange. No new p
 - **Approvals:** strengthened pending/history separation, risk hierarchy, and explicit approval/rejection actions
 - **Notifications:** added calm empty state, readable status/priority treatment, and single explicit mark-read action
 - **AI Review:** clarified provider-credit cost, review-only behavior, and no-auto-execution guardrail
-- **How to Add People:** added route-choice guidance and lowest-friction capture framing
+- **App Instructions:** added route-choice guidance and lowest-friction capture framing
 - **Settings:** prioritized degraded connections, separated routine refresh from maintenance, and preserved shared-inbox setup guidance
 
 ## Validation

@@ -219,7 +219,7 @@ No automated payment/order is implemented by design.
 
 Trace:
 
-1. Authenticated operator runs AI smoke test.
+1. Authenticated operator runs AI Helper.
 2. Claude route creates pending AI suggestion.
 3. Suggestion appends to `ai_suggestions`.
 4. Response includes `internal_data_trace`.

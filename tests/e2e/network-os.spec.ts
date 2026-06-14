@@ -45,8 +45,8 @@ const sidebar = [
   'Touchpoints',
   'Approvals',
   'Notifications',
-  'AI Smoke Test',
-  'How to Add People',
+  'AI Helper',
+  'App Instructions',
   'Settings'
 ] as const;
 
@@ -61,8 +61,8 @@ const contentBySidebar: Record<(typeof sidebar)[number], RegExp> = {
   Touchpoints: /Intentional follow-through|Handwritten note fulfillment|pending_approval/i,
   Approvals: /Approvals Needed|Needs decision|Approve/i,
   Notifications: /Calm reminders|Approval needed|Notifications/i,
-  'AI Smoke Test': /AI Suggestions Ready for Review|Claude smoke test|AI Suggestions/i,
-  'How to Add People': /How to add people|Canonical trigger|#wpnetwork/i,
+  'AI Helper': /Ask Claude for a reviewable next step|AI Helper/i,
+  'App Instructions': /How to add people|Canonical trigger|#wpnetwork/i,
   Settings: /Connections and operator settings|Google Gmail OAuth|Google Sheets/i
 };
 
@@ -433,7 +433,7 @@ test('surface: dashboard exposes primary West Peek Network actions', async ({ pa
 test('surface: all major views are reachable', async ({ page }) => { for (const label of sidebar) { await nav(page, label); await mainText(page, contentBySidebar[label]); } });
 test('dashboard action: Add Person card opens Add Person', async ({ page }) => { await nav(page, 'Dashboard'); await page.getByRole('main').getByRole('button', { name: /Add Person/i }).first().click(); await mainText(page, /Add to West Peek Network/i); });
 test('dashboard journey: voice note path reaches Capture Studio', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /voice notes|Capture/i); await nav(page, 'Capture Studio'); await mainText(page, /Voice note transcription|cards, screenshots, and voice notes/i); });
-test('dashboard journey: #wpnetwork path reaches How to Add People', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /#wpnetwork|#wpdealflow|#dealflow|canonical trigger|Intake/i); await nav(page, 'How to Add People'); await mainText(page, /Canonical trigger|#wpnetwork|#wpdealflow|#dealflow/i); });
+test('dashboard journey: #wpnetwork path reaches App Instructions', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /#wpnetwork|#wpdealflow|#dealflow|canonical trigger|Intake/i); await nav(page, 'App Instructions'); await mainText(page, /Canonical trigger|#wpnetwork|#wpdealflow|#dealflow/i); });
 
 test('transaction+persistence: manual add persists after reload and duplicate email is blocked', async ({ page }) => {
   await nav(page, 'Add Person');
@@ -571,8 +571,22 @@ test('capture studio: image OCR route preserves provider trace and human review'
 test('capture studio: voice note route preserves provider trace and human review', async ({ page }) => { await nav(page, 'Capture Studio'); await page.locator('input[type="file"]').nth(1).setInputFiles('tests/e2e/fixtures/voice.webm'); await page.getByPlaceholder(/This was after/i).fill('Voice note context.'); await page.getByRole('main').getByRole('button', { name: /Transcribe voice note to Intake Queue/i }).click(); await mainText(page, /human_review_required|execution_allowed|provider_trace/i); });
 test('thank-you studio: drafts touch without automatic execution', async ({ page }) => { await nav(page, 'Thank-You'); await page.locator('input[name="recipient_name"]').fill('Thank You E2E'); await page.getByPlaceholder('jordan@example.com').fill('thanks-e2e@example.com'); await page.getByPlaceholder('Apex Family Office').fill('Thanks Capital'); await page.getByRole('main').getByRole('button', { name: /^Draft \+ save thank-you touch$/i }).click(); await mainText(page, /Thank you|execution_allowed|human_review_required/i); });
 
-test('surface: AI Review and Settings communicate authenticated provider-gated layers', async ({ page }) => { await nav(page, 'AI Smoke Test'); await mainText(page, /Requires Google session|Google session/i); await mainText(page, /Claude|Anthropic|AI Suggestions/i); });
-test('AI smoke test: creates pending human-review suggestion without auto execution', async ({ page }) => { await nav(page, 'AI Smoke Test'); await page.getByRole('main').getByRole('button', { name: /^Run Claude smoke test$/i }).click(); await mainText(page, /suggestion_id|human_review_required|execution_allowed/i); });
+test('surface: AI Review and Settings communicate authenticated provider-gated layers', async ({ page }) => { await nav(page, 'AI Helper'); await mainText(page, /Claude|reviewable|human approval/i); await mainText(page, /Claude|Anthropic|AI Suggestions/i); });
+test('AI Helper: creates pending human-review suggestion without auto execution', async ({ page }) => {
+  await nav(page, 'AI Helper');
+  const responsePromise = page.waitForResponse((response) => response.url().includes('/api/ai/suggestions/create') && response.request().method() === 'POST');
+  await page.getByRole('main').getByRole('button', { name: /^Ask AI Helper$/i }).click();
+  const response = await responsePromise;
+  expect(response.ok()).toBeTruthy();
+  const payload = await response.json() as { suggestion_id?: string; human_review_required?: boolean; execution_allowed?: boolean };
+  expect(payload.suggestion_id).toBeTruthy();
+  expect(payload.human_review_required).toBe(true);
+  expect(payload.execution_allowed).toBe(false);
+  await mainText(page, /AI Helper created a pending approval and notification/i);
+  await expect(page.getByRole('main').getByRole('heading', { name: /Approvals Needed/i })).toBeVisible();
+  await mainText(page, /Pending/);
+  await mainText(page, /Approval never means automatic payment, sending, or vendor execution/i);
+});
 
 test('settings: refresh connection status shows OAuth and browser session state', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Refresh connection status$/i }).click(); await mainText(page, /Gmail OAuth|Browser session|Connected|signed in/i); });
 test('settings: refresh from Google Sheets loads snapshot', async ({ page }) => { await nav(page, 'Settings'); await page.getByRole('main').getByRole('button', { name: /^Refresh from Google Sheets$/i }).click(); await mainText(page, /Refreshed from Google Sheets|Live Google Sheets snapshot loaded/i); });
@@ -589,15 +603,15 @@ test('surface: deal-flow guidance appears across Dashboard Add Person Intake Ins
   await nav(page, 'Intake Queue');
   await mainText(page, /#wpdealflow\s*\/\s*#dealflow|founder-deal-flow|prospective deal flow/i);
 
-  await nav(page, 'How to Add People');
+  await nav(page, 'App Instructions');
   await mainText(page, /Deal-flow email trigger rule|#wpdealflow|#dealflow|Human Review Required|Execution Allowed/i);
 
   await nav(page, 'Settings');
   await mainText(page, /#wpdealflow|#dealflow|founder \/ prospective deal flow/i);
 });
 
-test('instructions: canonical triggers and capture route examples are present', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /#wpnetwork/i); await mainText(page, /#addtowestpeek/i); await mainText(page, /#westpeeknetwork/i); await mainText(page, /#wpdealflow/i); await mainText(page, /#dealflow/i); await mainText(page, /business card|screenshot/i); await mainText(page, /voice note/i); });
-test('instructions: no automatic execution guardrails are visible', async ({ page }) => { await nav(page, 'How to Add People'); await mainText(page, /Human approval is required before|does not silently send|Nothing sends automatically/i); });
+test('instructions: canonical triggers and capture route examples are present', async ({ page }) => { await nav(page, 'App Instructions'); await mainText(page, /#wpnetwork/i); await mainText(page, /#addtowestpeek/i); await mainText(page, /#westpeeknetwork/i); await mainText(page, /#wpdealflow/i); await mainText(page, /#dealflow/i); await mainText(page, /business card|screenshot/i); await mainText(page, /voice note/i); });
+test('instructions: no automatic execution guardrails are visible', async ({ page }) => { await nav(page, 'App Instructions'); await mainText(page, /Human approval is required before|does not silently send|Nothing sends automatically/i); });
 
-test('surface: mobile viewport keeps primary actions reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await expect(page.getByRole('button', { name: /^Menu$/i })).toBeVisible(); await nav(page, 'Dashboard'); await nav(page, 'Add Person'); await nav(page, 'Intake Queue'); await nav(page, 'How to Add People'); });
+test('surface: mobile viewport keeps primary actions reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await expect(page.getByRole('button', { name: /^Menu$/i })).toBeVisible(); await nav(page, 'Dashboard'); await nav(page, 'Add Person'); await nav(page, 'Intake Queue'); await nav(page, 'App Instructions'); });
 test('mobile: every left-sidebar route remains reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); for (const label of sidebar) { await nav(page, label); await mainText(page, contentBySidebar[label]); } });

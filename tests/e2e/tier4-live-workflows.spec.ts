@@ -358,6 +358,48 @@ test.describe('Tier 4 deployed live workflows', () => {
     expect(String(touch?.fulfillment_mode || '')).toBe('self');
   });
 
+  test('ai helper approval notification live', async ({ request }) => {
+    const marker = unique('tier4-ai-helper');
+    const runId = process.env.WEST_PEEK_E2E_RUN_ID || '';
+    expect(runId).toMatch(/^wpno-tier4-/);
+
+    const create = await request.post('/api/ai/suggestions/create', {
+      headers: { 'x-west-peek-proof-run-id': runId },
+      data: {
+        raw_text: `Summarize this relationship context and recommend a reviewable follow-up. Marker ${marker}. <div>raw provider html must never render as markup</div> â€™ {"debug":true}`,
+        source_entity_type: 'adhoc',
+        source_entity_id: marker,
+        suggestion_type: 'follow_up_recommendation',
+        proof_run_id: runId
+      }
+    });
+
+    expect(create.ok(), await create.text()).toBeTruthy();
+    const created = await create.json();
+    expect(created.execution_allowed).toBe(false);
+    expect(created.human_review_required).toBe(true);
+    expect(created.suggestion?.suggestion_id).toBeTruthy();
+    expect(created.approval?.approval_id).toBeTruthy();
+    expect(created.notification?.notification_id).toBeTruthy();
+
+    const data = await snapshot(request);
+    const suggestion = (data.ai_suggestions || []).find((row) => String(row.suggestion_id || '') === String(created.suggestion.suggestion_id));
+    const approval = (data.approvals || []).find((row) => String(row.approval_id || '') === String(created.approval.approval_id));
+    const notification = (data.notifications || []).find((row) => String(row.notification_id || '') === String(created.notification.notification_id));
+
+    expect(suggestion).toBeTruthy();
+    expect(String(suggestion?.status || '')).toBe('pending_human_review');
+    expect(String(suggestion?.proof_run_id || '')).toBe(runId);
+    expect(approval).toBeTruthy();
+    expect(String(approval?.status || '')).toBe('pending');
+    expect(String(approval?.source_entity_id || '')).toBe(String(created.suggestion.suggestion_id));
+    expect(String(approval?.proof_run_id || '')).toBe(runId);
+    expect(notification).toBeTruthy();
+    expect(String(notification?.status || '')).toBe('unread');
+    expect(String(notification?.entity_id || '')).toBe(String(created.approval.approval_id));
+    expect(String(notification?.proof_run_id || '')).toBe(runId);
+  });
+
   test('public event live', async ({ browser, request }) => {
     const marker = unique('tier4-event');
     const email = `${marker}@example.com`;

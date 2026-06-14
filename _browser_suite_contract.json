@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "repo": "west-peek-network-os",
+  "browser_suite": {
+    "command": "npm run test:e2e:container",
+    "projects": [
+      "container-chromium"
+    ],
+    "required_failed": 0,
+    "registered_skips": [
+      "postdeploy public event deployed-only lane",
+      "postdeploy Pitch Lab signed profile and packet deployed-only lane"
+    ],
+    "required_before_push": true,
+    "evidence_required": [
+      "screenshots",
+      "traces",
+      "summary.json"
+    ],
+    "expected_collected": 55,
+    "expected_skipped": 2
+  }
+}

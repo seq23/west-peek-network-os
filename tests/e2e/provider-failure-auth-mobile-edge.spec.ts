@@ -60,8 +60,8 @@ test.describe('provider failure, auth/session, mobile, and edge-case E2E', () =>
   });
 
   test('Claude, OCR, and voice provider failures are controlled and do not fake success', async ({ page }) => {
-    await nav(page, 'AI Smoke Test');
-    await page.getByRole('main').getByRole('button', { name: /^Run Claude smoke test$/i }).click();
+    await nav(page, 'AI Helper');
+    await page.getByRole('main').getByRole('button', { name: /^Ask AI Helper$/i }).click();
     await expect(page.getByRole('main')).toContainText(/provider unavailable|Nothing executed|Claude/i);
     await expect(page.getByRole('main')).not.toContainText(/suggestion approved|execution_allowed[^\n]+true/i);
 
@@ -74,7 +74,7 @@ test.describe('provider failure, auth/session, mobile, and edge-case E2E', () =>
   test('mobile critical workflows remain reachable beyond the sidebar smoke', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
-    for (const label of ['Dashboard', 'Add Person', 'Capture Studio', 'Intake Queue', 'How to Add People', 'Settings']) {
+    for (const label of ['Dashboard', 'Add Person', 'Capture Studio', 'Intake Queue', 'App Instructions', 'Settings']) {
       await nav(page, label);
       await expect(page.getByRole('main')).toBeVisible();
     }

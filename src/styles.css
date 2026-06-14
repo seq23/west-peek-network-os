@@ -315,3 +315,12 @@ body { background: radial-gradient(circle at 15% 0%, rgba(240,90,26,.14), transp
   .record-header > div { min-width: 0; }
   .action-footer .btn { width: 100%; justify-content: center; }
 }
+
+
+/* AI Helper and populated-data flow hardening */
+.ai-helper-request textarea{width:100%;resize:vertical;min-height:180px;max-height:420px;overflow:auto}
+.helper-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px}
+.clean-list{padding-left:20px;line-height:1.65}
+.ai-helper-grid>*{min-width:0}
+.record-card details p,.record-card details dd,.record-card details pre{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+@media (max-width:760px){.helper-row{align-items:stretch;flex-direction:column}.helper-row .btn{width:100%}.ai-helper-request textarea{min-height:220px}}
