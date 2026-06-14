@@ -149,3 +149,11 @@ Deprecated Pitch Lab payloads using `capture_type: pitch_practice`, `trigger_int
 ## Current Network Database Intake Rule — 2026-06-10
 
 Self-submitted user details auto-write to Network OS. Public event forms use `capture_type=event_registration`, upsert/link a profile by email, append an `intake_queue` event, and set `execution_allowed=false`. Pitch Lab profile leads use `founder_profile_lead`; Pitch Lab packets use `founder_story_packet`; both use `trigger_intent=relationship_routing`. Approval gates downstream action only; approval must not gate intake persistence.
+
+### Gmail lifecycle records in `provider_replay_guard`
+
+- `provider=gmail_ingestion_ledger`: `signature_hash` is `<mailbox>:<gmail_message_id>`, `source_ip` stores the approved mailbox, `submitted_at` stores the Gmail internal timestamp, and `status` records the terminal ingestion outcome.
+- `provider=gmail_sync_watermark`: `source_ip` and `signature_hash` identify the approved mailbox, while `submitted_at` is the last successful normal-sync boundary.
+- `provider=gmail_sync_cursor`: `source_ip` identifies the approved mailbox, `signature_hash` stores the provider continuation token, `submitted_at` stores the server-owned sync-start boundary, and `status` is `active` or `completed`.
+
+These rows are permanent production evidence and are excluded from Tier 4 cleanup.

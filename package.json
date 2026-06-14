@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "West Peek Network OS — private internal relationship intelligence app for adding people to the West Peek Network.",
+  "description": "West Peek Network OS \u2014 private internal relationship intelligence app for adding people to the West Peek Network.",
   "scripts": {
     "build": "tsc -b && vite build",
     "cf:secrets:audit": "node scripts/cloudflare-secret-audit.mjs",
@@ -44,6 +44,8 @@
     "validate:triggers": "node scripts/validate-trigger-product-promises.mjs",
     "validate:validator-admission": "node scripts/validate-validator-admission.mjs",
     "test:e2e:live-gmail:real": "LIVE_GMAIL_TRIGGER_E2E=1 playwright test tests/e2e/live-gmail-trigger-ingestion.spec.ts --trace on --workers=1",
+    "test:e2e:live-gmail-forward-only:real": "LIVE_GMAIL_FORWARD_ONLY_E2E=1 playwright test tests/e2e/live-gmail-forward-only-runtime.spec.ts --trace on --workers=1",
+    "release:gmail-forward-only-proof": "npm run test:e2e:live-gmail-forward-only:real",
     "test:e2e:public-pitchlab-real": "playwright test tests/e2e/public-event-and-pitchlab.spec.ts --grep \"postdeploy Pitch Lab signed profile and packet\" --trace on --workers=1",
     "test:e2e:local-functions-headed": "PLAYWRIGHT_HEADED=1 playwright test tests/e2e/provider-failure-auth-mobile-edge.spec.ts tests/e2e/public-event-and-pitchlab.spec.ts --headed --trace on --workers=1",
     "test:e2e:maxdepth-headed": "PLAYWRIGHT_HEADED=1 playwright test tests/e2e/master-gauntlet.spec.ts tests/e2e/network-os.spec.ts tests/e2e/provider-failure-auth-mobile-edge.spec.ts --headed --trace on --workers=1",

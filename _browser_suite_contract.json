@@ -17,7 +17,7 @@
       "traces",
       "summary.json"
     ],
-    "expected_collected": 59,
+    "expected_collected": 63,
     "expected_skipped": 2
   }
 }

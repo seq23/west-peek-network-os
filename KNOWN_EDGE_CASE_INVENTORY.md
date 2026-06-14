@@ -62,3 +62,8 @@ Date: 2026-06-11
 - Partial mailbox failures are reported without aborting other connected mailboxes.
 - Rapid repeated activation is locked to one browser-side batch.
 - Successful sync followed by snapshot-refresh failure reports both outcomes explicitly.
+
+- Gmail sync provider backlog / Worker subrequest ceiling: one invocation is capped at five messages and one Gmail search page; UI follows `next_page_token` sequentially. Connected provider failures must not render as disconnected mailboxes.
+
+- Gmail sync: Cloudflare-generated non-JSON failure responses must be reported as connected/attempted mailbox sync failures unless the API explicitly returns `MAILBOX_NOT_CONNECTED`.
+- Gmail sync: repeated continuation tokens must stop the mailbox loop immediately.

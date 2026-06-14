@@ -1,4 +1,4 @@
-import { appendRecord, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
+import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
 import { badRequest, cookieHeader, getCookie, isAllowedEmail, requireAuthEnv, verifySignedValue, createSignedValue, type AuthEnv } from '../../_shared/auth';
 import { encryptTokenPayload } from '../../_shared/tokens';
 
@@ -68,6 +68,19 @@ export async function onRequestGet({ request, env }: Context) {
 
   try {
     await appendRecord(env, 'oauth_tokens', tokenRecord);
+    const replayRows = await readTab(env, 'provider_replay_guard');
+    const hasWatermark = replayRows.some((row) => String(row.provider || '') === 'gmail_sync_watermark' && String(row.source_ip || '').toLowerCase() === email);
+    if (!hasWatermark) {
+      await appendRecord(env, 'provider_replay_guard', {
+        replay_id: `gmail_watermark_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+        created_at: now,
+        provider: 'gmail_sync_watermark',
+        signature_hash: email,
+        submitted_at: now,
+        source_ip: email,
+        status: 'initial_connection'
+      });
+    }
   } catch (error) {
     return sheetsUnavailable(error);
   }

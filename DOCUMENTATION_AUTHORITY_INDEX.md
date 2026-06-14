@@ -81,6 +81,7 @@ This index classifies documentation without deleting historical evidence. Only r
 - `docs/runbooks/deployment-cloudflare.md`
 - `docs/runbooks/environment-setup.md`
 - `docs/runbooks/GMAIL_SYNC_UI_RUNBOOK.md`
+- `docs/runbooks/GMAIL_FORWARD_ONLY_RUNTIME_PROOF.md` — canonical deployed normal-mode Gmail lifecycle proof.
 - `docs/runbooks/postdeploy.md`
 - `docs/runbooks/validation-operations.md`
 - `docs/secrets-and-cloudflare.md`

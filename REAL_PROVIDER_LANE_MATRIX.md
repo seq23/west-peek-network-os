@@ -30,3 +30,8 @@ Tier 4 is postdeploy only and has these required lanes:
 Provider proof must be behavior-based. Gmail, Sheets, Pitch Lab, AI/OCR/voice, and OAuth cannot be claimed from static validators.
 
 Provider lane anchors: /api/gmail/sync; Gmail trigger sync; operator-seeded Gmail; Google Sheets read/write; Claude Vision OCR; Google Speech-to-Text; execution_allowed=false; human_review_required; Header spoofing is not accepted; Tier 4 is postdeploy only; Ultimate Live E2E provider + data proof.
+
+
+## Gmail forward-only deployed proof
+
+`npm run release:gmail-forward-only-proof` is the admitted normal-mode provider proof after Gmail ingestion lifecycle changes. It uses real Gmail, deployed Cloudflare Workers, permanent Sheets ledger/watermark/cursor records, exact Intake cleanup, and a second sync to prove deleted Intake rows do not re-import. Tier 4 proof mode is not a substitute for this lane.

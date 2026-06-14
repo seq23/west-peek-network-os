@@ -638,7 +638,7 @@ test('gmail sync UI: Settings distinguishes Sheets refresh from Gmail import and
   await mainText(page, /Personal mailboxes import only canonical trigger messages/i);
   await page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i }).click();
   await mainText(page, /Checked: info@westpeek\.ventures, sequoia@westpeek\.ventures/i);
-  await mainText(page, /Imported 3; duplicates skipped 2; message failures 0/i);
+  await mainText(page, /Imported 3; duplicates skipped 2; proof fixtures rejected 0; message failures 0/i);
   await mainText(page, /Not connected: scooter@westpeek\.ventures/i);
   expect(requested).toEqual(['info@westpeek.ventures', 'sequoia@westpeek.ventures', 'scooter@westpeek.ventures']);
 });
@@ -665,6 +665,94 @@ test('gmail sync UI hostile: malformed and failed mailbox responses do not block
   await mainText(page, /Checked: sequoia@westpeek\.ventures/i);
   await mainText(page, /info@westpeek\.ventures: HTTP 502/i);
   await mainText(page, /Not connected: scooter@westpeek\.ventures/i);
+});
+
+
+
+test('gmail sync UI hostile: continuation batches stay bounded and connected provider failures are named correctly', async ({ page }) => {
+  const calls: Array<{ mailbox: string; pageToken: string; maxResults: number }> = [];
+  await page.unroute('**/api/gmail/sync');
+  await page.route('**/api/gmail/sync', async (route) => {
+    const body = route.request().postDataJSON() as { mailbox_email?: string; page_token?: string; sync_started_at?: string; max_results?: number };
+    const mailbox = String(body.mailbox_email || '').toLowerCase();
+    const pageToken = String(body.page_token || '');
+    calls.push({ mailbox, pageToken, maxResults: Number(body.max_results || 0) });
+    expect(body.page_token).toBeUndefined();
+    expect(body.sync_started_at).toBeUndefined();
+    if (mailbox === 'info@westpeek.ventures') return send(route, { ok: false, mailbox, mailbox_connected: false, error_code: 'MAILBOX_NOT_CONNECTED' }, 409);
+    if (mailbox === 'scooter@westpeek.ventures') return send(route, { ok: false, mailbox, mailbox_connected: true, error_code: 'GMAIL_SYNC_PROVIDER_LIMIT', error: 'Too many subrequests by single Worker invocation.' }, 503);
+    const sequoiaCalls = calls.filter((call) => call.mailbox === 'sequoia@westpeek.ventures').length;
+    if (sequoiaCalls === 1) return send(route, { ok: true, mailbox, mailbox_connected: true, imported_count: 1, skipped_duplicate_count: 0, failed_message_count: 0, has_more: true, next_page_token: 'page-2' });
+    return send(route, { ok: true, mailbox, mailbox_connected: true, imported_count: 1, skipped_duplicate_count: 1, failed_message_count: 0, has_more: false, next_page_token: '' });
+  });
+  await nav(page, 'Dashboard');
+  await page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i }).click();
+  await mainText(page, /Checked: sequoia@westpeek\.ventures/i);
+  await mainText(page, /Imported 2; duplicates skipped 1; proof fixtures rejected 0; message failures 0/i);
+  await mainText(page, /Connected but failed: scooter@westpeek\.ventures/i);
+  await mainText(page, /Too many subrequests by single Worker invocation/i);
+  expect(calls).toEqual([
+    { mailbox: 'info@westpeek.ventures', pageToken: '', maxResults: 5 },
+    { mailbox: 'sequoia@westpeek.ventures', pageToken: '', maxResults: 5 },
+    { mailbox: 'sequoia@westpeek.ventures', pageToken: '', maxResults: 5 },
+    { mailbox: 'scooter@westpeek.ventures', pageToken: '', maxResults: 5 }
+  ]);
+});
+
+
+test('gmail sync UI hostile: upstream Worker failure is never mislabeled as disconnected', async ({ page }) => {
+  await page.unroute('**/api/gmail/sync');
+  await page.route('**/api/gmail/sync', async (route) => {
+    const body = route.request().postDataJSON() as { mailbox_email?: string };
+    const mailbox = String(body.mailbox_email || '').toLowerCase();
+    if (mailbox === 'sequoia@westpeek.ventures') {
+      return route.fulfill({ status: 500, contentType: 'text/plain', body: 'Too many subrequests by single Worker invocation.' });
+    }
+    return send(route, { ok: false, mailbox, mailbox_connected: false, error_code: 'MAILBOX_NOT_CONNECTED' }, 409);
+  });
+  await nav(page, 'Dashboard');
+  await page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i }).click();
+  await mainText(page, /Connected Gmail mailbox sync failed/i);
+  await mainText(page, /Affected: sequoia@westpeek\.ventures/i);
+  await expect(page.getByRole('main')).not.toContainText(/No eligible Gmail mailbox is connected/i);
+});
+
+test('gmail sync UI hostile: repeated continuation token stops immediately', async ({ page }) => {
+  let sequoiaCalls = 0;
+  await page.unroute('**/api/gmail/sync');
+  await page.route('**/api/gmail/sync', async (route) => {
+    const body = route.request().postDataJSON() as { mailbox_email?: string; page_token?: string };
+    const mailbox = String(body.mailbox_email || '').toLowerCase();
+    if (mailbox !== 'sequoia@westpeek.ventures') {
+      return send(route, { ok: false, mailbox, mailbox_connected: false, error_code: 'MAILBOX_NOT_CONNECTED' }, 409);
+    }
+    sequoiaCalls += 1;
+    return send(route, { ok: true, mailbox, mailbox_connected: true, imported_count: 0, skipped_duplicate_count: 0, failed_message_count: 0, has_more: true, next_page_token: 'same-token' });
+  });
+  await nav(page, 'Dashboard');
+  await page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i }).click();
+  await mainText(page, /repeated continuation token/i);
+  expect(sequoiaCalls).toBe(2);
+});
+
+
+test('gmail sync UI hostile: failed-message retry stays on the server-managed current page', async ({ page }) => {
+  let sequoiaCalls = 0;
+  await page.unroute('**/api/gmail/sync');
+  await page.route('**/api/gmail/sync', async (route) => {
+    const body = route.request().postDataJSON() as { mailbox_email?: string; page_token?: string };
+    const mailbox = String(body.mailbox_email || '').toLowerCase();
+    expect(body.page_token).toBeUndefined();
+    if (mailbox !== 'sequoia@westpeek.ventures') return send(route, { ok: false, mailbox, mailbox_connected: false, error_code: 'MAILBOX_NOT_CONNECTED' }, 409);
+    sequoiaCalls += 1;
+    if (sequoiaCalls === 1) return send(route, { ok: true, mailbox, mailbox_connected: true, imported_count: 0, skipped_duplicate_count: 0, failed_message_count: 1, has_more: true, next_page_token: 'server-managed-retry-1', cursor_action: 'retry_current_page' });
+    return send(route, { ok: true, mailbox, mailbox_connected: true, imported_count: 1, skipped_duplicate_count: 0, failed_message_count: 0, has_more: false, next_page_token: '', cursor_action: 'complete' });
+  });
+  await nav(page, 'Dashboard');
+  await page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i }).click();
+  await mainText(page, /Checked: sequoia@westpeek\.ventures/i);
+  await mainText(page, /Imported 1; duplicates skipped 0;.*message failures 1/i);
+  expect(sequoiaCalls).toBe(2);
 });
 
 test('gmail sync UI hostile: repeated click cannot launch a second concurrent batch', async ({ page }) => {

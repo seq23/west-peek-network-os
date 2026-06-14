@@ -52,6 +52,14 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `docs/runbooks/deployment-cloudflare.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/runbooks/environment-setup.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/runbooks/GMAIL_SYNC_UI_RUNBOOK.md` | ACTIVE | Canonical operator distinction between Gmail import and Google Sheets refresh, approved mailbox policy, completion reporting, and hostile behavior. | None |
+| `docs/runbooks/GMAIL_FORWARD_ONLY_RUNTIME_PROOF.md` | ACTIVE | Canonical deployed normal-mode Gmail proof covering watermark, cursor, permanent ledger, cleanup-safe dedupe, Tier 4 rejection, and explicit backfill separation. | None |
+| `docs/runbooks/CONTAINER_BROWSER_FALLBACK_CONTRACT.md` | ACTIVE | Container browser fallback and honest browser-unavailable classification contract. | None |
+| `docs/runbooks/DUAL_PREPUSH_AND_ARTIFACT_PARITY_CONTRACT.md` | ACTIVE | Dual prepush and reopened-artifact parity authority. | None |
+| `docs/runbooks/FIRST_COMMAND_GREEN_DELIVERY_CONTRACT.md` | ACTIVE | First-command-green delivery and updater execution contract. | None |
+| `docs/runbooks/LIVE_GMAIL_SHEETS_PROOF_AND_HOSTILE_MATRIX.md` | ACTIVE | Live Gmail and Google Sheets proof and hostile regression authority. | None |
+| `docs/runbooks/PRE_UPDATER_BASELINE_CHECKLIST.md` | ACTIVE | Pre-updater baseline identity and packaging checklist. | None |
+| `docs/runbooks/SUITE_RELEASE_LIFECYCLE_CONTRACT.md` | ACTIVE | Suite release lifecycle sequencing and proof contract. | None |
+| `docs/runbooks/TRIGGER_SHEETS_INCIDENT_AND_REGRESSION_GUARD.md` | ACTIVE | Trigger/Sheets incident response and regression guard authority. | None |
 | `docs/runbooks/postdeploy.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/runbooks/validation-operations.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/secrets-and-cloudflare.md` | ACTIVE_VALIDATOR_REFERENCED | Current active operator/proof/runbook surface or validator-referenced source. | None |
@@ -71,6 +79,40 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `docs/archive/superseded/FINAL_TIER_PATCH_SUMMARY_2026-06-11.md` | ARCHIVED | Superseded historical release record. | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` |
 | `MASTER_ADDENDUM_COMPLIANCE_LEDGER.md` | ACTIVE | Final tier / master addendum compliance, testing, provider proof, or delivery summary artifact. | None |
 | `RUNTIME_CONTEXT_TRACE_MATRIX.md` | ACTIVE | Final tier / master addendum compliance, testing, provider proof, or delivery summary artifact. | None |
+
+| `AUTHENTICATED_HOSTILE_PRODUCT_AUDIT_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `AUTHENTICATED_PRODUCT_AUDIT.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `AUTHENTICATED_ROUTE_MANIFEST.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `AUTONOMOUS_ENGINEERING_IMPLEMENTATION_REPORT_2026-06-14.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `AUTONOMOUS_TERMINAL_RUNBOOK.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `DIAGNOSTICS_ROUTING_MATRIX.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `DISPLAY_NORMALIZATION_CONTRACT.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `DOCUMENTATION_AND_VALIDATOR_SIMPLIFICATION_2026-06-14.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `DOCUMENTATION_AUTHORITY_INDEX.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `ENTITY_LIFECYCLE_MATRIX.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `FINAL_PROOF_COVERAGE_MATRIX.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `HALLMARK_GLOBAL_ROUTE_REFINEMENT_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `HALLMARK_GLOBAL_ROUTE_REMEDIATION_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `HALLMARK_ROUTE_COVERAGE.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `HOSTILE_FIXLOOP_FINAL_2026-06-14.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `HOSTILE_RELEASE_VERIFICATION_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `HOSTILE_REVIEW_REPORT_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `LOCAL_PLAYWRIGHT_FAILURE_REMEDIATION_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `MAINTENANCE_SCALE_AND_PLATFORM_LIMITS.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `ORIGINAL_TRIGGER_SHEETS_PLAN_COMPLETION_AUDIT_2026-06-14.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `PRODUCTION_SHAPED_FIXTURES.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `REPO_UPDATE_LIFECYCLE.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `ROLLBACK_AND_CONTAINMENT_RUNBOOK.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `Repo_and_Project_Instructions_Master_Operating_Contract_v5.0.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `TESTING_ARCHITECTURE_MIGRATION_REPORT_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `TIER4_PROOF_FIXTURE_CLEANUP.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `TRIGGER_SHEETS_REMEDIATION_REPORT_2026-06-14.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `VALIDATOR_RISK_RECLASSIFICATION_2026-06-14.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `VISIBLE_CONTROL_INVENTORY.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `WEST_PEEK_SUITE_MASTER_CONTRACT_REMEDIATION_PLAN_2026-06-14_REV3.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `docs/CLEANUP_OPERATIONS.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `docs/SHEETS_TRIGGER_RECOVERY_RUNBOOK.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
 
 ## Final-tier release/test docs
 

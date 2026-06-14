@@ -30,6 +30,20 @@
       "failureHandling": "Juniper investigates and normally repairs before release; local work may continue when proof is environment-bound."
     },
     {
+      "name": "Live Gmail forward-only production lifecycle",
+      "command": "npm run release:gmail-forward-only-proof",
+      "tier": "tier4",
+      "category": "live_provider_forward_only_lifecycle",
+      "severity": "HARD FAIL",
+      "productionRisk": "Normal Gmail sync may replay historical messages, lose continuation state, or lose permanent dedupe after cleanup.",
+      "proofLayer": "DEPLOYED GMAIL + CLOUDFLARE + SHEETS PROOF",
+      "whatItProves": "Normal-mode forward-only watermark, bounded continuation, permanent message ledger, cleanup-safe dedupe, Tier 4 rejection, and explicit backfill boundary against the deployed provider path.",
+      "whatItDoesNotProve": "Does not prove future provider availability or an OAuth connection not included in the selected mailbox run.",
+      "failureHandling": "Juniper repairs the provider lifecycle and reruns before claiming Gmail ingestion complete.",
+      "ownerDecisionNeeded": "NO unless provider credentials or external authorization are required.",
+      "blockerPolicy": "Required for COMPLETE after changes to Gmail ingestion lifecycle; environment-bound before deployment."
+    },
+    {
       "name": "build",
       "command": "npm run build",
       "tier": "tier2",

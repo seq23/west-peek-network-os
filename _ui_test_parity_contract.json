@@ -9,5 +9,23 @@
     "AI Suggestions Ready for Review",
     "Run AI Helper request",
     "Requires Google session"
-  ]
+  ],
+  "gmail_sync_summary_contract": {
+    "component": "src/ui/GmailSyncControl.tsx",
+    "browser_test": "tests/e2e/network-os.spec.ts",
+    "ordered_labels": [
+      "Imported",
+      "duplicates skipped",
+      "proof fixtures rejected",
+      "message failures"
+    ],
+    "forbidden_browser_expectations": [
+      "Imported 3; duplicates skipped 2; message failures 0",
+      "Imported 2; duplicates skipped 1; message failures 0"
+    ],
+    "required_browser_expectations": [
+      "Imported 3; duplicates skipped 2; proof fixtures rejected 0; message failures 0",
+      "Imported 2; duplicates skipped 1; proof fixtures rejected 0; message failures 0"
+    ]
+  }
 }

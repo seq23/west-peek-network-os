@@ -44,3 +44,8 @@ This lane is LOCAL INTEGRATION proof only. It does not prove DOM rendering, navi
 ## Authenticated Product Usability Addendum — 2026-06-13
 
 This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.
+
+
+## Gmail forward-only deployed proof
+
+`npm run release:gmail-forward-only-proof` is the admitted normal-mode provider proof after Gmail ingestion lifecycle changes. It uses real Gmail, deployed Cloudflare Workers, permanent Sheets ledger/watermark/cursor records, exact Intake cleanup, and a second sync to prove deleted Intake rows do not re-import. Tier 4 proof mode is not a substitute for this lane.

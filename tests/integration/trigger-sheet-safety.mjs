@@ -17,7 +17,8 @@ assert.match(resetSource, /SHEETS_RESET_CREATE_TABS_FAILED/);
 assert.ok(resetSource.indexOf('SHEETS_RESET_CREATE_TABS_FAILED') < resetSource.indexOf('SHEETS_RESET_CLEAR_FAILED'), 'missing tabs must be created before values are cleared');
 for (const fragment of ['proof_fixture','proof_run_id','proof_test_id','CLEANUP_EXPECTED_IDS_MISMATCH','DELETE_EXACT_REGISTERED_PROOF_FIXTURES','unrelated_rows_preserved']) assert.match(cleanupSource, new RegExp(fragment));
 assert.doesNotMatch(cleanupSource, /Tier Four Founder|tier4-network-|company_name.*includes|full_name.*includes/i);
-assert.match(gmailSource, /TRIGGER_ALIASES\.map/);
+assert.match(gmailSource, /const\s+TRIGGER_ALIASES\s*=\s*\[/);
+assert.match(gmailSource, /TRIGGER_ALIASES\.join\(['\"]\s+['\"]\)/);
 assert.match(gmailSource, /nextPageToken/);
 assert.match(gmailSource, /gmail_ingestion_key/);
 assert.match(gmailSource, /skipped_duplicate_count/);
@@ -28,4 +29,4 @@ for (const [tab, spec] of Object.entries(schema.tabs)) {
   for (const required of ['proof_run_id','proof_test_id','proof_fixture']) assert.ok(spec.headers.includes(required), `${tab} ${required}`);
   assert.equal(spec.deletion_policy, 'exact_registered_fixture_only', `${tab} deletion policy`);
 }
-console.log('trigger-sheet-safety: PASS — aliases, independent paginated search, fail-closed schema, create-first reset, append readback, dedupe, and exact fixture cleanup are enforced.');
+console.log('trigger-sheet-safety: PASS — aliases, canonical grouped paginated search, fail-closed schema, create-first reset, append readback, dedupe, and exact fixture cleanup are enforced.');

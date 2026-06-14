@@ -2,13 +2,15 @@
   "schema_version": "1.0",
   "repo": "west-peek-network-os",
   "profile": "container",
-  "release_prepush_container": "BLOCKED_BROWSER_UNAVAILABLE",
-  "ui_test_parity": "PASS",
-  "browser_suite_contract": "PASS_59_COLLECTED_2_REGISTERED_SKIPS",
-  "artifact_source_parity": "PASS",
-  "reopened_container_validation": "STATIC_PASS_BROWSER_UNPROVEN",
+  "release_prepush_container": "PASS",
+  "ui_test_parity": "PASS_GMAIL_RESULT_SUMMARY_ORDER_AND_EXPECTATIONS_ENFORCED",
+  "browser_suite_contract": "PASS_63_COLLECTED_2_REGISTERED_SKIPS",
+  "artifact_source_parity": "PENDING_REOPENED_ZIP_CHECK",
+  "reopened_container_validation": "PENDING",
   "local_browser_validation": "REQUIRED_BY_UPDATER",
+  "deployed_forward_only_provider_proof": "REQUIRED_AFTER_DEPLOY",
   "required_local_command": "npm run release:prepush:local",
-  "status": "STRUCTURALLY_CHECKED_LOCAL_BROWSER_REQUIRED",
-  "repair_note": "Gmail sync UI is shared across Dashboard, Intake Queue, and Settings; server and client enforce the exact three-mailbox policy; hostile partial-failure, malformed-response, mailbox-mismatch, repeated-click, and refresh-failure paths are guarded. Browser execution is unproven in this runtime because Playwright Chromium is unavailable and system Chromium blocks local navigation."
+  "required_deployed_command": "npm run release:gmail-forward-only-proof",
+  "status": "STRUCTURALLY_CHECKED_LOCAL_BROWSER_AND_DEPLOYED_PROVIDER_REQUIRED",
+  "repair_note": "Stale Gmail summary assertions repaired; browserless UI/test parity now enforces the exact four-counter result order and forbids obsolete three-counter expectations. Forward-only Gmail lifecycle protections remain intact."
 }

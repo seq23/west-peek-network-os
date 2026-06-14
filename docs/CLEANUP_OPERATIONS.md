@@ -47,3 +47,7 @@ It never selects rows by contact name, founder name, email, company, labels, dat
 ## Workbook reset is separate
 
 `sheets:reset-empty-workbook` clears all governed workbook values, including non-test data and OAuth rows. It is not a Tier 4 cleanup command and should only be used for an intentionally empty workbook reset.
+
+## Permanent Gmail ingestion evidence
+
+Rows in `provider_replay_guard` whose `provider` is `gmail_ingestion_ledger`, `gmail_sync_watermark`, or `gmail_sync_cursor` are permanent production evidence. Exact-run, registered historical, and marker-based Tier 4 cleanup must preserve them. Cleanup may remove Tier 4-created Intake rows, but it must not remove the Gmail message-ID ledger or per-mailbox forward-only watermark.

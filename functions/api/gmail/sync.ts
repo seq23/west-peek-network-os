@@ -8,7 +8,7 @@ import { classifyIntelligentInbox, type InboxClassification } from '../../_share
 type Env = RuntimeEnv & AuthEnv & TokenEnv & { GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string };
 type Context = { request: Request; env: Env };
 
-type Body = { query?: string; max_results?: number; run_id?: string; dry_run?: boolean; mailbox_email?: string };
+type Body = { query?: string; max_results?: number; run_id?: string; dry_run?: boolean; mailbox_email?: string; page_token?: string; sync_mode?: 'normal' | 'backfill'; backfill_confirm?: string; sync_started_at?: string };
 type MailboxPolicy = 'trigger_only' | 'intelligent_inbox';
 const activeMailboxSyncs = new Set<string>();
 type TokenPayload = { access_token?: string; refresh_token?: string; expires_in?: number; scope?: string; token_type?: string };
@@ -17,8 +17,19 @@ type GmailMessage = { id: string; threadId?: string; payload?: { headers?: Array
 type GmailPart = { mimeType?: string; body?: { data?: string }; parts?: GmailPart[] };
 
 const TRIGGER_ALIASES = ['#wpnetwork', '#addtowestpeek', '#westpeeknetwork', '#wpdealflow', '#dealflow'] as const;
-const DEFAULT_QUERY = TRIGGER_ALIASES.map((alias) => `${alias} newer_than:30d`).join(' | ');
-const MAX_RESULTS = 100;
+const DEFAULT_QUERY = `{${TRIGGER_ALIASES.join(' ')}}`;
+const BACKFILL_CONFIRM = 'BACKFILL_GMAIL_HISTORY';
+const GMAIL_LEDGER_PROVIDER = 'gmail_ingestion_ledger';
+const GMAIL_WATERMARK_PROVIDER = 'gmail_sync_watermark';
+const GMAIL_CURSOR_PROVIDER = 'gmail_sync_cursor';
+const GMAIL_LOCK_PROVIDER = 'gmail_sync_lock';
+const GMAIL_LOCK_TTL_MS = 2 * 60 * 1000;
+const CURSOR_FIRST_PAGE = '__FIRST_PAGE__';
+const WATERMARK_OVERLAP_SECONDS = 120;
+const TIER4_PROOF_MARKER = /wpno[-_ ]?tier4|WEST_PEEK_E2E_RUN_ID|WP Network Tier 4|Tier 4 Proof/i;
+const RUNTIME_GMAIL_PROOF_RUN = /^wpno-runtime-gmail-[A-Za-z0-9._:-]+$/;
+const MAX_RESULTS = 5;
+const MAX_SYNC_BATCH_SIZE = 5;
 const APPROVED_SYNC_MAILBOXES = new Set(['info@westpeek.ventures', 'sequoia@westpeek.ventures', 'scooter@westpeek.ventures']);
 
 export async function onRequestPost({ request, env }: Context) {
@@ -35,8 +46,15 @@ export async function onRequestPost({ request, env }: Context) {
   if (requestedMailbox && !APPROVED_SYNC_MAILBOXES.has(requestedMailbox)) {
     return json({ ok: false, error_code: 'MAILBOX_NOT_APPROVED', error: `Mailbox ${requestedMailbox} is not approved for West Peek Gmail sync.` }, { status: 400 });
   }
-  const queryOverride = clean(body.query);
-  const maxResults = Math.min(Math.max(Number(body.max_results || MAX_RESULTS), 1), 25);
+  const proofRun = /^wpno-tier4-[A-Za-z0-9._:-]+$/.test(runId);
+  const runtimeProofRun = RUNTIME_GMAIL_PROOF_RUN.test(runId);
+  const syncMode = proofRun ? 'proof' : (body.sync_mode === 'backfill' ? 'backfill' : 'normal');
+  if (syncMode === 'backfill' && body.backfill_confirm !== BACKFILL_CONFIRM) {
+    return json({ ok: false, error_code: 'GMAIL_BACKFILL_CONFIRMATION_REQUIRED', error: `backfill_confirm must equal ${BACKFILL_CONFIRM}.` }, { status: 400 });
+  }
+  const queryOverride = (syncMode === 'backfill' || syncMode === 'proof') ? clean(body.query) : '';
+  const maxResults = Math.min(Math.max(Number(body.max_results || MAX_RESULTS), 1), MAX_SYNC_BATCH_SIZE);
+  const requestedPageToken = clean(body.page_token);
 
   let tokenPayload: TokenPayload;
   let tokenOwner = user.email;
@@ -47,7 +65,7 @@ export async function onRequestPost({ request, env }: Context) {
       .filter((row) => requestedMailbox ? String(row.user_email || '').toLowerCase() === requestedMailbox : (!row.user_email || String(row.user_email).toLowerCase() === user.email.toLowerCase()))
       .sort((a, b) => timestamp(b.updated_at || b.created_at) - timestamp(a.updated_at || a.created_at));
     const latest = activeRows[0];
-    if (!latest) return json({ ok: false, error_code: 'MAILBOX_NOT_CONNECTED', error: requestedMailbox ? `No active Google OAuth token found for ${requestedMailbox}. Connect that mailbox first.` : 'No active Google OAuth token found. Connect Gmail first.', setup_required: true }, { status: 409 });
+    if (!latest) return json({ ok: false, error_code: 'MAILBOX_NOT_CONNECTED', error: requestedMailbox ? `No active Google OAuth token found for ${requestedMailbox}. Connect that mailbox first.` : 'No active Google OAuth token found. Connect Gmail first.', setup_required: true, mailbox: requestedMailbox || user.email.toLowerCase(), mailbox_connected: false }, { status: 409 });
     tokenOwner = String(latest.user_email || user.email).toLowerCase();
     tokenPayload = await decryptTokenPayload<TokenPayload>(env, String(latest.encrypted_payload || ''), String(latest.encryption_iv || ''));
   } catch (error) {
@@ -56,7 +74,29 @@ export async function onRequestPost({ request, env }: Context) {
   }
 
   const mailboxPolicy: MailboxPolicy = tokenOwner === 'info@westpeek.ventures' ? 'intelligent_inbox' : 'trigger_only';
-  const query = queryOverride || (mailboxPolicy === 'intelligent_inbox' ? 'in:inbox newer_than:30d -category:promotions -category:social' : DEFAULT_QUERY);
+  let ledgerRows: Array<Record<string, unknown>> = [];
+  try {
+    ledgerRows = await readTab(env, 'provider_replay_guard');
+  } catch (error) {
+    if (error instanceof Error && /SHEETS_|Google Sheets/.test(error.message)) return sheetsUnavailable(error);
+    return json({ ok: false, mailbox: tokenOwner, mailbox_connected: true, error_code: 'GMAIL_LEDGER_READ_FAILED', error: error instanceof Error ? error.message : 'Could not read Gmail ingestion ledger.' }, { status: 503 });
+  }
+  const latestWatermark = latestMailboxWatermark(ledgerRows, tokenOwner);
+  const resumableCursor = syncMode === 'normal' ? latestMailboxCursor(ledgerRows, tokenOwner) : null;
+  const syncStartedAt = syncMode === 'normal'
+    ? (resumableCursor?.syncStartedAt || new Date().toISOString())
+    : (clean(body.sync_started_at) || new Date().toISOString());
+  const pageToken = syncMode === 'normal' ? (resumableCursor?.pageToken || '') : requestedPageToken;
+  if (syncMode === 'normal' && !latestWatermark) {
+    try {
+      if (!body.dry_run) await appendWatermark(env, tokenOwner, syncStartedAt, 'initial_connection');
+    } catch (error) {
+      if (error instanceof Error && /SHEETS_|Google Sheets|Too many subrequests/i.test(error.message)) return sheetsUnavailable(error);
+      return json({ ok: false, mailbox: tokenOwner, mailbox_connected: true, error_code: 'GMAIL_WATERMARK_WRITE_FAILED', error: error instanceof Error ? error.message : 'Could not initialize Gmail sync watermark.' }, { status: 503 });
+    }
+    return json({ ok: true, provider: 'google_gmail', mailbox: tokenOwner, mailbox_connected: true, mailbox_policy: mailboxPolicy, sync_mode: 'normal', watermark_initialized: true, watermark: syncStartedAt, discovered_message_count: 0, imported_count: 0, skipped_duplicate_count: 0, skipped_tier4_count: 0, failed_message_count: 0, has_more: false, next_page_token: '', human_review_required: true, execution_allowed: false, execution_status: 'not_executed', persistence: body.dry_run ? 'dry_run' : 'google_sheets' });
+  }
+  const query = buildSyncQuery(mailboxPolicy, syncMode, latestWatermark, queryOverride);
   let accessToken = tokenPayload.access_token || '';
   if (!accessToken && tokenPayload.refresh_token) {
     try {
@@ -64,30 +104,40 @@ export async function onRequestPost({ request, env }: Context) {
       accessToken = tokenPayload.access_token || '';
       await storeRefreshedToken(env, tokenOwner, tokenPayload);
     } catch (error) {
-      return json({ ok: false, error: error instanceof Error ? error.message : 'Could not refresh Google token.' }, { status: 503 });
+      return json({ ok: false, mailbox: tokenOwner, mailbox_connected: true, error_code: 'GOOGLE_TOKEN_REFRESH_FAILED', error: error instanceof Error ? error.message : 'Could not refresh Google token.' }, { status: 503 });
     }
   }
-  if (!accessToken) return json({ ok: false, error: 'Google OAuth token payload does not include an access token or refresh token.', reconnect_required: true }, { status: 409 });
+  if (!accessToken) return json({ ok: false, mailbox: tokenOwner, mailbox_connected: true, error_code: 'GOOGLE_TOKEN_INVALID', error: 'Google OAuth token payload does not include an access token or refresh token.', reconnect_required: true }, { status: 409 });
   if (activeMailboxSyncs.has(tokenOwner)) return json({ ok: false, error_code: 'SYNC_ALREADY_RUNNING', error: `A Gmail sync is already running for ${tokenOwner}.`, mailbox: tokenOwner }, { status: 409 });
   activeMailboxSyncs.add(tokenOwner);
+  let mailboxLockId = '';
 
   try {
-    let searchResult = await searchMessages(accessToken, mailboxPolicy, queryOverride, maxResults);
+    if (!body.dry_run) {
+      const lock = await acquireMailboxLock(env, tokenOwner, ledgerRows);
+      // Track our lock event even when this invocation loses the race so the finally block
+      // writes a release event instead of leaving a phantom active lock for the full TTL.
+      mailboxLockId = lock.lockId;
+      if (!lock.acquired) return json({ ok: false, error_code: 'SYNC_ALREADY_RUNNING', error: `A Gmail sync is already running for ${tokenOwner}.`, mailbox: tokenOwner, mailbox_connected: true }, { status: 409 });
+    }
+    let searchResult = await searchMessages(accessToken, query, maxResults, pageToken);
     if (searchResult.status === 401 && tokenPayload.refresh_token) {
       tokenPayload = await refreshGoogleToken(env, tokenPayload.refresh_token);
       accessToken = tokenPayload.access_token || '';
       await storeRefreshedToken(env, tokenOwner, tokenPayload);
-      searchResult = await searchMessages(accessToken, mailboxPolicy, queryOverride, maxResults);
+      searchResult = await searchMessages(accessToken, query, maxResults, pageToken);
     }
-    if (!searchResult.ok) return json({ ok: false, error_code: 'GMAIL_SEARCH_FAILED', error: `Gmail search failed: ${searchResult.status} ${searchResult.text}`, query_diagnostics: searchResult.queryDiagnostics }, { status: 502 });
+    if (!searchResult.ok) return json({ ok: false, mailbox: tokenOwner, mailbox_connected: true, error_code: 'GMAIL_SEARCH_FAILED', error: `Gmail search failed: ${searchResult.status} ${searchResult.text}`, query_diagnostics: searchResult.queryDiagnostics }, { status: 502 });
     const messages = searchResult.messages;
 
     const existingRows = await readTab(env, 'intake_queue');
+    const ledgerKeys = new Set(ledgerRows.filter((row) => String(row.provider || '') === GMAIL_LEDGER_PROVIDER).map((row) => String(row.signature_hash || '')).filter(Boolean));
     const existingKeys = new Set(existingRows.flatMap((row) => [String(row.gmail_ingestion_key || ''), String(row.gmail_message_id || ''), String(row.gmail_rfc_message_id || '')]).filter(Boolean));
     const imported = [] as Array<Record<string, unknown>>;
     const importedRecords = [] as Array<{ gmail_message_id: string; intake_id: string; source_trigger: string; trigger_intent: string; row_number: number | null; readback_verified: boolean }>;
     const skippedDuplicates = [] as string[];
     const skippedIrrelevant = [] as Array<{ message_id: string; category: string; score: number }>;
+    const skippedTier4 = [] as string[];
     const failedMessages = [] as Array<{ message_id: string; status: number }>;
     const inspected = [] as string[];
 
@@ -100,19 +150,35 @@ export async function onRequestPost({ request, env }: Context) {
       const searchableText = [headers.subject, headers.from, headers.to, rawText, message.payload.snippet].filter(Boolean).join('\n');
       const rfcMessageId = clean(headers['message-id']).toLowerCase();
       const ingestionKey = `${tokenOwner}:${item.id}`;
-      if (existingKeys.has(ingestionKey) || existingKeys.has(item.id) || (rfcMessageId && existingKeys.has(rfcMessageId))) { skippedDuplicates.push(item.id); continue; }
-      if (mailboxPolicy === 'trigger_only' && !containsTrigger(searchableText)) continue;
+      if (ledgerKeys.has(ingestionKey) || existingKeys.has(ingestionKey) || existingKeys.has(item.id) || (rfcMessageId && existingKeys.has(rfcMessageId))) {
+        skippedDuplicates.push(item.id);
+        if (!body.dry_run && !ledgerKeys.has(ingestionKey)) await appendLedgerRecord(env, tokenOwner, item.id, message.payload.internalDate, 'duplicate_existing');
+        ledgerKeys.add(ingestionKey);
+        continue;
+      }
+      if (!proofRun && TIER4_PROOF_MARKER.test(searchableText)) {
+        skippedTier4.push(item.id);
+        if (!body.dry_run) await appendLedgerRecord(env, tokenOwner, item.id, message.payload.internalDate, 'rejected_proof_fixture');
+        ledgerKeys.add(ingestionKey);
+        continue;
+      }
+      if (mailboxPolicy === 'trigger_only' && !containsTrigger(searchableText)) {
+        if (!body.dry_run) await appendLedgerRecord(env, tokenOwner, item.id, message.payload.internalDate, 'irrelevant_no_trigger');
+        ledgerKeys.add(ingestionKey);
+        continue;
+      }
       const inboxClassification = mailboxPolicy === 'intelligent_inbox' ? classifyIntelligentInbox(headers, rawText) : undefined;
       if (inboxClassification && !inboxClassification.capture) {
         skippedIrrelevant.push({ message_id: item.id, category: inboxClassification.category, score: inboxClassification.score });
+        if (!body.dry_run) await appendLedgerRecord(env, tokenOwner, item.id, message.payload.internalDate, `irrelevant_${inboxClassification.category}`);
+        ledgerKeys.add(ingestionKey);
         continue;
       }
-      const intake = buildGmailIntake({ rawText: searchableText, headers, message: message.payload, userEmail: user.email, mailboxEmail: tokenOwner, mailboxPolicy, ingestionKey, rfcMessageId, runId, inboxClassification });
+      const intake = buildGmailIntake({ rawText: searchableText, headers, message: message.payload, userEmail: user.email, mailboxEmail: tokenOwner, mailboxPolicy, ingestionKey, rfcMessageId, runId, runtimeProofRun, inboxClassification });
       if (!body.dry_run) {
-        const latestRows = await readTab(env, 'intake_queue');
-        const alreadyWritten = latestRows.some((row) => String(row.gmail_ingestion_key || '') === ingestionKey || String(row.gmail_message_id || '') === item.id || (rfcMessageId && String(row.gmail_rfc_message_id || '').toLowerCase() === rfcMessageId));
-        if (alreadyWritten) { skippedDuplicates.push(item.id); continue; }
         const writeResult = await appendRecord(env, 'intake_queue', intake);
+        await appendLedgerRecord(env, tokenOwner, item.id, message.payload.internalDate, 'imported');
+        ledgerKeys.add(ingestionKey);
         importedRecords.push({ gmail_message_id: item.id, intake_id: String(intake.intake_id), source_trigger: String(intake.source_trigger || ''), trigger_intent: String(intake.trigger_intent || ''), row_number: Number(writeResult.row_number || 0) || null, readback_verified: true });
       }
       imported.push(intake);
@@ -121,20 +187,48 @@ export async function onRequestPost({ request, env }: Context) {
       if (rfcMessageId) existingKeys.add(rfcMessageId);
     }
 
+    const retryCurrentPage = failedMessages.length > 0;
+    const providerHasMore = Boolean(searchResult.nextPageToken);
+    const hasMore = providerHasMore || retryCurrentPage;
+    const watermarkAdvanced = syncMode === 'normal' && !providerHasMore && !retryCurrentPage && !body.dry_run;
+    let responseNextPageToken = searchResult.nextPageToken || '';
+    if (syncMode === 'normal' && !body.dry_run) {
+      if (retryCurrentPage) {
+        await appendCursor(env, tokenOwner, pageToken || CURSOR_FIRST_PAGE, syncStartedAt, 'active');
+        responseNextPageToken = `server-managed-retry-${crypto.randomUUID()}`;
+      } else if (providerHasMore) {
+        await appendCursor(env, tokenOwner, searchResult.nextPageToken || '', syncStartedAt, 'active');
+      } else {
+        await appendCursor(env, tokenOwner, '', syncStartedAt, 'completed');
+        await appendWatermark(env, tokenOwner, syncStartedAt, 'completed_sync');
+      }
+    }
+
     return json({
       ok: true,
       provider: 'google_gmail',
       mailbox: tokenOwner,
+      mailbox_connected: true,
       mailbox_policy: mailboxPolicy,
       sync_id: runId,
+      sync_mode: syncMode,
+      sync_started_at: syncStartedAt,
+      watermark_before: latestWatermark || '',
+      watermark_advanced: watermarkAdvanced,
       query,
       query_diagnostics: searchResult.queryDiagnostics,
       discovered_message_count: messages.length,
+      batch_limit: MAX_SYNC_BATCH_SIZE,
+      next_page_token: responseNextPageToken,
+      has_more: hasMore,
+      cursor_action: retryCurrentPage ? 'retry_current_page' : (providerHasMore ? 'advance_to_next_page' : 'complete'),
       inspected_message_ids: inspected,
       imported_count: imported.length,
       skipped_duplicate_count: skippedDuplicates.length,
       skipped_duplicate_message_ids: skippedDuplicates,
       skipped_irrelevant_count: skippedIrrelevant.length,
+      skipped_tier4_count: skippedTier4.length,
+      skipped_tier4_message_ids: skippedTier4,
       skipped_irrelevant_messages: skippedIrrelevant,
       failed_message_count: failedMessages.length,
       failed_messages: failedMessages,
@@ -147,41 +241,143 @@ export async function onRequestPost({ request, env }: Context) {
       persistence: body.dry_run ? 'dry_run' : 'google_sheets'
     });
   } catch (error) {
-    if (error instanceof Error && /SHEETS_|Google Sheets/.test(error.message)) return sheetsUnavailable(error);
-    return json({ ok: false, error: error instanceof Error ? error.message : 'Gmail sync failed.' }, { status: 503 });
+    const detail = error instanceof Error ? error.message : 'Gmail sync failed.';
+    if (error instanceof Error && /SHEETS_|Google Sheets|Too many subrequests/i.test(error.message)) {
+      const response = sheetsUnavailable(error);
+      const payload = await response.json() as Record<string, unknown>;
+      return json({ ...payload, mailbox: tokenOwner, mailbox_connected: true, error_code: String(payload.error_code || 'GMAIL_SYNC_PROVIDER_LIMIT') }, { status: response.status });
+    }
+    return json({ ok: false, mailbox: tokenOwner, mailbox_connected: true, error_code: 'GMAIL_SYNC_FAILED', error: detail }, { status: 503 });
   } finally {
+    if (mailboxLockId) {
+      try { await releaseMailboxLock(env, tokenOwner, mailboxLockId); } catch { /* lock expires safely */ }
+    }
     activeMailboxSyncs.delete(tokenOwner);
   }
 }
 
-async function searchMessages(accessToken: string, mailboxPolicy: MailboxPolicy, queryOverride: string, maxResults: number) {
-  const queries = queryOverride
-    ? [queryOverride]
-    : mailboxPolicy === 'intelligent_inbox'
-      ? ['in:inbox newer_than:30d -category:promotions -category:social']
-      : TRIGGER_ALIASES.map((alias) => `${alias} newer_than:30d`);
-  const byId = new Map<string, { id: string; threadId?: string }>();
-  const queryDiagnostics: Array<{ query: string; count: number; pages: number }> = [];
 
-  for (const query of queries) {
-    let pageToken = '';
-    let pages = 0;
-    let count = 0;
-    do {
-      const result = await listMessagesPage(accessToken, query, Math.min(100, maxResults), pageToken);
-      if (!result.ok) return { ok: false, status: result.status, text: result.text, messages: [], queryDiagnostics };
-      pages += 1;
-      for (const item of result.payload.messages || []) {
-        byId.set(item.id, item);
-        count += 1;
-        if (byId.size >= maxResults) break;
-      }
-      pageToken = result.payload.nextPageToken || '';
-    } while (pageToken && byId.size < maxResults && pages < 20);
-    queryDiagnostics.push({ query, count, pages });
-    if (byId.size >= maxResults) break;
+async function acquireMailboxLock(env: Env, mailbox: string, existingRows: Array<Record<string, unknown>>) {
+  if (activeMailboxLocks(existingRows, mailbox).length) return { acquired: false, lockId: '' };
+  const lockId = `gmail_lock_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+  const now = new Date().toISOString();
+  await appendRecord(env, 'provider_replay_guard', {
+    replay_id: `gmail_lock_event_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+    created_at: now,
+    provider: GMAIL_LOCK_PROVIDER,
+    signature_hash: lockId,
+    submitted_at: now,
+    source_ip: mailbox.toLowerCase(),
+    status: 'active'
+  });
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  const confirmedRows = await readTab(env, 'provider_replay_guard');
+  const active = activeMailboxLocks(confirmedRows, mailbox);
+  return { acquired: active[0]?.lockId === lockId, lockId };
+}
+
+async function releaseMailboxLock(env: Env, mailbox: string, lockId: string) {
+  const now = new Date().toISOString();
+  await appendRecord(env, 'provider_replay_guard', {
+    replay_id: `gmail_lock_release_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+    created_at: now,
+    provider: GMAIL_LOCK_PROVIDER,
+    signature_hash: lockId,
+    submitted_at: now,
+    source_ip: mailbox.toLowerCase(),
+    status: 'released'
+  });
+}
+
+function activeMailboxLocks(rows: Array<Record<string, unknown>>, mailbox: string) {
+  const latestByLock = new Map<string, Record<string, unknown>>();
+  for (const row of rows) {
+    if (String(row.provider || '') !== GMAIL_LOCK_PROVIDER || String(row.source_ip || '').toLowerCase() !== mailbox.toLowerCase()) continue;
+    const lockId = String(row.signature_hash || '').trim();
+    if (!lockId) continue;
+    const current = latestByLock.get(lockId);
+    if (!current || timestamp(row.created_at) > timestamp(current.created_at)) latestByLock.set(lockId, row);
   }
-  return { ok: true, status: 200, text: '', messages: [...byId.values()], queryDiagnostics };
+  const cutoff = Date.now() - GMAIL_LOCK_TTL_MS;
+  return [...latestByLock.entries()]
+    .filter(([, row]) => String(row.status || '') === 'active' && timestamp(row.created_at) >= cutoff)
+    .map(([lockId, row]) => ({ lockId, createdAt: timestamp(row.created_at) }))
+    .sort((a, b) => a.createdAt - b.createdAt || a.lockId.localeCompare(b.lockId));
+}
+
+async function searchMessages(accessToken: string, query: string, maxResults: number, pageToken: string) {
+  const result = await listMessagesPage(accessToken, query, maxResults, pageToken);
+  if (!result.ok) return { ok: false, status: result.status, text: result.text, messages: [], queryDiagnostics: [{ query, count: 0, pages: 1 }], nextPageToken: '' };
+  const messages = result.payload.messages || [];
+  return { ok: true, status: 200, text: '', messages, queryDiagnostics: [{ query, count: messages.length, pages: 1 }], nextPageToken: result.payload.nextPageToken || '' };
+}
+
+function buildSyncQuery(mailboxPolicy: MailboxPolicy, syncMode: 'normal' | 'backfill' | 'proof', watermark: string, queryOverride: string) {
+  if (queryOverride) return queryOverride;
+  const base = mailboxPolicy === 'intelligent_inbox' ? 'in:inbox -category:promotions -category:social' : DEFAULT_QUERY;
+  if (syncMode === 'backfill' || syncMode === 'proof') return base;
+  const after = Math.max(0, Math.floor(Date.parse(watermark) / 1000) - WATERMARK_OVERLAP_SECONDS);
+  return `${base} after:${after}`;
+}
+
+function latestMailboxWatermark(rows: Array<Record<string, unknown>>, mailbox: string) {
+  return rows
+    .filter((row) => String(row.provider || '') === GMAIL_WATERMARK_PROVIDER && String(row.source_ip || '').toLowerCase() === mailbox.toLowerCase())
+    .map((row) => String(row.submitted_at || ''))
+    .filter((value) => Number.isFinite(Date.parse(value)))
+    .sort((a, b) => Date.parse(b) - Date.parse(a))[0] || '';
+}
+
+
+function latestMailboxCursor(rows: Array<Record<string, unknown>>, mailbox: string) {
+  const latest = rows
+    .filter((row) => String(row.provider || '') === GMAIL_CURSOR_PROVIDER && String(row.source_ip || '').toLowerCase() === mailbox.toLowerCase())
+    .sort((a, b) => timestamp(b.created_at) - timestamp(a.created_at))[0];
+  if (!latest || String(latest.status || '') !== 'active') return null;
+  const storedPageToken = String(latest.signature_hash || '').trim();
+  const syncStartedAt = String(latest.submitted_at || '').trim();
+  if (!storedPageToken || !Number.isFinite(Date.parse(syncStartedAt))) return null;
+  return { pageToken: storedPageToken === CURSOR_FIRST_PAGE ? '' : storedPageToken, syncStartedAt };
+}
+
+async function appendCursor(env: Env, mailbox: string, pageToken: string, syncStartedAt: string, status: 'active' | 'completed') {
+  const now = new Date().toISOString();
+  await appendRecord(env, 'provider_replay_guard', {
+    replay_id: `gmail_cursor_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+    created_at: now,
+    provider: GMAIL_CURSOR_PROVIDER,
+    signature_hash: pageToken,
+    submitted_at: syncStartedAt,
+    source_ip: mailbox.toLowerCase(),
+    status
+  });
+}
+
+async function appendWatermark(env: Env, mailbox: string, watermark: string, status: string) {
+  const now = new Date().toISOString();
+  await appendRecord(env, 'provider_replay_guard', {
+    replay_id: `gmail_watermark_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+    created_at: now,
+    provider: GMAIL_WATERMARK_PROVIDER,
+    signature_hash: mailbox.toLowerCase(),
+    submitted_at: watermark,
+    source_ip: mailbox.toLowerCase(),
+    status
+  });
+}
+
+async function appendLedgerRecord(env: Env, mailbox: string, messageId: string, internalDate: string | undefined, status: string) {
+  const now = new Date().toISOString();
+  const key = `${mailbox.toLowerCase()}:${messageId}`;
+  await appendRecord(env, 'provider_replay_guard', {
+    replay_id: `gmail_message_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+    created_at: now,
+    provider: GMAIL_LEDGER_PROVIDER,
+    signature_hash: key,
+    submitted_at: internalDate && Number.isFinite(Number(internalDate)) ? new Date(Number(internalDate)).toISOString() : now,
+    source_ip: mailbox.toLowerCase(),
+    status
+  });
 }
 
 async function listMessagesPage(accessToken: string, query: string, maxResults: number, pageToken = '') {
@@ -234,7 +430,7 @@ async function storeRefreshedToken(env: Env, userEmail: string, token: TokenPayl
   });
 }
 
-function buildGmailIntake(input: { rawText: string; headers: Record<string, string>; message: GmailMessage; userEmail: string; mailboxEmail: string; mailboxPolicy: MailboxPolicy; ingestionKey: string; rfcMessageId: string; runId: string; inboxClassification?: InboxClassification }) {
+function buildGmailIntake(input: { rawText: string; headers: Record<string, string>; message: GmailMessage; userEmail: string; mailboxEmail: string; mailboxPolicy: MailboxPolicy; ingestionKey: string; rfcMessageId: string; runId: string; runtimeProofRun: boolean; inboxClassification?: InboxClassification }) {
   const fields = parseFields(input.rawText);
   const smart = input.inboxClassification;
   const classification = smart ? { source_trigger: `shared_inbox_${smart.category}`, trigger_intent: smart.triggerIntent, person_type: smart.personType, deal_flow_prospect: smart.dealFlowProspect, deal_context: `Intelligent shared-inbox classification: ${smart.category}; score ${smart.score}; ${smart.reasons.join(', ')}` } : classifyTrigger(input.rawText);
@@ -244,6 +440,8 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
   const parsedEmail = fields.email || envelope.email || '';
   const parsedNotes = fields.context || fields.notes || stripTrigger(input.rawText) || 'Minimal Gmail trigger capture. Review email thread for context.';
   const tier4ProofRun = /^wpno-tier4-[A-Za-z0-9._:-]+$/.test(input.runId);
+  const registeredProofRun = tier4ProofRun || input.runtimeProofRun;
+  const proofTestPrefix = input.runtimeProofRun ? 'live-gmail-forward-only-runtime' : 'live-gmail-trigger-ingestion';
   return {
     intake_id: deterministicIntakeId(input.mailboxEmail, input.message.id),
     created_at: now,
@@ -294,11 +492,11 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
     human_review_required: 'true',
     execution_allowed: 'false',
     review_status: 'pending_human_review',
-    proof_run_id: tier4ProofRun ? input.runId : '',
-    proof_test_id: tier4ProofRun ? `live-gmail-trigger-ingestion:${classification.source_trigger}` : '',
-    proof_fixture: tier4ProofRun ? 'true' : '',
-    proof_status: tier4ProofRun ? 'active' : '',
-    proof_created_at: tier4ProofRun ? now : '',
+    proof_run_id: registeredProofRun ? input.runId : '',
+    proof_test_id: registeredProofRun ? `${proofTestPrefix}:${classification.source_trigger}:${input.message.id}` : '',
+    proof_fixture: registeredProofRun ? 'true' : '',
+    proof_status: registeredProofRun ? 'active' : '',
+    proof_created_at: registeredProofRun ? now : '',
     proof_expires_at: '',
     proof_cleaned_at: '',
     proof_cleanup_run_id: ''

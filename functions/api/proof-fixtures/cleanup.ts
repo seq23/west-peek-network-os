@@ -20,6 +20,7 @@ const EXACT_CONFIRM = 'DELETE_EXACT_REGISTERED_PROOF_FIXTURES';
 const REGISTERED_HISTORICAL_CONFIRM = 'DELETE_ALL_REGISTERED_TIER4_PROOF_FIXTURES';
 const MARKER_HISTORICAL_CONFIRM = 'DELETE_ALL_TIER4_MARKED_ROWS';
 const TIER4_RUN_PATTERN = /^wpno-tier4-[A-Za-z0-9._:-]+$/;
+const EXACT_PROOF_RUN_PATTERN = /^wpno-(?:tier4|runtime-gmail)-[A-Za-z0-9._:-]+$/;
 const TIER4_MARKER = /(^|[^a-z0-9])(?:wpno[\s_-]*)?tier[\s_-]*4([^a-z0-9]|$)/i;
 const MINIMUM_GRID_ROWS = 1000;
 const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
@@ -42,8 +43,8 @@ export async function onRequestPost({ request, env }: Context) {
     const tab = String(body.tab || '').trim() as SheetTab;
     const dryRun = body.dry_run !== false;
 
-    if (scope === 'exact_run' && !TIER4_RUN_PATTERN.test(runId)) {
-      return json({ ok: false, error_code: 'CLEANUP_RUN_ID_INVALID', error: 'A valid exact wpno-tier4 run_id is required.' }, { status: 400 });
+    if (scope === 'exact_run' && !EXACT_PROOF_RUN_PATTERN.test(runId)) {
+      return json({ ok: false, error_code: 'CLEANUP_RUN_ID_INVALID', error: 'A valid exact wpno-tier4 or wpno-runtime-gmail run_id is required.' }, { status: 400 });
     }
     if (!TABS.includes(tab)) return json({ ok: false, error_code: 'CLEANUP_TAB_INVALID', error: `tab must be one of: ${TABS.join(', ')}` }, { status: 400 });
 
@@ -130,8 +131,9 @@ export async function onRequestPost({ request, env }: Context) {
       proof_test_id: String(record.proof_test_id || '').trim()
     }));
 
-    if (proposed.some((item) => !item.record_id || !item.proof_test_id || !TIER4_RUN_PATTERN.test(item.proof_run_id))) {
-      return json({ ok: false, error_code: 'CLEANUP_FIXTURE_REGISTRY_INCOMPLETE', error: 'Every registered fixture must have an exact stable record ID, valid wpno-tier4 proof_run_id, and proof_test_id.', proposed }, { status: 409 });
+    const admittedPattern = scope === 'all_registered_tier4' ? TIER4_RUN_PATTERN : EXACT_PROOF_RUN_PATTERN;
+    if (proposed.some((item) => !item.record_id || !item.proof_test_id || !admittedPattern.test(item.proof_run_id))) {
+      return json({ ok: false, error_code: 'CLEANUP_FIXTURE_REGISTRY_INCOMPLETE', error: 'Every registered fixture must have an exact stable record ID, admitted proof_run_id, and proof_test_id.', proposed }, { status: 409 });
     }
 
     if (dryRun) {
@@ -181,6 +183,8 @@ export async function onRequestPost({ request, env }: Context) {
 }
 
 function tier4MarkerFields(record: Record<string, unknown>) {
+  const provider = String(record.provider || '').toLowerCase();
+  if (provider === 'gmail_ingestion_ledger' || provider === 'gmail_sync_watermark' || provider === 'gmail_sync_cursor' || provider === 'gmail_sync_lock') return [];
   return Object.entries(record)
     .filter(([, value]) => TIER4_MARKER.test(String(value ?? '')))
     .map(([key]) => key)
@@ -208,7 +212,10 @@ function normalizeMarkedRows(items: ExpectedMarkedRow[]) {
 }
 
 function isExactOwnedFixture(record: Record<string, unknown>, runId: string) {
-  return isRegisteredTier4Fixture(record) && String(record.proof_run_id || '') === runId;
+  return String(record.proof_fixture || '').toLowerCase() === 'true'
+    && EXACT_PROOF_RUN_PATTERN.test(String(record.proof_run_id || '').trim())
+    && Boolean(String(record.proof_test_id || '').trim())
+    && String(record.proof_run_id || '') === runId;
 }
 
 function isRegisteredTier4Fixture(record: Record<string, unknown>) {
@@ -222,7 +229,7 @@ function normalizeManifest(items: ExpectedFixture[]) {
     record_id: String(item.record_id || '').trim(),
     proof_run_id: String(item.proof_run_id || '').trim(),
     proof_test_id: String(item.proof_test_id || '').trim()
-  })).filter((item) => item.record_id && TIER4_RUN_PATTERN.test(item.proof_run_id) && item.proof_test_id)
+  })).filter((item) => item.record_id && EXACT_PROOF_RUN_PATTERN.test(item.proof_run_id) && item.proof_test_id)
     .sort((a, b) => fixtureKey(a).localeCompare(fixtureKey(b)));
 }
 

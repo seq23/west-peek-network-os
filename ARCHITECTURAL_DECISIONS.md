@@ -257,3 +257,27 @@ This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT
 Legacy Tier 4 workflows created populated test rows before proof ownership fields were consistently written. Exact registry cleanup therefore could truthfully find zero registered fixtures while visible Tier 4 data remained. A previous blank-row compaction attempt deleted unused spreadsheet capacity instead of test records and is prohibited.
 
 The admitted recovery path is dry-run-first `all_tier4_markers` cleanup. It scans all populated cells for explicit Tier 4 markers, locks execution to the exact preview manifest, requires `DELETE_ALL_TIER4_MARKED_ROWS`, physically deletes matched populated rows with Google Sheets `deleteDimension`, preserves unrelated stable IDs, verifies zero marker matches remain, and restores each governed tab to at least 1,000 physical rows with `appendDimension`. Blank rows are never selected merely because they are blank.
+
+### Decision ID: ADM-2026-06-14-07
+* **Date:** 2026-06-14
+* **Status:** Accepted
+* **Context:** Gmail sync fetched and persisted up to 25 messages in one Cloudflare Worker invocation. Each message required a Gmail detail request plus Sheets append/readback calls, causing the deployed UI to fail with `Too many subrequests by single Worker invocation` and then incorrectly label the connected mailbox as disconnected.
+* **Decision:** Limit each backend invocation to one Gmail search page and at most five message details. Return Gmail continuation tokens to the shared UI, which processes batches sequentially with a bounded 20-batch ceiling. Remove the redundant full Intake Queue read before every individual write. Return `mailbox_connected` on provider-path failures and render connected failures separately from missing OAuth connections.
+* **Alternatives Considered:** Increasing Cloudflare limits; processing 25 messages in one invocation; blind retries; background queues. Increasing platform limits preserves wasteful behavior, blind retries risk duplicate writes, and queues add unnecessary infrastructure for the current volume.
+* **Reasoning:** Continuation batches are the smallest deterministic change, preserve existing dedupe/readback guarantees, and keep each Worker invocation safely below the provider subrequest ceiling.
+* **Tradeoffs:** A large backlog requires multiple sequential HTTP requests and one click processes at most 100 messages per mailbox.
+* **Risks Accepted:** Provider continuation tokens can expire; the operator can rerun sync, and dedupe prevents already-imported rows from being recreated.
+* **Validation Impact:** Static contract, hostile browser continuation/failure tests, TypeScript/build, local real-browser prepush, then deployed UI proof.
+* **Future Reversal Conditions:** Adopt Cloudflare Queues or scheduled ingestion when mailbox volume routinely exceeds the bounded interactive workflow.
+
+### Decision ID: ADM-2026-06-14-GMAIL-RUNTIME-PROOF
+* **Date:** 2026-06-14
+* **Status:** Accepted
+* **Context:** Tier 4 Gmail proof mode did not prove normal production watermark, cursor, permanent ledger, cleanup, and second-sync behavior.
+* **Decision:** Add a separate deployed normal-mode provider proof using `wpno-runtime-gmail-*` cleanup-owned Intake fixtures while preserving permanent Gmail provider ledger records.
+* **Alternatives Considered:** Static token validation only; mocked browser tests only; reusing Tier 4 query-override proof mode.
+* **Reasoning:** Only the deployed normal path can prove Gmail indexing, Cloudflare Worker limits, Sheets persistence, cursor continuation, and cleanup-safe dedupe together.
+* **Tradeoffs:** Requires a temporary Gmail send-scope proof token and leaves harmless seed emails plus permanent ledger entries in Gmail/Sheets.
+* **Risks Accepted:** Gmail indexing can add bounded wait time; provider outages remain external blockers.
+* **Validation Impact:** `npm run release:gmail-forward-only-proof` is required after Gmail ingestion lifecycle changes.
+* **Future Reversal Conditions:** Replace only when a stronger provider-native automated proof covers the same normal-mode lifecycle without broadening production permissions.
