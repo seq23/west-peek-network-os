@@ -51,6 +51,7 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `docs/provider-contracts.md` | ACTIVE_VALIDATOR_REFERENCED | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/runbooks/deployment-cloudflare.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/runbooks/environment-setup.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
+| `docs/runbooks/GMAIL_SYNC_UI_RUNBOOK.md` | ACTIVE | Canonical operator distinction between Gmail import and Google Sheets refresh, approved mailbox policy, completion reporting, and hostile behavior. | None |
 | `docs/runbooks/postdeploy.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/runbooks/validation-operations.md` | ACTIVE | Current active operator/proof/runbook surface or validator-referenced source. | None |
 | `docs/secrets-and-cloudflare.md` | ACTIVE_VALIDATOR_REFERENCED | Current active operator/proof/runbook surface or validator-referenced source. | None |
@@ -104,6 +105,7 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `docs/providers/INTELLIGENT_SHARED_INBOX.md` | ACTIVE | Shared inbox classification, deduplication, and proof contract. | None |
 | `docs/archive/superseded/UX_DATA_INTEGRITY_IMPLEMENTATION_REPORT_2026-06-13.md` | ARCHIVED | Superseded by consolidated changelog after hostile review. | `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md` |
 | `HOSTILE_UX_DATA_INTEGRITY_REVIEW_2026-06-13.md` | ACTIVE | Current hostile review and proof-boundary record. | None |
+| `HOSTILE_GMAIL_SYNC_UI_REVIEW_2026-06-14.md` | ACTIVE | Current hostile review and proof-boundary record for the shared Gmail sync control and endpoint. | None |
 
 | `DIAGNOSTICS_STANDARD.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
 | `MASTER_GAUNTLET.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |

@@ -27,7 +27,7 @@ type RuntimeStatus = {
 const openStatus = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'needs_more_info']);
 const openTouchStatus = new Set(['pending_approval', 'approved_ready_to_send', 'opened_vendor', 'will_do_myself', 'needed', 'planned', 'drafted']);
 
-export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (page: Page) => void; runtime: RuntimeStatus }) {
+export function Dashboard({ data, go, runtime, gmailSyncControl }: { data: DashboardData; go: (page: Page) => void; runtime: RuntimeStatus; gmailSyncControl: React.ReactNode }) {
   const openIntake = data.intake.filter((item) => openStatus.has(item.review_status));
   const openTouches = data.touches.filter((item) => openTouchStatus.has(item.status));
   const pendingApprovals = data.approvals.filter((item) => item.status === 'pending');
@@ -81,6 +81,7 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
         />
         <StatusLine label="Google Sheets" value={runtime.usingLiveSheets ? 'Live snapshot loaded' : runtime.sheetStatus} good={runtime.usingLiveSheets} />
         {(!runtime.gmailOauthConnected || !runtime.sessionAuthenticated || !runtime.usingLiveSheets) && <p className="muted">Resolve degraded connections in Settings before relying on sync, OCR, or transcription.</p>}
+        <div className="dashboard-gmail-sync"><p className="muted">Check all eligible connected West Peek Gmail mailboxes and refresh Intake Queue.</p>{gmailSyncControl}</div>
       </div>
     </section>
 

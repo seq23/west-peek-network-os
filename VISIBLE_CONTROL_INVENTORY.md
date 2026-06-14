@@ -31,3 +31,13 @@ Status: ACTIVE
 | Settings | sync | Authenticated operator | UI action → authenticated API | Documented entity state change | Fresh snapshot/API readback required | Required | Classified, no false success | Master Gauntlet / authenticated click audit |
 | Settings | maintain | Authenticated operator | UI action → authenticated API | Documented entity state change | Fresh snapshot/API readback required | Required | Classified, no false success | Master Gauntlet / authenticated click audit |
 | Settings | cleanup exact run | Authenticated operator | UI action → authenticated API | Documented entity state change | Fresh snapshot/API readback required | Required | Classified, no false success | Master Gauntlet / authenticated click audit |
+
+
+## Gmail synchronization controls — 2026-06-14
+
+| Surface | Control | Effect | Guardrails |
+|---|---|---|---|
+| Dashboard → System health | Sync new emails from Gmail | Sequentially checks approved connected Gmail mailboxes, imports qualifying messages, refreshes Intake | Auth required; three-mailbox allowlist; duplicate protection; human review only |
+| Intake Queue | Sync new emails from Gmail | Same shared action with immediate queue refresh | Same shared component and endpoint |
+| Settings → Gmail intake sync | Sync new emails from Gmail | Same shared action, with full mailbox-policy explanation | Distinct from Refresh from Google Sheets |
+| Settings → Google Sheets data | Refresh from Google Sheets | Reloads workbook rows already persisted | Does not query Gmail or create intake rows |

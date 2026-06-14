@@ -105,3 +105,14 @@ Typecheck, local build, static validators, documentation governance, and ZIP che
 ## Authenticated Product Usability Addendum — 2026-06-13
 
 This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.
+
+
+## Gmail sync UI hostile coverage — 2026-06-14
+
+| Layer | Command | Proof |
+|---|---|---|
+| Static/UI contract | `npm run test:critical-ui-data-flow` | Shared Gmail control appears on Dashboard, Intake Queue, and Settings; exact approved mailbox set; endpoint allowlist; narrow integrity behavior |
+| Authenticated usability | `npm run validate:authenticated-usability-contract` | Operator wording distinguishes Gmail import from Sheets refresh and identifies separate OAuth requirements |
+| Browser behavior | `npm run test:e2e:maxdepth` or `npm run test:e2e:container` | Sequential three-mailbox batch, connected/not-connected reporting, partial/malformed failure isolation, automatic refresh, and repeated-click lock |
+
+Browser collection without execution is not behavior proof. A runtime without an admitted Chromium executable must report the browser lane as UNPROVEN and defer it to the local updater's real-browser prepush.

@@ -80,6 +80,7 @@ This index classifies documentation without deleting historical evidence. Only r
 - `docs/providers/PROVIDER_FAILURE_HANDLING.md`
 - `docs/runbooks/deployment-cloudflare.md`
 - `docs/runbooks/environment-setup.md`
+- `docs/runbooks/GMAIL_SYNC_UI_RUNBOOK.md`
 - `docs/runbooks/postdeploy.md`
 - `docs/runbooks/validation-operations.md`
 - `docs/secrets-and-cloudflare.md`
@@ -129,6 +130,7 @@ This index classifies documentation without deleting historical evidence. Only r
 - `HOSTILE_RELEASE_VERIFICATION_2026-06-13.md`
 - `HOSTILE_REVIEW_REPORT_2026-06-13.md`
 - `HOSTILE_UX_DATA_INTEGRITY_REVIEW_2026-06-13.md`
+- `HOSTILE_GMAIL_SYNC_UI_REVIEW_2026-06-14.md`
 - `PROOF_COMPLETION_MASTER_PLAN_2026-06-13.md`
 - `TESTING_ARCHITECTURE_MIGRATION_REPORT_2026-06-13.md`
 - `UX_DATA_INTEGRITY_CHANGELOG_2026-06-13.md`

@@ -168,7 +168,7 @@
     "validate:suite-release-lifecycle-contract": "node scripts/validate-suite-release-lifecycle-contract.mjs",
     "validate:reopened-baseline": "node scripts/validate-reopened-baseline.mjs",
     "release:local-visual-proof": "npm run test:e2e:maxdepth-headed",
-    "postcleanup:integrity": "npm run tier4:report-check && npm run postdeploy:auth-boundary && npm run postdeploy:provider-health",
+    "postcleanup:integrity": "node scripts/postcleanup-integrity.mjs",
     "release:prepush:container": "bash scripts/testing/release-validate-container.sh && npm run validate:ui-test-parity && npm run validate:browser-suite-contract",
     "release:prepush:local": "bash scripts/testing/release-prepush.sh && npm run validate:browser-suite-contract",
     "validate:ui-test-parity": "node scripts/validate-ui-test-parity.mjs",

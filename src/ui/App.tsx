@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, CreditCard, Home, Inbox, MailCheck, Menu, Plus, Settings, Sparkles, Users, X } from 'lucide-react';
 import { Dashboard } from './Dashboard';
+import { GmailSyncControl } from './GmailSyncControl';
 import { Instructions } from './Instructions';
 import { AddPerson } from './AddPerson';
 import { CaptureStudio } from './CaptureStudio';
@@ -263,13 +264,13 @@ export function App() {
           gmailOauthConnected: Boolean(oauthStatus.gmail_oauth_connected),
           gmailOauthEmail: oauthStatus.connected_email,
           gmailOauthCapturedAt: oauthStatus.token_captured_at
-        }} />}
+        }} gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} compact onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} />}
         {page === 'instructions' && <Instructions />}
         {page === 'events' && <EventsPage events={data.events} attendees={data.eventAttendees} onAttendeeLifecycle={(id, action) => { void handleLifecycle('event_attendee', id, action); }} onSaved={(nextMessage) => void reloadSheetsSnapshot(nextMessage || 'Event data saved to Google Sheets.')} />}
         {page === 'add' && <AddPerson onAdded={handleAdded} />}
         {page === 'capture' && <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}
         {page === 'thankyou' && <ThankYouStudio onSaved={() => void reloadSheetsSnapshot('Thank-you touch saved to Google Sheets.')} />}
-        {page === 'intake' && <IntakePage rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id) => { void handleIntakeReview(id, 'convert'); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
+        {page === 'intake' && <IntakePage gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id) => { void handleIntakeReview(id, 'convert'); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
         {page === 'contacts' && <ContactsPage rows={data.contacts} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
         {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('touch', id, action); }} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
         {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('approval', id, action); }} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
@@ -283,6 +284,7 @@ export function App() {
           onRefresh={() => void reloadSheetsSnapshot('Refreshed from Google Sheets. Live Google Sheets snapshot loaded.', true)}
           onSessionRefresh={() => void refreshConnectionStatus()}
           onMaintenanceComplete={() => void reloadSheetsSnapshot('Sheet maintenance finished and a fresh snapshot was loaded.', true)}
+          gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />}
         />}
       </main>
     </div>
@@ -301,7 +303,7 @@ function ContactsPage({ rows, mutationKey, onStatus }: { rows: ContactRecord[]; 
   </>;
 }
 
-function IntakePage({ rows, mutationKey, onCapture, onConvert, onAttach, onDismiss }: { rows: IntakeRecord[]; mutationKey: string | null; onCapture: (rawText: string) => void; onConvert: (id: string) => void; onAttach: (id: string) => void; onDismiss: (id: string) => void }) {
+function IntakePage({ gmailSyncControl, rows, mutationKey, onCapture, onConvert, onAttach, onDismiss }: { gmailSyncControl: React.ReactNode; rows: IntakeRecord[]; mutationKey: string | null; onCapture: (rawText: string) => void; onConvert: (id: string) => void; onAttach: (id: string) => void; onDismiss: (id: string) => void }) {
   const [view, setView] = useState<'pending' | 'history' | 'all'>('pending');
   const [search, setSearch] = useState('');
   const pendingStatuses = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'needs_more_info', 'pending_network_review', 'event_intake_received']);
@@ -315,6 +317,7 @@ function IntakePage({ rows, mutationKey, onCapture, onConvert, onAttach, onDismi
   return <>
     <Header eyebrow="Intake Queue" title="Review captured relationship context" subtitle="Actionable captures appear first. Use #wpdealflow / #dealflow for founder or prospective deal flow. Every capture remains in human review until an operator decides." />
     <RouteGuide purpose="Turn raw captures into trusted relationship records." primaryAction="Resolve pending intake one item at a time." secondary="Capture a manual note when no source integration is available." caution="Nothing converts, attaches, or dismisses without operator action." />
+    <div className="card settings-operations"><h3>Import new Gmail intake</h3><p className="muted">Checks all eligible connected West Peek mailboxes, imports new qualifying messages, and refreshes this queue.</p>{gmailSyncControl}</div>
     <div className="filter-bar"><input aria-label="Search intake" placeholder="Search person, company, email, subject, or summary" value={search} onChange={(event) => setSearch(event.target.value)} /><div className="segmented" role="group" aria-label="Intake view"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visibleRows.length} records</span></div>
     <details className="card" open><summary>Manual capture</summary><form className="form compact-form" onSubmit={submitCapture}><p className="muted">Paste a real relationship or deal-flow note. Production forms start empty.</p><textarea name="raw_text" aria-label="Gmail trigger text" required placeholder="#wpnetwork or #wpdealflow, then the relationship context" /><button className="btn primary" type="submit">Capture to Intake Queue</button></form></details>
     <div className="list">{visibleRows.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No records match this view' : 'No intake records yet'}</h3><p>{rows.length ? 'Change the search or view filters.' : 'New review items will appear here.'}</p></div> : visibleRows.map((i) => { const busy = mutationKey?.startsWith(`intake:${i.intake_id}:`); return <article className="card record-card" key={i.intake_id} data-testid={`intake-${i.intake_id}`}><header className="record-header"><div><div className="kicker">{humanize(i.source)} • {humanize(i.review_status)}{i.created_at ? ` • ${relativeWhen(i.created_at)}` : ''}</div><h3>{i.parsed_name || i.email_from || 'Unparsed person'}</h3><p className="muted">{i.parsed_company || i.email_subject || 'Company not parsed'}{i.source_mailbox ? ` • via ${i.source_mailbox}` : ''}</p></div><div className="badge-stack">{i.missing_fields && <span className="badge warn">Missing {humanizeList(i.missing_fields)}</span>}{i.deal_flow_prospect === 'yes' && <span className="badge warn">Deal flow</span>}</div></header><p className="record-summary">{bounded(i.ai_summary || i.parsed_notes || i.raw_text, 420)}</p><details><summary>View source details</summary><dl className="metadata"><dt>From</dt><dd>{i.email_from || '—'}</dd><dt>To</dt><dd>{i.email_to || '—'}</dd><dt>Message ID</dt><dd>{i.gmail_message_id || '—'}</dd></dl><pre className="raw-source">{bounded(i.raw_text, 4000)}</pre></details>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onConvert(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:convert` ? 'Adding…' : 'Add to West Peek Network'}</button><button className="btn" disabled={Boolean(busy)} onClick={() => onAttach(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:attach` ? 'Attaching…' : 'Attach to Existing Person'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onDismiss(i.intake_id)}>{mutationKey === `intake:${i.intake_id}:dismiss` ? 'Dismissing…' : 'Dismiss'}</button></footer>}</article>})}</div>
@@ -489,7 +492,8 @@ function SettingsPanel({
   oauthMessage,
   onRefresh,
   onSessionRefresh,
-  onMaintenanceComplete
+  onMaintenanceComplete,
+  gmailSyncControl
 }: {
   sheetStatus: string;
   session: SessionState;
@@ -498,11 +502,10 @@ function SettingsPanel({
   onRefresh: () => void;
   onSessionRefresh: () => void;
   onMaintenanceComplete: () => void;
+  gmailSyncControl: React.ReactNode;
 }) {
   const [maintenanceStatus, setMaintenanceStatus] = useState<string | null>(null);
   const [maintenanceBusy, setMaintenanceBusy] = useState(false);
-  const [gmailSyncBusy, setGmailSyncBusy] = useState(false);
-  const [gmailSyncStatus, setGmailSyncStatus] = useState('');
   const [refreshBusy, setRefreshBusy] = useState(false);
   const [cleanupRunId, setCleanupRunId] = useState('');
   const [cleanupBusy, setCleanupBusy] = useState(false);
@@ -526,32 +529,6 @@ function SettingsPanel({
       await onRefresh();
     } finally {
       setTimeout(() => setRefreshBusy(false), 1500);
-    }
-  }
-
-  async function runGmailSync() {
-    if (gmailSyncBusy) return;
-    if (!session.authenticated) {
-      setGmailSyncStatus('Authentication required. Connect / reconnect Gmail on this same production domain, then retry.');
-      return;
-    }
-    setGmailSyncBusy(true);
-    setGmailSyncStatus('Syncing Gmail trigger messages into Intake Queue...');
-    try {
-      const response = await fetch('/api/gmail/sync', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ max_results: 10 })
-      });
-      const payload = await response.json() as { ok?: boolean; imported_count?: number; skipped_duplicate_count?: number; imported_intake_ids?: string[]; error?: string; sync_id?: string };
-      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Gmail sync failed.');
-      setGmailSyncStatus(`Gmail sync ${payload.sync_id || 'complete'}: imported ${payload.imported_count ?? 0}; duplicates skipped ${payload.skipped_duplicate_count ?? 0}.`);
-      await onRefresh();
-    } catch (error) {
-      setGmailSyncStatus(error instanceof Error ? error.message : 'Gmail sync failed.');
-    } finally {
-      setGmailSyncBusy(false);
     }
   }
 
@@ -651,8 +628,8 @@ function SettingsPanel({
       </div>
       <div className="card"><h3>Canonical triggers</h3><p><strong>#wpnetwork</strong> relationship capture<br /><strong>#wpdealflow</strong> founder / prospective deal flow<br /><strong>#dealflow</strong> short alias for founder deal-flow capture</p><p className="muted">Relationship aliases: #addtowestpeek, #westpeeknetwork. Deal-flow aliases: #wpdealflow, #dealflow.</p></div>
       <div className="card"><h3>Initial users</h3><p>sequoia@westpeek.ventures<br />scooter@westpeek.ventures</p></div>
-      <div className="card settings-operations"><h3>Google Sheets data</h3><p><strong>{sheetStatus}</strong></p><p className="muted">Refresh pulls the latest saved contacts, intake, approvals, touchpoints, notifications, events, and attendees from the live spreadsheet. It does not modify spreadsheet rows and explicitly bypasses the short snapshot cache.</p><button className="btn" type="button" disabled={refreshBusy || !session.authenticated} onClick={guardedSheetRefresh}>{refreshBusy ? 'Refreshing from Sheets…' : 'Refresh from Google Sheets'}</button></div>
-      <div className="card settings-operations"><h3>Gmail intake sync</h3><p className="muted">Personal mailboxes import only canonical trigger messages. When <strong>info@westpeek.ventures</strong> is connected as its own Google account, inbound inbox messages are treated as founder/deal-flow intake without requiring a hashtag. Every message still requires human review and must pass duplicate protection.</p><div className="notice subtle">The shared inbox must be connected separately. A team member signing in does not automatically monitor another mailbox.</div><button className="btn primary" type="button" disabled={gmailSyncBusy || !session.authenticated} onClick={runGmailSync}>{gmailSyncBusy ? 'Syncing Gmail…' : 'Sync connected Gmail'}</button>{gmailSyncStatus && <p className="operation-result" aria-live="polite">{gmailSyncStatus}</p>}</div>
+      <div className="card settings-operations"><h3>Google Sheets data</h3><p><strong>{sheetStatus}</strong></p><p className="muted"><strong>Refresh app data from Google Sheets</strong> reloads records that already exist in the workbook. It does not check Gmail, import emails, or create intake records.</p><button className="btn" type="button" disabled={refreshBusy || !session.authenticated} onClick={guardedSheetRefresh}>{refreshBusy ? 'Refreshing from Sheets…' : 'Refresh from Google Sheets'}</button></div>
+      <div className="card settings-operations"><h3>Gmail intake sync</h3><p className="muted"><strong>Import new intake emails from connected Gmail</strong> checks every eligible West Peek mailbox that is actually connected: <strong>info@westpeek.ventures</strong>, <strong>sequoia@westpeek.ventures</strong>, and <strong>scooter@westpeek.ventures</strong>.</p><p className="muted">Personal mailboxes import only canonical trigger messages: #wpnetwork, #addtowestpeek, #westpeeknetwork, #wpdealflow, or #dealflow. The separately connected info@westpeek.ventures shared inbox may classify eligible founder or deal-flow messages without a hashtag.</p><div className="notice subtle">Each mailbox must be connected separately. The result names exactly which connected mailboxes were checked. Every imported message still requires human review and duplicate protection.</div>{gmailSyncControl}</div>
       <div className="card settings-operations"><h3>Sheet maintenance</h3><p className="muted">Runs a non-destructive structural check. It creates missing tabs, restores required headers, normalizes supported status and boolean values, fills missing timestamps where safe, and reports possible duplicates. It does not delete or merge records.</p><button className="btn" type="button" disabled={maintenanceBusy || !session.authenticated} onClick={() => { if (window.confirm('Run non-destructive Sheet maintenance? This may create missing tabs, restore required headers, normalize supported values, fill safe missing timestamps, and write an audit report. It will not delete or merge records.')) void runSheetMaintenance(); }}>{maintenanceBusy ? 'Running maintenance…' : 'Run Sheet Maintenance'}</button>{maintenanceStatus && <p className="operation-result" role="status" aria-live="polite">{maintenanceStatus}</p>}</div>
       <div className="card settings-operations"><h3>Tier 4 test-data cleanup</h3><p className="muted">Removes only proof fixtures tied to one exact <code>wpno-tier4-*</code> run ID. Preview is required before cleanup. Records are archived or marked proof-cleaned in Google Sheets and disappear from active app views after verified readback.</p><label><span className="muted">Exact Tier 4 run ID</span><input value={cleanupRunId} onChange={(event) => { setCleanupRunId(event.target.value); setCleanupPreview(null); }} placeholder="wpno-tier4-YYYYMMDDTHHMMSSZ" autoComplete="off" /></label><div className="actions"><button className="btn" type="button" disabled={cleanupBusy || !session.authenticated} onClick={() => void previewProofCleanup()}>{cleanupBusy ? 'Working…' : 'Preview test data'}</button><button className="btn primary" type="button" disabled={cleanupBusy || !cleanupPreview || !session.authenticated} onClick={() => void executeProofCleanup()}>Clean previewed test data</button></div>{cleanupPreview && <p className="muted">Matched: {Object.values(cleanupPreview).reduce((sum, value) => sum + value, 0)} active fixtures.</p>}{cleanupStatus && <p className="operation-result" role="status" aria-live="polite">{cleanupStatus}</p>}</div>
       <div className="card"><h3>Operator Login launchpads</h3><p>joinwestpeek.com/operator<br />westpeek.ventures/operator</p><p className="muted">Team-area access is managed outside this repo. No shared password or passphrase is stored or displayed here.</p></div>

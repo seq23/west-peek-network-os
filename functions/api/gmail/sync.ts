@@ -19,6 +19,7 @@ type GmailPart = { mimeType?: string; body?: { data?: string }; parts?: GmailPar
 const TRIGGER_ALIASES = ['#wpnetwork', '#addtowestpeek', '#westpeeknetwork', '#wpdealflow', '#dealflow'] as const;
 const DEFAULT_QUERY = TRIGGER_ALIASES.map((alias) => `${alias} newer_than:30d`).join(' | ');
 const MAX_RESULTS = 100;
+const APPROVED_SYNC_MAILBOXES = new Set(['info@westpeek.ventures', 'sequoia@westpeek.ventures', 'scooter@westpeek.ventures']);
 
 export async function onRequestPost({ request, env }: Context) {
   let user: { email: string };
@@ -31,6 +32,9 @@ export async function onRequestPost({ request, env }: Context) {
   const body = await readJson<Body>(request).catch(() => ({} as Body));
   const runId = clean(body.run_id) || `gmail_sync_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
   const requestedMailbox = clean(body.mailbox_email).toLowerCase();
+  if (requestedMailbox && !APPROVED_SYNC_MAILBOXES.has(requestedMailbox)) {
+    return json({ ok: false, error_code: 'MAILBOX_NOT_APPROVED', error: `Mailbox ${requestedMailbox} is not approved for West Peek Gmail sync.` }, { status: 400 });
+  }
   const queryOverride = clean(body.query);
   const maxResults = Math.min(Math.max(Number(body.max_results || MAX_RESULTS), 1), 25);
 

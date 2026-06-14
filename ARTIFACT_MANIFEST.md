@@ -1,13 +1,13 @@
 # ARTIFACT MANIFEST
 
 - Repo: `west-peek-network-os`
-- Current artifact name: `west-peek-network-os-main_BASELINE_06-14-26_8a53f324.zip`
+- Current artifact name: `west-peek-network-os-main_BASELINE_06-14-26_a7c9d3e1.zip`
 - Source ZIP: full baseline snapshot from the validated repo root
 - Repo root: `west-peek-network-os-main/`
-- Changed files: confirmation-gated historical Tier 4 marker discovery across every populated cell, exact preview-manifest locking, physical deletion of marked populated rows, unrelated-row preservation, 1,000-row grid-capacity restoration, removal of blank-row compaction from exact cleanup, release cleanup integration, operator documentation, and cleanup contract validation
+- Changed files: shared Gmail sync control on Dashboard, Intake Queue, and Settings; clear Sheets-refresh versus Gmail-import explanations; exact three-mailbox server allowlist; sequential mailbox sync; partial-failure isolation; repeated-click lock; mailbox identity verification; automatic Intake refresh; narrow post-cleanup integrity handling; hostile browser/static contracts; operator runbook and review documentation
 - Generated artifacts excluded: `.git`, `node_modules`, build outputs, logs, diagnostics, browser evidence, active environment files, decrypted auth state, and `tsconfig.tsbuildinfo`
-- Validation status: cleanup contract, TypeScript, production build, artifact manifest, generated-artifact exclusion, and baseline packaging checks passed; reopened-artifact validation performed before delivery
-- Proof limits: local real-browser, deployed provider lanes, CI, deployment, and live physical cleanup remain local/deployed gates
-- Revision: `8a53f324`
+- Validation status: TypeScript, production build, critical UI/data-flow contract, authenticated usability contract, validator admission, UI/test parity, artifact manifest, generated-artifact exclusion, and baseline packaging checks passed; hostile browser tests are collected but require local real-browser execution because this runtime cannot launch an admitted Playwright Chromium
+- Proof limits: local real-browser hostile Gmail UI execution, deployed multi-mailbox OAuth/provider behavior, CI, and deployment remain local/deployed gates
+- Revision: `a7c9d3e1`
 - Date: `2026-06-14`
 - Status: `STRUCTURALLY CHECKED — LOCAL BROWSER VALIDATION REQUIRED`

@@ -2,6 +2,9 @@ import fs from 'node:fs';
 const app=fs.readFileSync('src/ui/App.tsx','utf8');
 const css=fs.readFileSync('src/styles.css','utf8');
 const audit=fs.readFileSync('scripts/postdeploy-click-audit-unified.mjs','utf8');
+const gmailControl=fs.readFileSync('src/ui/GmailSyncControl.tsx','utf8');
+const gmailApi=fs.readFileSync('functions/api/gmail/sync.ts','utf8');
+const postcleanup=fs.readFileSync('scripts/postcleanup-integrity.mjs','utf8');
 const manifest=JSON.parse(fs.readFileSync('config/deployed-route-manifest.json','utf8'));
 const requiredApp=['bounded(i.ai_summary || i.parsed_notes || i.raw_text, 420)','View source details','raw-source','clippedText(parseSuggestedPayload(a.suggested_payload).summary','AI Helper','App Instructions','setPage(\'approvals\')'];
 for(const token of requiredApp) if(!app.includes(token)) throw new Error(`critical UI flow missing ${token}`);
@@ -10,4 +13,8 @@ for(const token of ['rawMarkup','mojibake','jsonBlob','longUnbounded','collision
 const byId=new Map(manifest.routes.map(r=>[r.id,r]));
 for(const id of ['dashboard','add-person','capture-studio','intake-queue','network','touchpoints','settings']) if(!byId.get(id)?.viewports?.includes('mobile')) throw new Error(`mobile risk route missing ${id}`);
 for(const id of ['approvals','notifications','ai-helper','instructions']) if(!byId.get(id)?.viewports?.includes('desktop')) throw new Error(`desktop flow route missing ${id}`);
+for(const token of ['info@westpeek.ventures','sequoia@westpeek.ventures','scooter@westpeek.ventures','runningRef.current','server reported unexpected mailbox','Intake refresh failed','Sync new emails from Gmail']) if(!gmailControl.includes(token)) throw new Error(`gmail sync hostile contract missing ${token}`);
+for(const token of ['APPROVED_SYNC_MAILBOXES','MAILBOX_NOT_APPROVED','MAILBOX_NOT_CONNECTED','activeMailboxSyncs']) if(!gmailApi.includes(token)) throw new Error(`gmail sync API contract missing ${token}`);
+for(const token of ["page === 'dashboard'","page === 'intake'","page === 'settings'",'does not check Gmail, import emails, or create intake records']) if(!app.includes(token)) throw new Error(`gmail sync placement/explanation missing ${token}`);
+if(!postcleanup.includes('Tier 4 JSON report not present; report check not applicable')) throw new Error('narrow postcleanup integrity must not fail solely on absent generated Tier 4 JSON');
 console.log('critical UI/data flow: PASS');

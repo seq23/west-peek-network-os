@@ -221,6 +221,12 @@ async function harness(page: Page) {
     cache_ttl_seconds: 75
   }));
   await page.route('**/api/sheets/snapshot**', (route) => send(route, { ok: true, data, source: 'fixture', refreshed_at: now(), freshness_requested: route.request().url().includes('fresh=1') }));
+  await page.route('**/api/gmail/sync', async (route) => {
+    const body = route.request().postDataJSON() as { mailbox_email?: string };
+    const mailbox = String(body.mailbox_email || '').toLowerCase();
+    if (mailbox !== 'sequoia@westpeek.ventures') return send(route, { ok: false, error_code: 'MAILBOX_NOT_CONNECTED', error: `No active Google OAuth token found for ${mailbox}.` }, 409);
+    return send(route, { ok: true, mailbox, imported_count: 2, skipped_duplicate_count: 1, failed_message_count: 0 });
+  });
   await page.route('**/api/admin/sheets/maintain', (route) => {
     data.sheet_maintenance_log.unshift({ run_id: rid('maint'), created_at: now(), status: 'complete' });
     return send(route, { ok: true, run_id: 'maint_e2e', report_rows_written: 1 });
@@ -615,3 +621,65 @@ test('instructions: no automatic execution guardrails are visible', async ({ pag
 
 test('surface: mobile viewport keeps primary actions reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await expect(page.getByRole('button', { name: /^Menu$/i })).toBeVisible(); await nav(page, 'Dashboard'); await nav(page, 'Add Person'); await nav(page, 'Intake Queue'); await nav(page, 'App Instructions'); });
 test('mobile: every left-sidebar route remains reachable', async ({ page }) => { await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); for (const label of sidebar) { await nav(page, label); await mainText(page, contentBySidebar[label]); } });
+
+
+test('gmail sync UI: Settings distinguishes Sheets refresh from Gmail import and reports checked mailboxes', async ({ page }) => {
+  const requested: string[] = [];
+  await page.unroute('**/api/gmail/sync');
+  await page.route('**/api/gmail/sync', async (route) => {
+    const body = route.request().postDataJSON() as { mailbox_email?: string };
+    const mailbox = String(body.mailbox_email || '').toLowerCase();
+    requested.push(mailbox);
+    if (mailbox === 'scooter@westpeek.ventures') return send(route, { ok: false, error_code: 'MAILBOX_NOT_CONNECTED', error: 'Not connected.' }, 409);
+    return send(route, { ok: true, mailbox, imported_count: mailbox.startsWith('info@') ? 1 : 2, skipped_duplicate_count: 1, failed_message_count: 0 });
+  });
+  await nav(page, 'Settings');
+  await mainText(page, /does not check Gmail, import emails, or create intake records/i);
+  await mainText(page, /Personal mailboxes import only canonical trigger messages/i);
+  await page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i }).click();
+  await mainText(page, /Checked: info@westpeek\.ventures, sequoia@westpeek\.ventures/i);
+  await mainText(page, /Imported 3; duplicates skipped 2; message failures 0/i);
+  await mainText(page, /Not connected: scooter@westpeek\.ventures/i);
+  expect(requested).toEqual(['info@westpeek.ventures', 'sequoia@westpeek.ventures', 'scooter@westpeek.ventures']);
+});
+
+test('gmail sync UI: Dashboard and Intake expose the same shared action', async ({ page }) => {
+  await nav(page, 'Dashboard');
+  await expect(page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i })).toBeVisible();
+  await nav(page, 'Intake Queue');
+  await expect(page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i })).toBeVisible();
+  await mainText(page, /imports new qualifying messages, and refreshes this queue/i);
+});
+
+test('gmail sync UI hostile: malformed and failed mailbox responses do not block a connected mailbox', async ({ page }) => {
+  await page.unroute('**/api/gmail/sync');
+  await page.route('**/api/gmail/sync', async (route) => {
+    const body = route.request().postDataJSON() as { mailbox_email?: string };
+    const mailbox = String(body.mailbox_email || '').toLowerCase();
+    if (mailbox === 'info@westpeek.ventures') return route.fulfill({ status: 502, contentType: 'text/plain', body: 'upstream exploded' });
+    if (mailbox === 'scooter@westpeek.ventures') return send(route, { ok: false, error_code: 'MAILBOX_NOT_CONNECTED' }, 409);
+    return send(route, { ok: true, mailbox, imported_count: 1, skipped_duplicate_count: 0, failed_message_count: 0 });
+  });
+  await nav(page, 'Dashboard');
+  await page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i }).click();
+  await mainText(page, /Checked: sequoia@westpeek\.ventures/i);
+  await mainText(page, /info@westpeek\.ventures: HTTP 502/i);
+  await mainText(page, /Not connected: scooter@westpeek\.ventures/i);
+});
+
+test('gmail sync UI hostile: repeated click cannot launch a second concurrent batch', async ({ page }) => {
+  let calls = 0;
+  await page.unroute('**/api/gmail/sync');
+  await page.route('**/api/gmail/sync', async (route) => {
+    calls += 1;
+    const body = route.request().postDataJSON() as { mailbox_email?: string };
+    const mailbox = String(body.mailbox_email || '').toLowerCase();
+    await new Promise((resolve) => setTimeout(resolve, 75));
+    return send(route, { ok: true, mailbox, imported_count: 0, skipped_duplicate_count: 0, failed_message_count: 0 });
+  });
+  await nav(page, 'Dashboard');
+  const button = page.getByRole('main').getByRole('button', { name: /^Sync new emails from Gmail$/i });
+  await button.dblclick();
+  await mainText(page, /Gmail sync complete/i);
+  expect(calls).toBe(3);
+});

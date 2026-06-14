@@ -52,3 +52,13 @@ Date: 2026-06-11
 - App shell requested without session cookie; redirect to OAuth instead of rendering private Settings.
 - Session request includes `x-west-peek-user-email`; production must not authenticate from header.
 - Secret scanner sees a committed password/passphrase literal; hard fail.
+
+
+## Gmail sync UI — 2026-06-14
+
+- Google Sheets refresh does not query Gmail; operators must use **Sync new emails from Gmail**.
+- Only `info@westpeek.ventures`, `sequoia@westpeek.ventures`, and `scooter@westpeek.ventures` are eligible.
+- Each mailbox requires a separate OAuth connection.
+- Partial mailbox failures are reported without aborting other connected mailboxes.
+- Rapid repeated activation is locked to one browser-side batch.
+- Successful sync followed by snapshot-refresh failure reports both outcomes explicitly.

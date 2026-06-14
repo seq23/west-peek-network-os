@@ -12,7 +12,9 @@ const required = [
   'HALLMARK_ROUTE_COVERAGE.md',
   'FINAL_PROOF_COVERAGE_MATRIX.md',
   'docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md',
-  'scripts/postdeploy-authenticated-click-audit.mjs'
+  'scripts/postdeploy-authenticated-click-audit.mjs',
+  'src/ui/GmailSyncControl.tsx',
+  'docs/runbooks/GMAIL_SYNC_UI_RUNBOOK.md'
 ];
 const failures = required.filter((file) => !fs.existsSync(file)).map((file) => `missing ${file}`);
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -35,6 +37,10 @@ for (const token of [
 const manifest = fs.readFileSync('AUTHENTICATED_ROUTE_MANIFEST.md', 'utf8');
 const expectedRoutes = ['Dashboard','Events','Add Person','Capture Studio','Thank-You','Intake Queue','West Peek Network','Touchpoints','Approvals','Notifications','AI Helper','App Instructions','Settings'];
 for (const route of expectedRoutes) if (!manifest.includes(`| ${route} |`)) failures.push(`route manifest missing ${route}`);
+const gmailControl = fs.readFileSync('src/ui/GmailSyncControl.tsx', 'utf8');
+for (const token of ['Sync new emails from Gmail','info@westpeek.ventures','sequoia@westpeek.ventures','scooter@westpeek.ventures','runningRef.current','Intake refresh failed']) if (!gmailControl.includes(token)) failures.push(`Gmail sync control missing ${token}`);
+const gmailApi = fs.readFileSync('functions/api/gmail/sync.ts', 'utf8');
+for (const token of ['APPROVED_SYNC_MAILBOXES','MAILBOX_NOT_APPROVED']) if (!gmailApi.includes(token)) failures.push(`Gmail sync API missing ${token}`);
 const coverage = fs.readFileSync('FINAL_PROOF_COVERAGE_MATRIX.md', 'utf8');
 if (!coverage.includes('UNPROVEN')) failures.push('final proof matrix must retain explicit UNPROVEN states before live proof');
 if (failures.length) {

@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "repo": "west-peek-network-os",
   "profile": "container",
-  "release_prepush_container": "PASS",
+  "release_prepush_container": "BLOCKED_BROWSER_UNAVAILABLE",
   "ui_test_parity": "PASS",
-  "browser_suite_contract": "PASS",
+  "browser_suite_contract": "PASS_59_COLLECTED_2_REGISTERED_SKIPS",
   "artifact_source_parity": "PASS",
-  "reopened_container_validation": "PASS",
-  "local_browser_validation": "NOT_EXECUTED",
+  "reopened_container_validation": "STATIC_PASS_BROWSER_UNPROVEN",
+  "local_browser_validation": "REQUIRED_BY_UPDATER",
   "required_local_command": "npm run release:prepush:local",
-  "status": "FIRST-COMMAND-READY",
-  "repair_note": "Historical Tier 4 cleanup now finds explicit Tier 4 markers in any populated cell, physically deletes only preview-locked marked rows, preserves unrelated records, and restores blank spreadsheet capacity to at least 1,000 rows per governed tab."
+  "status": "STRUCTURALLY_CHECKED_LOCAL_BROWSER_REQUIRED",
+  "repair_note": "Gmail sync UI is shared across Dashboard, Intake Queue, and Settings; server and client enforce the exact three-mailbox policy; hostile partial-failure, malformed-response, mailbox-mismatch, repeated-click, and refresh-failure paths are guarded. Browser execution is unproven in this runtime because Playwright Chromium is unavailable and system Chromium blocks local navigation."
 }
