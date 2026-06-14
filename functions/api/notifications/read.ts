@@ -10,7 +10,7 @@ export async function onRequestPost({ request, env }: Context) {
     const body = await readJson<{ notification_id?: string; recipient_email?: string }>(request);
     const id = String(body.notification_id || '').trim();
     if (!id) return json({ ok: false, error: 'notification_id is required.' }, { status: 400 });
-    const rows = await readTab(env, 'notifications', { ensureHeaders: false });
+    const rows = await readTab(env, 'notifications');
     const current = rows.filter((row) => String(row.notification_id || '') === id).sort((a, b) => stamp(b) - stamp(a))[0];
     if (!current) return json({ ok: false, error: 'Notification not found.' }, { status: 404 });
     const now = new Date().toISOString();

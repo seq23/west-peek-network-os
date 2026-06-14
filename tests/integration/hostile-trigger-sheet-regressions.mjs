@@ -86,6 +86,20 @@ assert.match(sheets,/SHEETS_READBACK_STALE/,'writes must require readback');
 assert.match(sheets,/columnCount: headers\.length/,'reset must remove extra columns by resizing to canonical width');
 assert.doesNotMatch(gmail,/oauth_tokens', \{ ensureHeaders: false \}/,'OAuth reads may not bypass schema validation');
 assert.doesNotMatch(gmail,/intake_queue', \{ ensureHeaders: false \}/,'intake reads may not bypass schema validation');
+
+const failClosedRuntimeFiles = [
+  'functions/api/oauth/status.ts',
+  'functions/api/approvals/decision.ts',
+  'functions/api/notifications/read.ts',
+  'functions/api/records/lifecycle.ts'
+];
+for (const file of failClosedRuntimeFiles) {
+  const source = fs.readFileSync(file, 'utf8');
+  assert.doesNotMatch(source, /ensureHeaders:\s*false/, `${file} may not bypass Sheet schema validation`);
+  assert.match(source, /readTab\(/, `${file} must read through the governed Sheets adapter`);
+}
+const oauthStatus = fs.readFileSync('functions/api/oauth/status.ts','utf8');
+assert.match(oauthStatus, /oauth_tokens:schema_validated_read/, 'OAuth status diagnostics must disclose schema-validated reads');
 for (const token of ['skipped_duplicate_count','nextPageToken','TRIGGER_ALIASES.map','imported_records','sync_diagnostics','readback_verified']) assert.match(gmail,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 for (const token of ['proof_fixture','proof_run_id','proof_test_id','CLEANUP_EXPECTED_IDS_MISMATCH','CLEANUP_UNRELATED_ROW_CHANGED']) assert.match(cleanup,new RegExp(token));
 assert.doesNotMatch(cleanup,/Tier Four Founder|tier4-network-|company_name|full_name.*includes/i,'cleanup may not use fuzzy business-field matching');
@@ -97,4 +111,4 @@ for (const [alias,intent] of cases) assert.equal(triggers.classifyTrigger(`Subje
 assert.equal(triggers.detectSourceTrigger('HTML <p>#wpnetwork</p>'),'#wpnetwork');
 assert.equal(triggers.detectSourceTrigger('Fwd: context\n----- Forwarded message -----\n#dealflow'),'#dealflow');
 assert.equal(triggers.detectSourceTrigger('#wpnetwork and #dealflow'),'#wpnetwork','multiple aliases must resolve deterministically to one record intent');
-console.log('hostile-trigger-sheet-regressions: PASS — behavioral schema, append, failure, cleanup isolation, dedupe, pagination, HTML, forwarded content, and production contract checks passed.');
+console.log('hostile-trigger-sheet-regressions: PASS — behavioral schema, fail-closed runtime reads, append, failure, cleanup isolation, dedupe, pagination, HTML, forwarded content, and production contract checks passed.');

@@ -32,3 +32,8 @@ The local updater must apply this baseline and run the repo-authorized local pre
 - Strengthened schema validation to compare every runtime header value and order against `_sheets_schema_contract.json`, rather than checking only that tab names appear in source.
 - Strengthened trigger/Sheet safety testing to enforce create-first reset, exact proof ownership fields on every governed tab, independent paginated alias search, dedupe markers, fail-closed schema behavior, and prohibited historical cleanup patterns.
 - Added `docs/runbooks/TRIGGER_SHEETS_INCIDENT_AND_REGRESSION_GUARD.md` and architectural decision `ADM-2026-06-14-TRIGGER-SHEETS-01`.
+
+
+## OAuth/runtime read regression guard (2026-06-14)
+
+All governed runtime reads, including OAuth status, approvals, notifications, and record lifecycle reads, must validate the live tab schema. `ensureHeaders: false` is forbidden in runtime API handlers. Read-only does not mean schema-optional: a misaligned header row can corrupt field interpretation without performing a write. The admitted hostile trigger/Sheets regression lane scans these handlers and hard-fails on any bypass.

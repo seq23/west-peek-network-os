@@ -90,7 +90,7 @@ if (fixtureSource.includes('Mike MacCombie') || appRuntime.includes('Seed Mike d
   console.error('Brittle Mike seed/demo fixture must not ship in runtime or fresh browser fallback.');
   process.exit(1);
 }
-for (const fragment of ['CACHE_TTL_MS = 75_000', "readTab(env, 'oauth_tokens', { ensureHeaders: false })", "status: rateLimited ? 200 : 503"]) {
+for (const fragment of ['CACHE_TTL_MS = 75_000', "readTab(env, 'oauth_tokens')", "status: rateLimited ? 200 : 503"]) {
   if (!oauthStatusSource.includes(fragment)) {
     console.error(`OAuth status rate-limit guard missing: ${fragment}`);
     process.exit(1);

@@ -108,7 +108,8 @@ assert.ok(!appSource.includes('Seed Mike demo record'), 'Settings must not expos
 assert.ok(!functionsSource.includes('seed_mike_fixture'), 'Runtime must not preserve brittle one-off Mike seed flow.');
 const oauthStatusSource = readFileSync('functions/api/oauth/status.ts', 'utf8');
 assert.ok(oauthStatusSource.includes('CACHE_TTL_MS = 75_000'), 'OAuth status refresh must have a cooldown cache to avoid Sheets 429 loops.');
-assert.ok(oauthStatusSource.includes("readTab(env, 'oauth_tokens', { ensureHeaders: false })"), 'OAuth status must not perform header-repair reads on every refresh.');
+assert.ok(oauthStatusSource.includes("readTab(env, 'oauth_tokens')"), 'OAuth status must validate the oauth_tokens schema before reading.');
+assert.ok(!oauthStatusSource.includes('ensureHeaders: false'), 'OAuth status must never bypass schema validation.');
 assert.ok(oauthStatusSource.includes("status: rateLimited ? 200 : 503"), 'OAuth status quota cooldown must return a handled payload instead of surfacing raw 429 UI errors.');
 
 const e2eSource = readFileSync('tests/e2e/network-os.spec.ts', 'utf8');

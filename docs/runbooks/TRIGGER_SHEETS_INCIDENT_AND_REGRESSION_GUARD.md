@@ -86,3 +86,8 @@ The initial repair removed broad historical cleanup because the old implementati
 The supported replacement is `all_registered_tier4` cleanup. It is not fuzzy historical matching. It selects only explicitly registered proof fixtures with a valid `wpno-tier4-*` run ID, nonempty test ID, and stable record ID. Preview returns the exact deletion manifest; execution must submit that same manifest and the dedicated confirmation token. Unrelated rows are fingerprinted before and after deletion.
 
 Regression rule: historical cleanup is allowed only when it remains fixture-owned, dry-run-first, exact-manifest-locked, and readback-verified.
+
+
+## OAuth/runtime read regression guard (2026-06-14)
+
+All governed runtime reads, including OAuth status, approvals, notifications, and record lifecycle reads, must validate the live tab schema. `ensureHeaders: false` is forbidden in runtime API handlers. Read-only does not mean schema-optional: a misaligned header row can corrupt field interpretation without performing a write. The admitted hostile trigger/Sheets regression lane scans these handlers and hard-fails on any bypass.

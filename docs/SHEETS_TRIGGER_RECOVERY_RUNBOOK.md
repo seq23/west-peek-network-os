@@ -24,3 +24,8 @@ It clears the governed tabs, writes canonical headers, freezes row 1, and valida
 ## Required live proof
 
 For each alias (`#wpnetwork`, `#addtowestpeek`, `#westpeeknetwork`, `#wpdealflow`, `#dealflow`): seed a unique Gmail message, run deployed sync, verify exactly one pending-human-review row under correct headers, rerun sync to prove dedupe, dry-run cleanup, execute using the exact returned IDs, and verify unrelated rows and headers remain unchanged.
+
+
+## OAuth/runtime read regression guard (2026-06-14)
+
+All governed runtime reads, including OAuth status, approvals, notifications, and record lifecycle reads, must validate the live tab schema. `ensureHeaders: false` is forbidden in runtime API handlers. Read-only does not mean schema-optional: a misaligned header row can corrupt field interpretation without performing a write. The admitted hostile trigger/Sheets regression lane scans these handlers and hard-fails on any bypass.

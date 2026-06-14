@@ -10,7 +10,7 @@ export async function onRequestPost({ request, env }: Context) {
     const body = await readJson<{ approval_id?: string; decision?: 'approve' | 'reject' }>(request);
     const id = String(body.approval_id || '').trim();
     if (!id || !body.decision) return json({ ok: false, error: 'approval_id and decision are required.' }, { status: 400 });
-    const rows = await readTab(env, 'approvals', { ensureHeaders: false });
+    const rows = await readTab(env, 'approvals');
     const current = rows.filter((row) => String(row.approval_id || '') === id).sort((a, b) => stamp(b) - stamp(a))[0];
     if (!current) return json({ ok: false, error: 'Approval not found.' }, { status: 404 });
     const now = new Date().toISOString();

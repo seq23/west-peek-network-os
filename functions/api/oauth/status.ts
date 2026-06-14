@@ -37,8 +37,8 @@ export async function onRequest({ request, env }: Context) {
   }
 
   try {
-    // OAuth status is read-only and must not perform header-repair reads on every click.
-    const rows = await readTab(env, 'oauth_tokens', { ensureHeaders: false });
+    // OAuth status is read-only, but it must still fail closed on schema mismatch.
+    const rows = await readTab(env, 'oauth_tokens');
 
     const activeRows = rows
       .filter((row) => String(row.provider || '').toLowerCase() === 'google')
@@ -60,7 +60,7 @@ export async function onRequest({ request, env }: Context) {
       status: latest ? String(latest.status || '') : 'not_connected',
       token_captured_at: latest ? String(latest.created_at || '') : '',
       token_updated_at: latest ? String(latest.updated_at || '') : '',
-      source: 'oauth_tokens:no_header_repair_read',
+      source: 'oauth_tokens:schema_validated_read',
       cache_ttl_seconds: CACHE_TTL_MS / 1000
     };
 

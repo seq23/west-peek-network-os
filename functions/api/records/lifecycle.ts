@@ -26,7 +26,7 @@ export async function onRequestPost({ request, env }: Context) {
       return json({ ok: false, error: 'entity, id, and a valid action are required.' }, { status: 400 });
     }
     const config = CONFIG[entity];
-    const rows = await readTab(env, config.tab, { ensureHeaders: false });
+    const rows = await readTab(env, config.tab);
     const matches = rows.filter((row) => String(row[config.idKey] || '') === id);
     const current = matches.sort((a, b) => stamp(b) - stamp(a))[0];
     if (!current) return json({ ok: false, error: `${entity} record not found.` }, { status: 404 });
