@@ -324,3 +324,46 @@ body { background: radial-gradient(circle at 15% 0%, rgba(240,90,26,.14), transp
 .ai-helper-grid>*{min-width:0}
 .record-card details p,.record-card details dd,.record-card details pre{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
 @media (max-width:760px){.helper-row{align-items:stretch;flex-direction:column}.helper-row .btn{width:100%}.ai-helper-request textarea{min-height:220px}}
+
+/* Populated-data overflow containment — Events + Capture Studio */
+.shell,
+.main,
+.grid,
+.grid > *,
+.card,
+.form,
+.field,
+.field > *,
+label {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+input,
+textarea,
+select,
+button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.form input,
+.form textarea,
+.form select,
+.form .btn {
+  width: 100%;
+  min-width: 0;
+}
+
+select {
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 920px) {
+  .grid.cols-2 > *,
+  .grid.cols-3 > * {
+    width: 100%;
+    min-width: 0;
+  }
+}
