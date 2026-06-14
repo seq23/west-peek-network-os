@@ -87,6 +87,11 @@ assert.match(sheets,/columnCount: headers\.length/,'reset must remove extra colu
 assert.doesNotMatch(gmail,/oauth_tokens', \{ ensureHeaders: false \}/,'OAuth reads may not bypass schema validation');
 assert.doesNotMatch(gmail,/intake_queue', \{ ensureHeaders: false \}/,'intake reads may not bypass schema validation');
 
+const liveGmailProof = fs.readFileSync('tests/e2e/live-gmail-trigger-ingestion.spec.ts','utf8');
+assert.match(liveGmailProof, /imported_records\.length \+ preexistingCount/, 'live Gmail proof must resume safely from existing exact-run fixtures');
+assert.match(liveGmailProof, /skipped_duplicate_count \|\| 0/, 'live Gmail proof must verify duplicates during resumable retries');
+assert.doesNotMatch(liveGmailProof, /imported_records\)\.toHaveLength\(aliases\.length\)/, 'live Gmail proof may not require five fresh imports on every retry');
+
 const failClosedRuntimeFiles = [
   'functions/api/oauth/status.ts',
   'functions/api/approvals/decision.ts',

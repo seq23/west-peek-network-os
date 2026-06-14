@@ -52,3 +52,7 @@ For each supported alias, the test verifies exact classification and exactly one
 ## Completion boundary
 
 The repository may not be marked provider-complete until the authenticated deployed five-alias proof runs successfully against the exact artifact hash. Manual and API seeding are equivalent only as input creation methods; both must traverse the same deployed Gmail read, Sheet mutation/readback, dedupe, and cleanup path.
+
+## Retry and interrupted-run behavior
+
+The live proof is resumable. If a prior attempt already created some or all exact-run fixtures, rerun with the same `WEST_PEEK_E2E_RUN_ID`. The sync may legitimately report fewer than five new imports, including zero, while reporting the remainder as duplicates. The test must reconstruct and verify exactly one row per alias from the Sheet, then continue through second-sync dedupe and exact cleanup. Do not send duplicate manual emails merely because a prior test stopped after persistence.

@@ -49,3 +49,7 @@ This token is used only by the proof runner to create the five messages. It does
 ## Hard boundary
 
 The test must fail when the selected mode lacks its required inputs. A missing API token must not block manual mode. Manual mode must not claim that the test created the messages itself.
+
+## Retry and interrupted-run behavior
+
+The live proof is resumable. If a prior attempt already created some or all exact-run fixtures, rerun with the same `WEST_PEEK_E2E_RUN_ID`. The sync may legitimately report fewer than five new imports, including zero, while reporting the remainder as duplicates. The test must reconstruct and verify exactly one row per alias from the Sheet, then continue through second-sync dedupe and exact cleanup. Do not send duplicate manual emails merely because a prior test stopped after persistence.

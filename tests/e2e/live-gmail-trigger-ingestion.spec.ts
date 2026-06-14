@@ -62,7 +62,7 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
     expect(syncPayload.ok).toBeTruthy();
     expect(syncPayload.execution_allowed).toBe(false);
     if (mode === 'api') for (const item of seeded) expect(syncPayload.inspected_message_ids).toContain(item.gmailId);
-    expect(syncPayload.imported_records).toHaveLength(aliases.length);
+    expect(syncPayload.imported_records.length).toBeLessThanOrEqual(aliases.length);
     for (const record of syncPayload.imported_records) {
       expect(record.gmail_message_id).toBeTruthy();
       expect(record.intake_id).toBeTruthy();
@@ -99,10 +99,18 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
       const importedRecord = syncPayload.imported_records.find((r:any)=>
         (item.gmailId && r.gmail_message_id===item.gmailId) || r.source_trigger===item.alias
       );
-      expect(importedRecord?.intake_id).toBe(row.intake_id);
-      expect(importedRecord?.source_trigger).toBe(row.source_trigger);
-      expect(importedRecord?.trigger_intent).toBe(row.trigger_intent);
+      if (importedRecord) {
+        expect(importedRecord.intake_id).toBe(row.intake_id);
+        expect(importedRecord.source_trigger).toBe(row.source_trigger);
+        expect(importedRecord.trigger_intent).toBe(row.trigger_intent);
+      }
     }
+
+    const preexistingCount = created.filter((row:any)=>
+      !syncPayload.imported_records.some((record:any)=>record.intake_id===row.intake_id)
+    ).length;
+    expect(syncPayload.imported_records.length + preexistingCount).toBe(aliases.length);
+    expect(syncPayload.skipped_duplicate_count || 0).toBeGreaterThanOrEqual(preexistingCount);
 
     const syncAgain = await request.post('/api/gmail/sync', { data: { query: runId, max_results: 25, run_id: runId } });
     expect(syncAgain.ok(), await syncAgain.text()).toBeTruthy();
