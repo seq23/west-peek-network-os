@@ -274,17 +274,48 @@ test.describe('Tier 4 deployed live workflows', () => {
   });
 
   test('relationship touch workflow live', async ({ request }) => {
-    const marker = unique('tier4-touch');
-    const approvedId = `approval-approved-${marker}`;
-    const rejectedId = `approval-rejected-${marker}`;
-    const touchId = `touch-${marker}`;
+    const runId = process.env.WEST_PEEK_E2E_RUN_ID || '';
+    expect(runId).toMatch(/^wpno-tier4-/);
+
+    async function createTouch(marker: string) {
+      const response = await request.post(
+        '/api/touches/thank-you/create',
+        {
+          headers: {
+            'x-west-peek-proof-run-id': runId
+          },
+          data: {
+            recipient_name: `Tier 4 Touch ${marker}`,
+            recipient_email: `${marker}@example.com`,
+            company: 'Tier 4 Touch Proof',
+            owner: 'Sequoia',
+            reason: `Relationship touch proof ${marker}`,
+            priority: 'Normal',
+            due_date: 'This week',
+            proof_run_id: runId
+          }
+        }
+      );
+
+      expect(response.ok(), await response.text()).toBeTruthy();
+      const payload = await response.json();
+
+      expect(payload.execution_allowed).toBe(false);
+      expect(payload.human_review_required).toBe(true);
+      expect(payload.touch?.touch_id).toBeTruthy();
+      expect(payload.approval?.approval_id).toBeTruthy();
+      expect(payload.notification?.notification_id).toBeTruthy();
+
+      return payload;
+    }
+
+    const approved = await createTouch(unique('tier4-touch-approved'));
+    const rejected = await createTouch(unique('tier4-touch-rejected'));
 
     const approve = await request.post('/api/approvals/decision', {
       data: {
-        approval_id: approvedId,
-        decision: 'approve',
-        approval_type: 'relationship_touch',
-        source_entity_id: touchId
+        approval_id: approved.approval.approval_id,
+        decision: 'approve'
       }
     });
 
@@ -292,10 +323,8 @@ test.describe('Tier 4 deployed live workflows', () => {
 
     const reject = await request.post('/api/approvals/decision', {
       data: {
-        approval_id: rejectedId,
-        decision: 'reject',
-        approval_type: 'relationship_touch',
-        source_entity_id: touchId
+        approval_id: rejected.approval.approval_id,
+        decision: 'reject'
       }
     });
 
@@ -305,18 +334,12 @@ test.describe('Tier 4 deployed live workflows', () => {
       '/api/touches/fulfillment/update',
       {
         data: {
-          touch_id: touchId,
-          recipient_name: `Tier 4 Touch ${marker}`,
-          recipient_email: `${marker}@example.com`,
-          company: 'Tier 4 Touch Proof',
-          owner: 'Sequoia',
-          reason: `Relationship touch proof ${marker}`,
-          priority: 'Normal',
-          method: 'handwritten_note',
+          ...approved.touch,
+          touch_id: approved.touch.touch_id,
           fulfillment_mode: 'self',
           fulfillment_status: 'will_do_myself',
           fulfillment_notes:
-            `No automatic send, payment, order, or vendor execution ${marker}`
+            'No automatic send, payment, order, or vendor execution'
         }
       }
     );
@@ -336,26 +359,43 @@ test.describe('Tier 4 deployed live workflows', () => {
     const data = await snapshot(request);
     const approvals = data.approvals || [];
     const touches = data.relationship_touches || [];
+    const notifications = data.notifications || [];
 
     expect(
       approvals.find(
-        (row) => String(row.approval_id || '') === approvedId
+        (row) =>
+          String(row.approval_id || '') ===
+          String(approved.approval.approval_id)
       )?.status
     ).toBe('approved');
 
     expect(
       approvals.find(
-        (row) => String(row.approval_id || '') === rejectedId
+        (row) =>
+          String(row.approval_id || '') ===
+          String(rejected.approval.approval_id)
       )?.status
     ).toBe('rejected');
 
-    const touch = touches.find(
-      (row) => String(row.touch_id || '') === touchId
-    );
+    expect(
+      touches.find(
+        (row) =>
+          String(row.touch_id || '') ===
+          String(approved.touch.touch_id)
+      )
+    ).toBeTruthy();
 
-    expect(touch).toBeTruthy();
-    expect(String(touch?.execution_allowed || '')).not.toBe('true');
-    expect(String(touch?.fulfillment_mode || '')).toBe('self');
+    expect(
+      notifications.find(
+        (row) =>
+          String(row.notification_id || '') ===
+          String(approved.notification.notification_id)
+      )
+    ).toBeTruthy();
+
+    expect(String(approved.touch.proof_run_id || '')).toBe(runId);
+    expect(String(approved.approval.proof_run_id || '')).toBe(runId);
+    expect(String(approved.notification.proof_run_id || '')).toBe(runId);
   });
 
   test('ai helper approval notification live', async ({ request }) => {

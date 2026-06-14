@@ -18,6 +18,7 @@ type Body = {
   priority?: string;
   due_date?: string;
   contact_id?: string;
+  proof_run_id?: string;
 };
 
 export async function onRequestPost({ request, env }: Context) {
@@ -48,6 +49,23 @@ export async function onRequestPost({ request, env }: Context) {
   if (reason.length > 2500) return validationError(traceId, trace, 'reason must be 2,500 characters or fewer.');
 
   const now = new Date().toISOString();
+  const proofRunId = cleanProofRunId(
+    body.proof_run_id ||
+    request.headers.get('x-west-peek-proof-run-id') ||
+    ''
+  );
+  const proofMeta = proofRunId
+    ? {
+        proof_run_id: proofRunId,
+        proof_fixture: true,
+        proof_status: 'active',
+        proof_created_at: now,
+        proof_expires_at: new Date(
+          Date.now() + 24 * 60 * 60 * 1000
+        ).toISOString()
+      }
+    : {};
+
   try {
     const draft = await createThankYouDraft(env, {
       recipientName,
@@ -85,11 +103,89 @@ export async function onRequestPost({ request, env }: Context) {
       updated_by: user.email
     };
 
-    await appendRecord(env, 'relationship_touches', touch);
-    trace.push({ stage: 'persistence', status: 'passed', detail: 'pending_approval thank-you touch appended to relationship_touches' });
-    trace.push({ stage: 'execution_guardrail', status: 'passed', detail: 'no card, email, gift, or vendor order sent automatically' });
+    Object.assign(touch, proofMeta);
 
-    return json({ ok: true, touch, draft, provider: 'anthropic', trace_id: traceId, internal_data_trace: trace, human_review_required: true, approval_required: true, execution_allowed: false, execution_status: 'not_executed', persistence: 'google_sheets' });
+    const approval = {
+      approval_id: `approval_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+      created_at: now,
+      updated_at: now,
+      approval_type: 'virtual_thank_you_card',
+      source_entity_type: 'relationship_touch',
+      source_entity_id: touch.touch_id,
+      requested_by: user.email,
+      assigned_to: touch.owner === 'Unassigned' ? 'Sequoia' : touch.owner,
+      relationship_owner: touch.owner === 'Unassigned' ? 'Sequoia' : touch.owner,
+      status: 'pending',
+      risk_level: 'medium',
+      suggested_payload: JSON.stringify({
+        recipient_name: touch.recipient_name,
+        recipient_email: touch.recipient_email,
+        company: touch.company,
+        reason: touch.reason,
+        method: touch.method,
+        card_title: touch.card_title,
+        draft_message: touch.draft_message,
+        human_review_required: true,
+        execution_allowed: false,
+        execution_status: 'not_executed'
+      }),
+      approved_by: '',
+      approved_at: '',
+      rejected_by: '',
+      rejected_at: '',
+      ...proofMeta
+    };
+
+    const notification = {
+      notification_id: `notification_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+      created_at: now,
+      updated_at: now,
+      recipient_email: user.email,
+      notification_type: 'approval_waiting',
+      channel: 'in_app',
+      subject: 'Thank-you touch needs approval',
+      body_preview: `Review thank-you touch for ${recipientName}.`,
+      entity_type: 'approval',
+      entity_id: approval.approval_id,
+      priority: 'Normal',
+      status: 'unread',
+      sent_at: now,
+      read_at: '',
+      resolved_at: '',
+      failure_reason: '',
+      ...proofMeta
+    };
+
+    await appendRecord(env, 'relationship_touches', touch);
+    await appendRecord(env, 'approvals', approval);
+    await appendRecord(env, 'notifications', notification);
+
+    trace.push({
+      stage: 'persistence',
+      status: 'passed',
+      detail: 'pending thank-you touch, linked approval, and unread notification appended'
+    });
+    trace.push({
+      stage: 'execution_guardrail',
+      status: 'passed',
+      detail: 'no card, email, gift, payment, or vendor order sent automatically'
+    });
+
+    return json({
+      ok: true,
+      touch,
+      approval,
+      notification,
+      draft,
+      provider: 'anthropic',
+      trace_id: traceId,
+      internal_data_trace: trace,
+      human_review_required: true,
+      approval_required: true,
+      execution_allowed: false,
+      execution_status: 'not_executed',
+      persistence: 'google_sheets'
+    });
   } catch (error) {
     const detail = error instanceof Error ? redactProviderError(error.message) : 'Thank-you card creation failed.';
     if (detail.includes('Google Sheets')) return sheetsUnavailable(error);
@@ -117,6 +213,13 @@ function normalizePriority(value: unknown) {
   const normalized = String(value || '').trim();
   if (normalized === 'Low' || normalized === 'High') return normalized;
   return 'Normal';
+}
+
+function cleanProofRunId(value: string) {
+  const normalized = String(value || '').trim();
+  return /^wpno-tier4-[A-Za-z0-9._:-]+$/.test(normalized)
+    ? normalized.slice(0, 180)
+    : '';
 }
 
 function redactProviderError(message: string) {
