@@ -1,12 +1,13 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json, readJson } from '../../_shared/json';
-import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
+import { appendRecord, deletePhysicalRows, readTab, readTabPhysicalRows, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
-type Body = { run_id?: string; scope?: 'exact_run' | 'historical'; confirm?: string; dry_run?: boolean; tab?: string; limit?: number; verify_only?: boolean };
+type Body = { run_id?: string; scope?: 'exact_run' | 'historical'; mode?: 'append_only' | 'physical_delete'; confirm?: string; physical_delete_confirm?: string; dry_run?: boolean; tab?: string; limit?: number; verify_only?: boolean };
 
 const CONFIRM = 'CLEAN_TIER4_PROOF_FIXTURES';
 const HISTORICAL_CONFIRM = 'CLEAN_ALL_HISTORICAL_TIER4_FIXTURES';
+const PHYSICAL_DELETE_CONFIRM = 'PHYSICALLY_DELETE_TIER4_PROOF_ROWS';
 const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
 const ID_KEYS: Partial<Record<SheetTab, string>> = {
   contacts: 'contact_id', intake_queue: 'intake_id', relationship_touches: 'touch_id', approvals: 'approval_id',
@@ -21,10 +22,14 @@ export async function onRequestPost({ request, env }: Context) {
     const user = await requireAuthenticatedUser(request, env);
     const body = await readJson<Body>(request);
     const scope = body.scope === 'historical' ? 'historical' : 'exact_run';
+    const mode = body.mode === 'physical_delete' ? 'physical_delete' : 'append_only';
     const runId = String(body.run_id || '').trim();
     if (scope === 'exact_run' && !/^wpno-tier4-[A-Za-z0-9._:-]+$/.test(runId)) return json({ ok: false, error: 'A valid wpno-tier4 run_id is required.' }, { status: 400 });
     const requiredConfirm = scope === 'historical' ? HISTORICAL_CONFIRM : CONFIRM;
     if (body.confirm !== requiredConfirm) return json({ ok: false, error: `confirm must equal ${requiredConfirm}.` }, { status: 400 });
+    if (mode === 'physical_delete' && body.physical_delete_confirm !== PHYSICAL_DELETE_CONFIRM) {
+      return json({ ok: false, error: `physical_delete_confirm must equal ${PHYSICAL_DELETE_CONFIRM}.` }, { status: 400 });
+    }
 
     const requestedTab = String(body.tab || '').trim();
     if (!requestedTab || !TABS.includes(requestedTab as SheetTab)) {
@@ -34,6 +39,51 @@ export async function onRequestPost({ request, env }: Context) {
     const limit = Math.min(MAX_LIMIT, Math.max(1, Number.isFinite(Number(body.limit)) ? Math.floor(Number(body.limit)) : DEFAULT_LIMIT));
     const idKey = ID_KEYS[tab];
     if (!idKey) return json({ ok: false, error: `No stable ID key configured for ${tab}.` }, { status: 500 });
+
+    if (mode === 'physical_delete') {
+      const physicalRows = await readTabPhysicalRows(env, tab);
+      const active = physicalRows.filter(({ record }) =>
+        scope === 'historical'
+          ? isHistoricalTier4FixtureIncludingCleaned(record)
+          : isTargetFixtureIncludingCleaned(record, runId)
+      );
+      const selected = body.verify_only ? [] : active.slice(0, limit);
+      const ids = selected.map(({ record }) => String(record[idKey] || '')).filter(Boolean);
+      const rowNumbers = selected.map(({ rowNumber }) => rowNumber);
+      let cleaned = 0;
+
+      if (!body.dry_run && !body.verify_only && rowNumbers.length) {
+        const result = await deletePhysicalRows(env, tab, rowNumbers);
+        cleaned = result.deleted;
+      }
+
+      const readback = await readTabPhysicalRows(env, tab);
+      const remaining = readback.filter(({ record }) =>
+        scope === 'historical'
+          ? isHistoricalTier4FixtureIncludingCleaned(record)
+          : isTargetFixtureIncludingCleaned(record, runId)
+      ).length;
+
+      return json({
+        ok: true,
+        run_id: scope === 'exact_run' ? runId : null,
+        scope,
+        mode,
+        tab,
+        dry_run: body.dry_run === true,
+        verify_only: body.verify_only === true,
+        matched: active.length,
+        selected: selected.length,
+        cleaned,
+        remaining,
+        has_more: remaining > 0,
+        ids,
+        row_numbers: rowNumbers,
+        limit,
+        cleanup_status: body.dry_run ? 'preview_only' : remaining === 0 ? 'physically_deleted_verified' : 'in_progress',
+        execution_allowed: false
+      });
+    }
 
     const rows = await readTab(env, tab, { ensureHeaders: false });
     const latest = latestByStableId(rows, idKey);
@@ -60,6 +110,7 @@ export async function onRequestPost({ request, env }: Context) {
       ok: true,
       run_id: scope === 'exact_run' ? runId : null,
       scope,
+      mode,
       tab,
       dry_run: body.dry_run === true,
       verify_only: body.verify_only === true,
@@ -84,6 +135,27 @@ function isTargetFixture(row: Record<string, unknown>, runId: string) {
   const explicit = String(row.proof_run_id || '') === runId && String(row.proof_fixture || '').toLowerCase() === 'true';
   const legacyTier4 = text.includes(runId) && /tier[ _-]?4|wpno-tier4|pitch lab (profile|packet)|public event e2e/i.test(text);
   return explicit || legacyTier4;
+}
+
+
+function isTargetFixtureIncludingCleaned(row: Record<string, unknown>, runId: string) {
+  const text = Object.values(row).map((value) => String(value || '')).join('\n');
+  const explicit = String(row.proof_run_id || '') === runId && String(row.proof_fixture || '').toLowerCase() === 'true';
+  const cleanupVersion = String(row.proof_cleanup_run_id || '') === runId;
+  const legacyTier4 = text.includes(runId) && /tier[ _-]?4|wpno-tier4|pitch lab (profile|packet)|public event e2e/i.test(text);
+  return explicit || cleanupVersion || legacyTier4;
+}
+
+function isHistoricalTier4FixtureIncludingCleaned(row: Record<string, unknown>) {
+  const proofRunId = String(row.proof_run_id || '').trim();
+  const cleanupRunId = String(row.proof_cleanup_run_id || '').trim();
+  const explicitProof = String(row.proof_fixture || '').toLowerCase() === 'true'
+    && (/^wpno-tier4-/i.test(proofRunId) || /^historical-tier4-/i.test(proofRunId));
+  if (explicitProof || /^wpno-tier4-/i.test(cleanupRunId) || /^historical-tier4-/i.test(cleanupRunId)) return true;
+  const text = Object.values(row).map((value) => String(value || '')).join('\n');
+  return /(?:wpno-tier4-|tier4-provider-|tier4-review-|tier4-event-|tier4-network-|tier4-founder-)/i.test(text)
+    || /\bTier Four (?:Network Contact|Founder|Ventures|Network Co)\b/i.test(text)
+    || /\bTier 4 (?:Proof|Review Proof|Event Guest|Event Capital|OCR proof|voice proof|voice diagnostic|direct OCR diagnostic)\b/i.test(text);
 }
 
 

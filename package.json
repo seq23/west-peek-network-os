@@ -176,7 +176,9 @@
     "validate:ui-test-parity": "node scripts/validate-ui-test-parity.mjs",
     "validate:browser-suite-contract": "node scripts/validate-browser-suite-contract.mjs",
     "validate:artifact-source-parity": "node scripts/validate-artifact-source-parity.mjs",
-    "validate:release-environment": "node scripts/detect-release-environment.mjs"
+    "validate:release-environment": "node scripts/detect-release-environment.mjs",
+    "tier4:physical-delete:preview": "TIER4_PHYSICAL_DELETE_DRY_RUN=1 bash scripts/auth-state/physical-delete-tier4.sh",
+    "tier4:physical-delete": "bash scripts/auth-state/physical-delete-tier4.sh"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

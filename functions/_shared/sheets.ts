@@ -60,6 +60,81 @@ export async function readTab(env: RuntimeEnv, tab: SheetTab, options: { ensureH
   return rowsToObjects(payload.values || []);
 }
 
+export async function readTabPhysicalRows(env: RuntimeEnv, tab: SheetTab) {
+  assertSheetsConfigured(env);
+  const token = await getServiceAccountToken(env);
+  const range = encodeURIComponent(`${tab}!A:ZZ`);
+  const response = await sheetsFetch(env, token, `values/${range}`);
+  if (!response.ok) throw new Error(`Google Sheets physical-row read failed for ${tab}: ${response.status} ${await response.text()}`);
+  const payload = await response.json() as { values?: string[][] };
+  const values = payload.values || [];
+  const [header = [], ...rows] = values;
+
+  return rows.map((row, index) => ({
+    rowNumber: index + 2,
+    record: rowToObject(header, row)
+  }));
+}
+
+export async function deletePhysicalRows(env: RuntimeEnv, tab: SheetTab, rowNumbers: number[]) {
+  assertSheetsConfigured(env);
+  const uniqueRows = [...new Set(rowNumbers)]
+    .filter((rowNumber) => Number.isInteger(rowNumber) && rowNumber >= 2)
+    .sort((a, b) => b - a);
+
+  if (!uniqueRows.length) return { deleted: 0 };
+
+  const token = await getServiceAccountToken(env);
+  const metadataResponse = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}?fields=sheets.properties`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  if (!metadataResponse.ok) {
+    throw new Error(`Google Sheets metadata read failed: ${metadataResponse.status} ${await metadataResponse.text()}`);
+  }
+
+  const metadata = await metadataResponse.json() as {
+    sheets?: Array<{ properties?: { sheetId?: number; title?: string } }>;
+  };
+
+  const sheet = metadata.sheets?.find((candidate) => candidate.properties?.title === tab);
+  const sheetId = sheet?.properties?.sheetId;
+
+  if (!Number.isInteger(sheetId)) {
+    throw new Error(`Google Sheets tab metadata not found for ${tab}.`);
+  }
+
+  const requests = uniqueRows.map((rowNumber) => ({
+    deleteDimension: {
+      range: {
+        sheetId,
+        dimension: 'ROWS',
+        startIndex: rowNumber - 1,
+        endIndex: rowNumber
+      }
+    }
+  }));
+
+  const response = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}:batchUpdate`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ requests })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Google Sheets physical row deletion failed for ${tab}: ${response.status} ${await response.text()}`);
+  }
+
+  return { deleted: uniqueRows.length };
+}
+
 export async function batchReadTabs(env: RuntimeEnv, tabs: SheetTab[]) {
   assertSheetsConfigured(env);
   const token = await getServiceAccountToken(env);
@@ -151,26 +226,27 @@ async function sheetsFetch(env: RuntimeEnv, token: string, path: string, init: R
 
 function rowsToObjects(values: string[][]) {
   const [header = [], ...rows] = values;
+  return rows.map((row: string[]) => rowToObject(header, row));
+}
 
-  return rows.map((row: string[]) => {
-    const record: Record<string, string> = {};
+function rowToObject(header: string[], row: string[]) {
+  const record: Record<string, string> = {};
 
-    header.forEach((rawKey: string, index: number) => {
-      const key = String(rawKey || '').trim();
-      if (!key) return;
+  header.forEach((rawKey: string, index: number) => {
+    const key = String(rawKey || '').trim();
+    if (!key) return;
 
-      const value = row[index] || '';
+    const value = row[index] || '';
 
-      // Historical sheets may contain duplicate headers. Preserve the first
-      // populated value instead of allowing a later blank duplicate column
-      // to overwrite valid data.
-      if (!(key in record) || (!record[key] && value)) {
-        record[key] = value;
-      }
-    });
-
-    return record;
+    // Historical sheets may contain duplicate headers. Preserve the first
+    // populated value instead of allowing a later blank duplicate column
+    // to overwrite valid data.
+    if (!(key in record) || (!record[key] && value)) {
+      record[key] = value;
+    }
   });
+
+  return record;
 }
 
 function serializeCell(value: unknown): string {

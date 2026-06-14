@@ -15,6 +15,8 @@ This repository has several cleanup mechanisms. They solve different problems an
 | Settings → Tier 4 test-data cleanup | Browser alternative to exact-run cleanup | Exact `wpno-tier4-*` run ID | Yes | Optional operator path |
 | `tier4:cleanup:historical:preview` | Discover all active legacy Tier 4 fixtures | Strong historical Tier 4 markers across all cleanup tabs | No | One-time recovery/audit operation |
 | `tier4:cleanup:historical` | Clean all active legacy Tier 4 fixtures | Strong historical Tier 4 markers across all cleanup tabs | Yes | One-time recovery/audit operation |
+| `tier4:physical-delete:preview` | Preview physical removal for one exact Tier 4 run | All physical rows carrying the exact run marker, including cleanup versions | No | Exceptional terminal-only operation |
+| `tier4:physical-delete` | Physically remove one exact Tier 4 run | All physical rows carrying the exact run marker, including cleanup versions | Yes — destructive | Exceptional terminal-only operation after evidence preservation |
 | `fixtures:cleanup:expired` | Update the local proof-fixture ledger | Expired local-adapter ledger rows only | No live-provider cleanup | Local fixture bookkeeping |
 | UI archive/restore/dismiss/revoke controls | Manage ordinary operator records | One selected business record | Yes | Daily product operation |
 
@@ -107,7 +109,44 @@ Google Sheets remains append-only. Cleanup writes a new terminal version using t
 
 Every cleanup version receives `proof_status=proof_cleaned` and `proof_cleaned_at`. Active snapshots filter those versions, so the records disappear from normal app views after refresh.
 
+## Guarded physical deletion
+
+Append-only cleanup remains the default normal lifecycle behavior.
+
+Physical deletion is a separate, exceptional exact-run operation. It is not invoked by release:cleanup, release:close-lifecycle, Settings, or historical cleanup.
+
+Safety controls:
+
+- exact wpno-tier4-* run ID required
+- authenticated Playwright storage state required
+- normal exact-run confirmation phrase required
+- second destructive confirmation phrase: PHYSICALLY_DELETE_TIER4_PROOF_ROWS
+- terminal-only; no browser button
+- one tab per request
+- maximum 15 physical rows per request
+- original proof rows and proof_cleaned terminal versions are matched
+- rows are deleted in descending order to prevent index drift
+- fresh physical-row readback covers all nine cleanup tabs
+- no-progress abort prevents infinite loops
+- success requires remaining_total: 0
+
+Preview:
+
+    npm run tier4:physical-delete:preview -- wpno-tier4-YYYYMMDDTHHMMSSZ
+
+Execute only after preserving evidence and reviewing preview counts:
+
+    npm run tier4:physical-delete -- wpno-tier4-YYYYMMDDTHHMMSSZ
+
+Successful completion ends with:
+
+    TIER 4 PHYSICAL ROW DELETION VERIFIED
+
+Physical deletion is irreversible. It must never use fuzzy customer-name matching or target ordinary production records.
+
 ## What cleanup does not do
+
+The normal append-only cleanup path:
 
 - does not physically delete Google Sheet history
 - does not delete Gmail messages
