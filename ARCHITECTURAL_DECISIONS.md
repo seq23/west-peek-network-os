@@ -224,3 +224,17 @@ This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT
 * **Risks Accepted:** A malformed row missing fixture metadata will be preserved rather than risk deleting real data.
 * **Validation Impact:** Cleanup contract validator, TypeScript, integration contract tests, live authenticated dry-run and execution readback.
 * **Future Reversal Conditions:** Replace only if fixture ownership moves to a dedicated database registry with stronger transactional guarantees.
+
+
+### Decision ID: ADM-2026-06-14-07
+*   **Date:** 2026-06-14
+*   **Status:** Accepted
+*   **Context:** The canonical Tier 4 closure executed Sheets-heavy live lanes back-to-back and exceeded Google Sheets' 60 read requests per minute per user quota, causing deterministic `429 RESOURCE_EXHAUSTED` failures after earlier lanes had passed.
+*   **Decision:** Enforce a default 65-second minimum gap between every Sheets-heavy Tier 4 lane. Permit configuration through `TIER4_SHEETS_COOLDOWN_MS` only when the value is at least 60000 milliseconds. Do not automatically retry failed mutation lanes because a quota failure may occur after a remote write but before readback.
+*   **Alternatives Considered:** Immediate full-suite reruns; automatic 429 retries; weakening failed lanes to warnings; requesting higher provider quota as the only remedy.
+*   **Reasoning:** Proactive pacing prevents quota exhaustion without masking provider failures, duplicating partially written fixtures, or requiring paid quota changes. It is deterministic and safe on the operator's 8GB MacBook Air.
+*   **Tradeoffs:** Full Tier 4 closure takes several additional minutes.
+*   **Risks Accepted:** A single lane that independently exceeds the quota still fails and requires targeted engineering repair.
+*   **Validation Impact:** Existing `validate:tier4-live-proof-contract` must enforce the cooldown variable, minimum bound, Sheets-heavy lane declarations, and visible cooldown logging.
+*   **Future Reversal Conditions:** Replace fixed spacing only after remote Sheets access is batched/cached sufficiently and live evidence proves the full suite remains below provider quotas.
+

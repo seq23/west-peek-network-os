@@ -29,6 +29,10 @@ npm run tier4:ultimate-live-proof
 - `tier4-runtime-context-live`
 - `tier4-report-check`
 
+## Google Sheets quota pacing
+
+The orchestrator enforces a minimum 65-second gap between Sheets-heavy live lanes because the deployed Google project is subject to per-user read quotas measured per minute. Override only with `TIER4_SHEETS_COOLDOWN_MS`, which must remain at least `60000`. Disabling or shortening the cooldown below one minute is forbidden. A quota failure remains a real failed lane; the orchestrator does not silently retry a possibly partially written mutation.
+
 ## Required evidence
 
 - explicit deployed URL
