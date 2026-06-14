@@ -136,3 +136,47 @@ Validation status:
 - Repo root: `west-peek-network-os`
 - Revision basis: deterministic source-tree digest (8 hex characters)
 - Status: structurally checked; deployed cleanup validation required
+
+## Authenticated hostile product audit remediation
+
+- Source snapshot: `west-peek-network-os-main-0ccbb55.zip`
+- Added authenticated append-only lifecycle controls for touchpoints, approval history, notifications, event attendees, and AI suggestions.
+- Corrected approval-decision and notification-read routes to preserve original record fields.
+- Batched Google Sheets maintenance normalization writes to avoid Cloudflare subrequest exhaustion.
+- Added safe display normalization for HTML-like provider/user text and long-string overflow hardening.
+- Added `AUTHENTICATED_HOSTILE_PRODUCT_AUDIT_2026-06-13.md`.
+- Structural validation, TypeScript, production build, provider contracts, secret scan, and `validate:all` passed.
+- Deployed authenticated click/persistence verification remains required.
+
+## Historical Tier 4 cleanup sweep
+
+- Source ZIP: `west-peek-network-os-main_BASELINE_06-13-26_a5f349d3.zip`
+- Adds terminal-only preview and verified cleanup for all historical Tier 4 fixtures.
+- Strong selectors preserve ordinary production records and reject generic fuzzy matching.
+- Adds consolidated cleanup documentation and architectural decision memory.
+- Validation: `validate:all`, TypeScript, and production build passed in the reopened working copy.
+- Live production cleanup and postdeploy authenticated readback remain locally required after deployment.
+
+
+## Authenticated Product Usability Addendum — 2026-06-13
+
+This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.
+
+
+## Remediation baseline 2e9a8f45 — 2026-06-13
+
+- Source: `west-peek-network-os-main_BASELINE_06-13-26_f70fd765.zip`
+- Scope: authenticated product usability remediation and proof-closure architecture
+- Key changes: duplicate navigation fix; canonical display normalization; production-shaped fixtures; route/control/lifecycle manifests; maintenance budget contract; authenticated postdeploy click-audit runner; route-complete Hallmark and final proof matrices; new governing addendum adoption.
+- Validation: `npm run validate:all` PASS; TypeScript PASS; production build PASS; secret scan PASS; cleanup contract PASS; auth-state vault contract PASS.
+- Not proven in artifact workspace: local updater apply/commit/push; GitHub Actions; Cloudflare deployment; restored production auth; historical cleanup execution; live route mutations/readback; post-cleanup route audit; expert Hallmark approval.
+- Status: STRUCTURALLY CHECKED — LOCAL VALIDATION REQUIRED after packaging/reopen.
+
+## Hostile verification update — 2026-06-13
+
+- Added strict authenticated route/session/console/network/readback audit semantics.
+- Corrected visible-control proof boundaries.
+- Added deterministic latest-record selection for malformed timestamps.
+- Added `tests/integration/latest-record.mjs`.
+- Clean-room `npm ci`, `validate:all`, typecheck, build, and Deep Validation passed.
+- Chromium/browser, deployed auth, GitHub Actions, Cloudflare, live providers, historical cleanup, and final Hallmark remain not proven in this environment.

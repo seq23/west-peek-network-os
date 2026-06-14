@@ -3,9 +3,10 @@ import { json, readJson } from '../../_shared/json';
 import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv, type SheetTab } from '../../_shared/sheets';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
-type Body = { run_id?: string; confirm?: string; dry_run?: boolean; tab?: string; limit?: number; verify_only?: boolean };
+type Body = { run_id?: string; scope?: 'exact_run' | 'historical'; confirm?: string; dry_run?: boolean; tab?: string; limit?: number; verify_only?: boolean };
 
 const CONFIRM = 'CLEAN_TIER4_PROOF_FIXTURES';
+const HISTORICAL_CONFIRM = 'CLEAN_ALL_HISTORICAL_TIER4_FIXTURES';
 const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
 const ID_KEYS: Partial<Record<SheetTab, string>> = {
   contacts: 'contact_id', intake_queue: 'intake_id', relationship_touches: 'touch_id', approvals: 'approval_id',
@@ -19,9 +20,11 @@ export async function onRequestPost({ request, env }: Context) {
   try {
     const user = await requireAuthenticatedUser(request, env);
     const body = await readJson<Body>(request);
+    const scope = body.scope === 'historical' ? 'historical' : 'exact_run';
     const runId = String(body.run_id || '').trim();
-    if (!/^wpno-tier4-[A-Za-z0-9._:-]+$/.test(runId)) return json({ ok: false, error: 'A valid wpno-tier4 run_id is required.' }, { status: 400 });
-    if (body.confirm !== CONFIRM) return json({ ok: false, error: `confirm must equal ${CONFIRM}.` }, { status: 400 });
+    if (scope === 'exact_run' && !/^wpno-tier4-[A-Za-z0-9._:-]+$/.test(runId)) return json({ ok: false, error: 'A valid wpno-tier4 run_id is required.' }, { status: 400 });
+    const requiredConfirm = scope === 'historical' ? HISTORICAL_CONFIRM : CONFIRM;
+    if (body.confirm !== requiredConfirm) return json({ ok: false, error: `confirm must equal ${requiredConfirm}.` }, { status: 400 });
 
     const requestedTab = String(body.tab || '').trim();
     if (!requestedTab || !TABS.includes(requestedTab as SheetTab)) {
@@ -34,7 +37,7 @@ export async function onRequestPost({ request, env }: Context) {
 
     const rows = await readTab(env, tab, { ensureHeaders: false });
     const latest = latestByStableId(rows, idKey);
-    const active = latest.filter((row) => isTargetFixture(row, runId));
+    const active = latest.filter((row) => scope === 'historical' ? isHistoricalTier4Fixture(row) : isTargetFixture(row, runId));
     const selected = body.verify_only ? [] : active.slice(0, limit);
     const now = new Date().toISOString();
     const ids = selected.map((row) => String(row[idKey] || '')).filter(Boolean);
@@ -42,7 +45,7 @@ export async function onRequestPost({ request, env }: Context) {
     let cleaned = 0;
     if (!body.dry_run && !body.verify_only) {
       for (const row of selected) {
-        await appendRecord(env, tab, cleanupVersion(tab, row, runId, user.email, now));
+        await appendRecord(env, tab, cleanupVersion(tab, row, scope === 'historical' ? `historical-tier4-${now}` : runId, user.email, now));
         cleaned += 1;
       }
     }
@@ -55,7 +58,8 @@ export async function onRequestPost({ request, env }: Context) {
 
     return json({
       ok: true,
-      run_id: runId,
+      run_id: scope === 'exact_run' ? runId : null,
+      scope,
       tab,
       dry_run: body.dry_run === true,
       verify_only: body.verify_only === true,
@@ -80,6 +84,18 @@ function isTargetFixture(row: Record<string, unknown>, runId: string) {
   const explicit = String(row.proof_run_id || '') === runId && String(row.proof_fixture || '').toLowerCase() === 'true';
   const legacyTier4 = text.includes(runId) && /tier[ _-]?4|wpno-tier4|pitch lab (profile|packet)|public event e2e/i.test(text);
   return explicit || legacyTier4;
+}
+
+
+export function isHistoricalTier4Fixture(row: Record<string, unknown>) {
+  if (String(row.proof_status || '') === 'proof_cleaned') return false;
+  const proofRunId = String(row.proof_run_id || '').trim();
+  const explicitProof = String(row.proof_fixture || '').toLowerCase() === 'true' && /^wpno-tier4-/i.test(proofRunId);
+  if (explicitProof) return true;
+  const text = Object.values(row).map((value) => String(value || '')).join('\n');
+  return /(?:wpno-tier4-|tier4-provider-|tier4-review-|tier4-event-|tier4-network-|tier4-founder-)/i.test(text)
+    || /\bTier Four (?:Network Contact|Founder|Ventures|Network Co)\b/i.test(text)
+    || /\bTier 4 (?:Proof|Review Proof|Event Guest|Event Capital|OCR proof|voice proof|voice diagnostic|direct OCR diagnostic)\b/i.test(text);
 }
 
 function cleanupVersion(tab: SheetTab, row: Record<string, unknown>, runId: string, userEmail: string, now: string) {

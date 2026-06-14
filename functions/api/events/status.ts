@@ -1,6 +1,7 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json, readJson } from '../../_shared/json';
 import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
+import { latestRecord } from '../../_shared/records';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
 type Body = { event_id?: string; action?: 'revoke' | 'restore' };
@@ -13,7 +14,7 @@ export async function onRequestPost({ request, env }: Context) {
     if (!eventId || !['revoke', 'restore'].includes(String(body.action || ''))) return json({ ok: false, error: 'event_id and action are required.' }, { status: 400 });
     const rows = await readTab(env, 'events');
     const matches = rows.filter((row) => String(row.event_id || '') === eventId);
-    const current = matches.sort((a, b) => Date.parse(String(b.updated_at || b.created_at || '')) - Date.parse(String(a.updated_at || a.created_at || '')))[0];
+    const current = latestRecord(matches);
     if (!current) return json({ ok: false, error: 'Event not found.' }, { status: 404 });
     const restore = body.action === 'restore';
     const next = { ...current, event_id: eventId, updated_at: new Date().toISOString(), updated_by: user.email, status: restore ? 'active' : 'closed', public_form_enabled: restore ? 'true' : 'false' };

@@ -36,3 +36,8 @@ Required guarded lanes:
 6. Provider/application cleanup verification.
 
 Every live lane requires run-scoped diagnostics, provider evidence, exact fixture registration, cleanup in `finally`, and zero unexplained active fixtures.
+
+
+## Authenticated Product Usability Addendum — 2026-06-13
+
+This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.

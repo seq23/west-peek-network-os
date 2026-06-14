@@ -81,7 +81,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         const headers = refreshedRows[0] || mergedHeaders;
         const rows = refreshedRows.slice(1);
         const updates = normalizeRows(tab, headers, rows, runId, report);
-        for (const update of updates) await writeValues(env, token, `${tab}!${update.cell}`, [[update.value]]);
+        if (updates.length) await batchWriteCells(env, token, tab, updates);
         detectDuplicates(tab, headers, rows, runId, report);
       }
     }
@@ -130,8 +130,21 @@ function classifyMaintenanceError(detail: string) {
   if (/429|quota|rate.?limit|RESOURCE_EXHAUSTED|ReadRequestsPerMinutePerUser/i.test(detail)) return { code: 'SHEETS_RATE_LIMITED', message: 'Google Sheets is temporarily rate-limited.', status: 429, retryable: true, retryAfterSeconds: 75, operatorAction: 'Wait about 75 seconds, then run maintenance once.' };
   if (/Create tab failed/i.test(detail)) return { code: 'TAB_CREATE_FAILED', message: 'Maintenance could not create a required spreadsheet tab.', status: 503, retryable: true, operatorAction: 'Check edit permission and retry. The response detail names the affected tab.' };
   if (/header|Write failed.*1/i.test(detail)) return { code: 'HEADER_REPAIR_FAILED', message: 'Maintenance could not restore required spreadsheet headers.', status: 503, retryable: true, operatorAction: 'Inspect protected ranges or sheet permissions, then retry.' };
+  if (/Batch normalization write failed/i.test(detail)) return { code: 'NORMALIZATION_BATCH_WRITE_FAILED', message: 'Maintenance could not write normalized Sheet values in one batch.', status: 503, retryable: true, operatorAction: 'Inspect the named tab in technical detail, confirm edit permission, then retry once.' };
+  if (/Too many subrequests/i.test(detail)) return { code: 'WORKER_SUBREQUEST_LIMIT', message: 'Sheet maintenance exceeded the Cloudflare request budget.', status: 503, retryable: false, operatorAction: 'Deploy the batched maintenance implementation before retrying.' };
   if (/sheet_maintenance_log/i.test(detail)) return { code: 'MAINTENANCE_LOG_WRITE_FAILED', message: 'Maintenance ran but could not write its audit log.', status: 503, retryable: true, operatorAction: 'Check the sheet_maintenance_log tab and spreadsheet write permission.' };
   return { code: 'UNKNOWN_MAINTENANCE_FAILURE', message: 'Sheet maintenance failed before it could finish.', status: 503, retryable: true, operatorAction: 'Use the technical detail and deployment logs to identify the failing Google Sheets operation.' };
+}
+
+
+async function batchWriteCells(env: Env, token: string, tab: string, updates: Array<{ cell: string; value: string }>) {
+  const data = updates.map((update) => ({ range: `${tab}!${update.cell}`, values: [[update.value]] }));
+  const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.GOOGLE_SHEET_ID}/values:batchUpdate`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ valueInputOption: 'USER_ENTERED', data })
+  });
+  if (!response.ok) throw new Error(`Batch normalization write failed for ${tab}: ${response.status} ${await response.text()}`);
 }
 
 function normalizeRows(tab: string, headers: string[], rows: string[][], runId: string, report: Record<string, string>[]) {

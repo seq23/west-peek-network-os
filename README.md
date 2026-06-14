@@ -1,3 +1,9 @@
+> **Repo update lifecycle:** Start with [`REPO_UPDATE_LIFECYCLE.md`](REPO_UPDATE_LIFECYCLE.md). The single postdeploy closure command is `npm run release:close-lifecycle`.
+
+## Cleanup operations
+
+See [`docs/CLEANUP_OPERATIONS.md`](docs/CLEANUP_OPERATIONS.md) for the operator map and [`TIER4_PROOF_FIXTURE_CLEANUP.md`](TIER4_PROOF_FIXTURE_CLEANUP.md) for exact-run and historical production cleanup contracts.
+
 # West Peek Network OS
 
 Private relationship intelligence, Gmail-trigger intake, Google Sheets persistence, public event intake, Pitch Lab handoff, and review-only AI/OCR/voice assistance.
@@ -24,3 +30,17 @@ Use bundled gates, not one-off validator whack-a-mole:
 - Tier 4: `POSTDEPLOY_BASE_URL=<url> PLAYWRIGHT_BASE_URL=<url> SMOKE_BASE_URL=<url> TIER4_ULTIMATE_LIVE_PROOF=1 WEST_PEEK_E2E_RUN_ID="wpno-tier4-$(date +%Y%m%d%H%M%S)" npm run tier4:ultimate-live-proof`
 
 Legacy exact-token hostile-audit validation is archived and does not block release.
+
+
+## Autonomous Engineering Lifecycle v5
+
+This repo implements the suite Revision 3 lifecycle: machine-readable route manifest, container validation, bounded strategy-rotating self-heal, mandatory predeploy Hallmark, applicable public/authenticated/role postdeploy audits, exact cleanup, rollback/containment, and final proof reporting.
+
+
+## Canonical West Peek brand authority
+
+- [`WEST_PEEK_BRAND_SYSTEM.md`](WEST_PEEK_BRAND_SYSTEM.md) — locked cross-suite visual system and Hallmark acceptance criteria.
+
+## Baseline ZIP preflight
+
+Before applying a baseline ZIP, use `docs/runbooks/PRE_UPDATER_BASELINE_CHECKLIST.md`. It is the canonical checklist for required root files, safe environment examples, forbidden generated artifacts, ZIP integrity, updater preflight, and localhost-before-push execution.

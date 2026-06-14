@@ -163,3 +163,40 @@ Decision: preserve Google-authenticated Playwright storage state as encrypted ci
 - **Risks accepted:** Playwright codegen UI behavior may evolve; contract validation protects the command surface but live capture remains locally proven.
 - **Validation impact:** Auth-state vault validator must require the capture script and package command. Synthetic capture tests verify overwrite refusal, validation, atomic install, and permissions.
 - **Future reversal conditions:** Replace only if Playwright deprecates codegen storage capture or the app adopts a safer first-class programmatic auth bootstrap.
+
+## Decision: Historical Tier 4 cleanup remains terminal-only
+
+Decision ID: WP-NETWORK-CLEANUP-002
+Date: 2026-06-13
+Status: Accepted
+
+Context:
+Legacy Tier 4 fixtures from multiple historical run IDs remained in production after exact-run cleanup was introduced. A broad browser button would create avoidable accidental-cleanup risk.
+
+Decision:
+Keep routine exact-run cleanup available through Settings and terminal. Add a separate terminal-only historical sweep using a distinct confirmation phrase, one-tab bounded batches, strong Tier 4 marker matching, append-only terminal versions, no-progress aborts, and all-tab fresh verification.
+
+Alternatives Considered:
+- manual Google Sheet row deletion
+- fuzzy matching on words such as founder, event, Gmail, or Pitch Lab
+- a one-click Settings button for all historical test data
+
+Reasoning:
+Manual deletion is error-prone and destroys append-only history. Fuzzy matching risks legitimate production records. Terminal-only execution makes the exceptional broad scope explicit while preserving authenticated, repeatable verification.
+
+Tradeoffs:
+The operator must apply/deploy source changes and run one local authenticated command. Historical fixture types without a strong Tier 4 marker are intentionally not auto-selected.
+
+Risks Accepted:
+A legacy fixture with no recognizable Tier 4 marker may require narrow classifier expansion after human inspection.
+
+Validation Impact:
+Cleanup contract validator now requires historical scripts, confirmation phrase, documentation, no-progress behavior, and verification output. Live production behavior still requires postdeploy execution.
+
+Future Reversal Conditions:
+A dedicated privileged maintenance console may replace terminal-only execution if it provides equivalent preview, explicit confirmation, exact match evidence, bounded writes, and fresh readback.
+
+
+## Authenticated Product Usability Addendum — 2026-06-13
+
+This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.

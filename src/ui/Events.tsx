@@ -1,3 +1,4 @@
+import { clippedText } from './text';
 import { useMemo, useState } from 'react';
 import { Header, RouteGuide } from './App';
 import { createSheetEvent, createSheetEventContext, updateSheetEventStatus } from '../services/sheetsClient';
@@ -7,9 +8,10 @@ type Props = {
   events: EventRecord[];
   attendees: EventAttendeeRecord[];
   onSaved?: (message?: string) => void;
+  onAttendeeLifecycle: (id: string, action: 'archive' | 'restore') => void;
 };
 
-export function EventsPage({ events, attendees, onSaved }: Props) {
+export function EventsPage({ events, attendees, onSaved, onAttendeeLifecycle }: Props) {
   const activeEvents = events.filter((event) => event.status === 'active');
   const [selectedId, setSelectedId] = useState(activeEvents[0]?.event_id || events[0]?.event_id || '');
   const [status, setStatus] = useState('Create an event, copy the public form link, and let people enter their own details.');
@@ -17,7 +19,7 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
   const [lifecycleBusy, setLifecycleBusy] = useState(false);
   const visibleEvents = events.filter((event) => view === 'all' || (view === 'active' ? event.status === 'active' && event.public_form_enabled : event.status !== 'active' || !event.public_form_enabled));
   const selected = useMemo(() => events.find((event) => event.event_id === selectedId) || visibleEvents[0] || events[0], [events, selectedId, visibleEvents]);
-  const selectedAttendees = selected ? attendees.filter((row) => row.event_id === selected.event_id) : [];
+  const selectedAttendees = selected ? attendees.filter((row) => row.event_id === selected.event_id && row.review_status !== 'archived') : [];
   const publicLink = selected ? absoluteEventLink(selected) : '';
 
   async function createEvent(event: React.FormEvent<HTMLFormElement>) {
@@ -135,7 +137,7 @@ export function EventsPage({ events, attendees, onSaved }: Props) {
           <strong>{person.public_name || person.public_email || 'Unnamed attendee'}</strong>
           <span>{person.public_company || 'No company'} • {person.source_type}</span>
           <span>{person.review_status} • missing: {person.missing_fields || 'none'}</span>
-          {(person.public_interest || person.private_context || person.ai_summary) && <p>{person.private_context || person.public_interest || person.ai_summary}</p>}
+          {(person.public_interest || person.private_context || person.ai_summary) && <p>{clippedText(person.private_context || person.public_interest || person.ai_summary, 500)}</p>}<div className="actions">{person.review_status !== 'archived' ? <button className="btn danger" type="button" onClick={() => { if (window.confirm('Archive this attendee from the event view?')) onAttendeeLifecycle(person.event_attendee_id, 'archive'); }}>Archive attendee</button> : <button className="btn" type="button" onClick={() => onAttendeeLifecycle(person.event_attendee_id, 'restore')}>Restore attendee</button>}</div>
         </div>)}</div>
         <p className="muted" style={{ marginTop: 12 }}>For card/photo or voice enrichment, use Capture Studio and choose this event. Those uploads stay internal and pending review.</p>
       </div>

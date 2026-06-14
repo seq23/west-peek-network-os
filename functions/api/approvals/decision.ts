@@ -1,41 +1,37 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json, readJson } from '../../_shared/json';
-import { appendRecord, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
+import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
 
 export async function onRequestPost({ request, env }: Context) {
-  let user: { email: string };
   try {
-    user = await requireAuthenticatedUser(request, env);
-  } catch (error) {
-    return json({ ok: false, error: error instanceof Error ? error.message : 'Authentication required.' }, { status: 401 });
-  }
-  const body = await readJson<{ approval_id?: string; decision?: 'approve' | 'reject'; actor?: string; approval_type?: string; source_entity_id?: string }>(request);
-  if (!body.approval_id || !body.decision) return json({ ok: false, error: 'approval_id and decision are required.' }, { status: 400 });
-  const now = new Date().toISOString();
-  const approval = {
-    approval_id: body.approval_id,
-    created_at: now,
-    updated_at: now,
-    approval_type: body.approval_type || 'relationship_touch',
-    source_entity_type: 'approval_decision',
-    source_entity_id: body.source_entity_id || body.approval_id,
-    requested_by: body.actor || user.email,
-    assigned_to: body.actor || user.email,
-    relationship_owner: body.actor || user.email,
-    status: body.decision === 'approve' ? 'approved' : 'rejected',
-    risk_level: 'medium',
-    suggested_payload: `Runtime approval decision recorded for ${body.approval_id}`,
-    approved_by: body.decision === 'approve' ? body.actor || user.email : '',
-    approved_at: body.decision === 'approve' ? now : '',
-    rejected_by: body.decision === 'reject' ? body.actor || user.email : '',
-    rejected_at: body.decision === 'reject' ? now : ''
-  };
-  try {
-    await appendRecord(env, 'approvals', approval);
+    const user = await requireAuthenticatedUser(request, env);
+    const body = await readJson<{ approval_id?: string; decision?: 'approve' | 'reject' }>(request);
+    const id = String(body.approval_id || '').trim();
+    if (!id || !body.decision) return json({ ok: false, error: 'approval_id and decision are required.' }, { status: 400 });
+    const rows = await readTab(env, 'approvals', { ensureHeaders: false });
+    const current = rows.filter((row) => String(row.approval_id || '') === id).sort((a, b) => stamp(b) - stamp(a))[0];
+    if (!current) return json({ ok: false, error: 'Approval not found.' }, { status: 404 });
+    const now = new Date().toISOString();
+    const next = {
+      ...current,
+      approval_id: id,
+      updated_at: now,
+      status: body.decision === 'approve' ? 'approved' : 'rejected',
+      approved_by: body.decision === 'approve' ? user.email : String(current.approved_by || ''),
+      approved_at: body.decision === 'approve' ? now : String(current.approved_at || ''),
+      rejected_by: body.decision === 'reject' ? user.email : String(current.rejected_by || ''),
+      rejected_at: body.decision === 'reject' ? now : String(current.rejected_at || '')
+    };
+    await appendRecord(env, 'approvals', next);
+    return json({ ok: true, approval: next, persistence: 'google_sheets_append_only' });
   } catch (error) {
     return sheetsUnavailable(error);
   }
-  return json({ ok: true, approval, persistence: 'google_sheets' });
+}
+
+function stamp(row: Record<string, unknown>) {
+  const parsed = Date.parse(String(row.updated_at || row.created_at || ''));
+  return Number.isFinite(parsed) ? parsed : 0;
 }

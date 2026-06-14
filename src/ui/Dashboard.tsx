@@ -1,4 +1,5 @@
 import { AlertCircle, ArrowRight, CalendarDays, CreditCard, Inbox, MailCheck, Mic, Plus, ShieldCheck } from 'lucide-react';
+import { clippedText, displayText } from './text';
 import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch } from '../domain/types';
 
 type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'capture' | 'thankyou' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
@@ -35,13 +36,13 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
   const queueCandidates = [
     ...openIntake.map((item) => ({
       key: `intake:${item.intake_id}`,
-      label: item.parsed_name || item.parsed_email || item.event_name || 'Unreviewed intake',
+      label: clippedText(item.parsed_name || item.parsed_email || item.event_name, 90, 'Unreviewed intake'),
       detail: [humanSource(item.source), item.parsed_company, relativeDate(item.created_at), humanizeStatus(item.review_status)].filter(Boolean).join(' • '),
       page: 'intake' as Page
     })),
     ...openTouches.map((item) => ({
       key: `touch:${item.touch_id}`,
-      label: item.recipient_name || item.contact_email || item.reason,
+      label: clippedText(item.recipient_name || item.contact_email || item.reason, 90, 'Relationship touch'),
       detail: [humanizeStatus(item.method), item.company, item.due_date ? `Due ${friendlyDate(item.due_date)}` : '', humanizeStatus(item.status)].filter(Boolean).join(' • '),
       page: 'touches' as Page
     })),
@@ -110,9 +111,9 @@ export function Dashboard({ data, go, runtime }: { data: DashboardData; go: (pag
     </section>
 
     <section className="grid cols-3 secondary-panels" style={{ marginTop: 16 }}>
-      <Panel title="Active events" count={activeEvents.length} empty="No active events yet." rows={activeEvents.slice(0, 5).map((event) => ({ title: event.event_name, meta: [event.event_date ? friendlyDate(event.event_date) : '', event.location].filter(Boolean).join(' • ') || 'Public form active' }))} actionLabel="Manage events" onClick={() => go('events')} />
-      <Panel title="Missing info" count={missingInfo.length} empty="No missing-field items in this snapshot." rows={missingInfo.slice(0, 5).map((item) => ({ title: item.parsed_name || item.parsed_email || 'Unidentified intake', meta: `${humanSource(item.source)} • Missing ${humanMissing(item.missing_fields)}${item.created_at ? ` • ${relativeDate(item.created_at)}` : ''}` }))} actionLabel="Review intake" onClick={() => go('intake')} />
-      <Panel title="Notifications" count={data.notifications.filter((n) => n.status === 'unread').length} empty="No unread notifications." rows={data.notifications.filter((n) => n.status === 'unread').slice(0, 5).map((n) => ({ title: n.subject, meta: `${humanizeStatus(n.priority)} priority${n.created_at ? ` • ${relativeDate(n.created_at)}` : ''}` }))} actionLabel="Open notifications" onClick={() => go('notifications')} />
+      <Panel title="Active events" count={activeEvents.length} empty="No active events yet." rows={activeEvents.slice(0, 5).map((event) => ({ title: clippedText(event.event_name, 90, 'Unnamed event'), meta: [event.event_date ? friendlyDate(event.event_date) : '', event.location].filter(Boolean).join(' • ') || 'Public form active' }))} actionLabel="Manage events" onClick={() => go('events')} />
+      <Panel title="Missing info" count={missingInfo.length} empty="No missing-field items in this snapshot." rows={missingInfo.slice(0, 5).map((item) => ({ title: clippedText(item.parsed_name || item.parsed_email, 90, 'Unidentified intake'), meta: `${humanSource(item.source)} • Missing ${humanMissing(item.missing_fields)}${item.created_at ? ` • ${relativeDate(item.created_at)}` : ''}` }))} actionLabel="Review intake" onClick={() => go('intake')} />
+      <Panel title="Notifications" count={data.notifications.filter((n) => n.status === 'unread').length} empty="No unread notifications." rows={data.notifications.filter((n) => n.status === 'unread').slice(0, 5).map((n) => ({ title: clippedText(n.subject, 90, 'Notification'), meta: `${humanizeStatus(n.priority)} priority${n.created_at ? ` • ${relativeDate(n.created_at)}` : ''}` }))} actionLabel="Open notifications" onClick={() => go('notifications')} />
     </section>
 
     <div className="truth-strip"><ShieldCheck size={16} /><span className="truth-long">Intake first. Review before final contact. No automatic emails, cards, vendor orders, payments, or AI execution.</span><span className="truth-short">Human review required. Nothing sends or executes automatically.</span></div>
@@ -131,7 +132,7 @@ function Action({ icon, title, body, onClick }: { icon: React.ReactNode; title: 
 function Panel({ title, count, rows, empty, actionLabel, onClick }: { title: string; count: number; rows: Array<{ title: string; meta?: string }>; empty: string; actionLabel: string; onClick: () => void }) {
   return <details className="card panel-button" open>
     <summary><span><span className="panel-count">{count}</span><strong>{title}</strong></span><ArrowRight size={17} /></summary>
-    <div className="panel-content">{rows.length ? <div className="list compact-list">{rows.map((row, index) => <div className="mini-card" key={`${row.title}-${index}`}><strong>{row.title}</strong>{row.meta && <small>{row.meta}</small>}</div>)}</div> : <EmptyState title={empty} />}
+    <div className="panel-content">{rows.length ? <div className="list compact-list">{rows.map((row, index) => <div className="mini-card" key={`${row.title}-${index}`}><strong>{displayText(row.title, 'Untitled')}</strong>{row.meta && <small>{displayText(row.meta)}</small>}</div>)}</div> : <EmptyState title={empty} />}
     <button className="panel-action" type="button" onClick={onClick}>{actionLabel}<ArrowRight size={15} /></button></div>
   </details>;
 }

@@ -39,3 +39,8 @@ Deep Validation runs every safe provider-independent lane before handoff. It rep
 When Chromium is unavailable, `npm run test:web-contracts:mocked` executes the real client request and normalization layer with a strict mocked `fetch` transport. This lane proves request routing, payload serialization, fresh-read metadata, lifecycle mutation payloads, and structured error propagation without external network access.
 
 This lane is LOCAL INTEGRATION proof only. It does not prove DOM rendering, navigation, CSS/layout, browser execution, visual behavior, deployed runtime, or live providers. Playwright and live-provider lanes remain separately required where applicable.
+
+
+## Authenticated Product Usability Addendum — 2026-06-13
+
+This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.

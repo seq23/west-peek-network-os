@@ -1,7 +1,7 @@
 {
   "_generated_by": "generic-testing-architecture-capability-installer",
   "generated_by": "generic-testing-architecture-capability-installer",
-  "schema_version": 1,
+  "schema_version": "3.1",
   "repo_name": "west-peek-network-os",
   "expected_branch": "main",
   "package_manager": "npm",
@@ -9,7 +9,20 @@
     "prepush": "npm run release:prepush",
     "postpush": "npm run release:postpush",
     "live_proof": "npm run release:live-proof",
-    "cleanup": "npm run fixtures:cleanup:expired"
+    "cleanup": "npm run release:cleanup",
+    "deep_validation": "npm run deep-validation",
+    "container_validation": "npm run release:validate:container",
+    "self_heal": "npm run release:self-heal",
+    "postdeploy_remediate": "npm run release:postdeploy-remediate",
+    "public_click_audit": "npm run postdeploy:public-click-audit",
+    "click_audit_all": "npm run postdeploy:click-audit:all",
+    "hallmark_predeploy": "npm run release:hallmark",
+    "final_report": "npm run release:report",
+    "authenticated_click_audit": "npm run postdeploy:authenticated-click-audit",
+    "auth_status": "npm run auth:status",
+    "auth_restore": "npm run auth:restore",
+    "close_lifecycle": "npm run release:close-lifecycle",
+    "close_lifecycle_dry_run": "npm run release:close-lifecycle:dry-run"
   },
   "secrets": {
     "mode": "vault_required",
@@ -20,5 +33,30 @@
       "materialize": "npm run env:restore",
       "cleanup": "npm run env:remove"
     }
-  }
+  },
+  "node_heap_mb": 3072,
+  "autonomous_engineering": true,
+  "deployment": {
+    "expected_hostname": "https://network.joinwestpeek.com",
+    "localhost_postdeploy_forbidden": true
+  },
+  "self_heal": {
+    "max_passes_per_strategy": 3,
+    "strategy_rotation_required": true,
+    "owner_interruption_budget": "credentials, material cost, destructive real-data action, legal/contractual/brand/business decision, or external platform block only"
+  },
+  "artifact_exclusions": [
+    "node_modules",
+    ".git",
+    ".next",
+    ".open-next",
+    "dist",
+    "build",
+    "coverage",
+    "playwright-report",
+    "test-results",
+    ".auth",
+    "artifacts/diagnostics",
+    "logs"
+  ]
 }

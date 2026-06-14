@@ -1,4 +1,4 @@
-import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch, TouchMethod } from '../domain/types';
+import type { AiSuggestionRecord, ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch, TouchMethod } from '../domain/types';
 
 export type SheetSnapshot = {
   source?: string;
@@ -10,6 +10,7 @@ export type SheetSnapshot = {
   touches: RelationshipTouch[];
   approvals: ApprovalRecord[];
   notifications: NotificationRecord[];
+  aiSuggestions: AiSuggestionRecord[];
   events: EventRecord[];
   eventAttendees: EventAttendeeRecord[];
 };
@@ -33,6 +34,7 @@ export async function fetchSheetSnapshot(options: { fresh?: boolean } = {}): Pro
     touches: rows(data.relationship_touches).map(normalizeTouch),
     approvals: rows(data.approvals).map(normalizeApproval),
     notifications: rows(data.notifications).map(normalizeNotification),
+    aiSuggestions: rows(data.ai_suggestions).map(normalizeAiSuggestion),
     events: rows(data.events).map(normalizeEvent),
     eventAttendees: rows(data.event_attendees).map(normalizeEventAttendee)
   };
@@ -114,6 +116,13 @@ export async function updateSheetEventStatus(eventId: string, action: 'revoke' |
   });
 }
 
+
+export async function updateSheetRecordLifecycle(entity: 'intake' | 'touch' | 'approval' | 'notification' | 'ai_suggestion' | 'event_attendee', id: string, action: 'archive' | 'restore', reason = '') {
+  return requestJson('/api/records/lifecycle', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ entity, id, action, reason })
+  });
+}
+
 async function requestJson<T = Record<string, unknown>>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { credentials: 'same-origin', ...(init || {}) });
   const payload = await response.json().catch(() => ({}));
@@ -168,6 +177,11 @@ function normalizeTouch(row: Record<string, unknown>): RelationshipTouch {
 
 function normalizeApproval(row: Record<string, unknown>): ApprovalRecord {
   return { approval_id: str(row.approval_id), created_at: str(row.created_at), updated_at: str(row.updated_at), approval_type: str(row.approval_type), source_entity_type: emptyToUndefined(row.source_entity_type), source_entity_id: emptyToUndefined(row.source_entity_id), requested_by: emptyToUndefined(row.requested_by), assigned_to: owner(row.assigned_to), relationship_owner: owner(row.relationship_owner), status: str(row.status, 'pending') as ApprovalRecord['status'], risk_level: str(row.risk_level, 'medium') as ApprovalRecord['risk_level'], suggested_payload: str(row.suggested_payload), approved_by: emptyToUndefined(row.approved_by), approved_at: emptyToUndefined(row.approved_at), rejected_by: emptyToUndefined(row.rejected_by), rejected_at: emptyToUndefined(row.rejected_at) };
+}
+
+
+function normalizeAiSuggestion(row: Record<string, unknown>): AiSuggestionRecord {
+  return { suggestion_id: str(row.suggestion_id), created_at: str(row.created_at), updated_at: str(row.updated_at), suggestion_type: str(row.suggestion_type, 'follow_up_recommendation') as AiSuggestionRecord['suggestion_type'], source_entity_type: str(row.source_entity_type), source_entity_id: str(row.source_entity_id), confidence: confidence(row.confidence), status: str(row.status, 'pending') as AiSuggestionRecord['status'], suggested_payload: str(row.suggested_payload), reasoning_summary: str(row.reasoning_summary), reviewed_by: emptyToUndefined(row.reviewed_by), reviewed_at: emptyToUndefined(row.reviewed_at), applied_entity_type: emptyToUndefined(row.applied_entity_type), applied_entity_id: emptyToUndefined(row.applied_entity_id), created_by_agent: emptyToUndefined(row.created_by_agent) };
 }
 
 function normalizeNotification(row: Record<string, unknown>): NotificationRecord {

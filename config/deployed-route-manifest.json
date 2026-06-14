@@ -1,0 +1,294 @@
+{
+  "schemaVersion": "west-peek-route-manifest-v1",
+  "repo": "west-peek-network-os",
+  "generatedFrom": "source routes and repo product contracts",
+  "routes": [
+    {
+      "id": "dashboard",
+      "path": "/",
+      "navigationLabel": "Dashboard",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Network OS"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "events",
+      "path": "/",
+      "navigationLabel": "Events",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Create event forms and review attendees"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "add-person",
+      "path": "/",
+      "navigationLabel": "Add Person",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Add to West Peek Network"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "capture-studio",
+      "path": "/",
+      "navigationLabel": "Capture Studio",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Add people from cards, screenshots, and voice notes"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "thank-you",
+      "path": "/",
+      "navigationLabel": "Thank-You",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Create a West Peek branded thank-you"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "intake-queue",
+      "path": "/",
+      "navigationLabel": "Intake Queue",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Review captured relationship context"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "network",
+      "path": "/",
+      "navigationLabel": "West Peek Network",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "People in the West Peek Network"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "touchpoints",
+      "path": "/",
+      "navigationLabel": "Touchpoints",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Intentional follow-through"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "approvals",
+      "path": "/",
+      "navigationLabel": "Approvals",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Approvals Needed"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "notifications",
+      "path": "/",
+      "navigationLabel": "Notifications",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Calm reminders, not approvals"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "ai-smoke",
+      "path": "/",
+      "navigationLabel": "AI Smoke Test",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "AI Suggestions Ready for Review"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "instructions",
+      "path": "/",
+      "navigationLabel": "How to Add People",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Capture people the way they actually show up."
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
+      "id": "settings",
+      "path": "/",
+      "navigationLabel": "Settings",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Connections and operator settings"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    }
+  ],
+  "allowedHttpFailures": []
+}

@@ -6,9 +6,10 @@ import { AddPerson } from './AddPerson';
 import { CaptureStudio } from './CaptureStudio';
 import { ThankYouStudio } from './ThankYouStudio';
 import { EventsPage } from './Events';
+import { clippedText, displayText } from './text';
 import { store } from '../data/store';
-import { createSheetContact, createSheetIntake, decideSheetApproval, fetchSheetSnapshot, markSheetNotificationRead, reviewSheetIntake, updateSheetTouchFulfillment, updateSheetContactStatus, type SheetSnapshot } from '../services/sheetsClient';
-import type { ApprovalRecord, ContactRecord, IntakeRecord, NotificationRecord, RelationshipTouch, TouchMethod } from '../domain/types';
+import { createSheetContact, createSheetIntake, decideSheetApproval, fetchSheetSnapshot, markSheetNotificationRead, reviewSheetIntake, updateSheetTouchFulfillment, updateSheetContactStatus, updateSheetRecordLifecycle, type SheetSnapshot } from '../services/sheetsClient';
+import type { AiSuggestionRecord, ApprovalRecord, ContactRecord, IntakeRecord, NotificationRecord, RelationshipTouch, TouchMethod } from '../domain/types';
 import { HANDWRITTEN_VENDORS, type HandwrittenVendor } from '../domain/handwrittenVendors';
 
 type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'capture' | 'thankyou' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
@@ -64,6 +65,7 @@ export function App() {
     touches: store.touches(),
     approvals: store.approvals(),
     notifications: store.notifications(),
+    aiSuggestions: [],
     events: [],
     eventAttendees: []
   }), [refreshToken]);
@@ -208,6 +210,20 @@ export function App() {
     }
   }
 
+  async function handleLifecycle(entity: 'intake' | 'touch' | 'approval' | 'notification' | 'ai_suggestion' | 'event_attendee', id: string, action: 'archive' | 'restore') {
+    const key = `${entity}:${id}:${action}`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      await updateSheetRecordLifecycle(entity, id, action, action === 'archive' ? 'Archived by operator from authenticated UI.' : 'Restored by operator from authenticated UI.');
+      await reloadSheetsSnapshot(action === 'archive' ? 'Record archived and removed from the active view.' : 'Record restored.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : `Could not ${action} record.`);
+    } finally {
+      setMutationKey(null);
+    }
+  }
+
   async function handleNotificationRead(id: string, recipientEmail = '') {
     try {
       await markSheetNotificationRead(id, recipientEmail);
@@ -249,16 +265,16 @@ export function App() {
           gmailOauthCapturedAt: oauthStatus.token_captured_at
         }} />}
         {page === 'instructions' && <Instructions />}
-        {page === 'events' && <EventsPage events={data.events} attendees={data.eventAttendees} onSaved={(nextMessage) => void reloadSheetsSnapshot(nextMessage || 'Event data saved to Google Sheets.')} />}
+        {page === 'events' && <EventsPage events={data.events} attendees={data.eventAttendees} onAttendeeLifecycle={(id, action) => { void handleLifecycle('event_attendee', id, action); }} onSaved={(nextMessage) => void reloadSheetsSnapshot(nextMessage || 'Event data saved to Google Sheets.')} />}
         {page === 'add' && <AddPerson onAdded={handleAdded} />}
         {page === 'capture' && <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}
         {page === 'thankyou' && <ThankYouStudio onSaved={() => void reloadSheetsSnapshot('Thank-you touch saved to Google Sheets.')} />}
         {page === 'intake' && <IntakePage rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id) => { void handleIntakeReview(id, 'convert'); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
         {page === 'contacts' && <ContactsPage rows={data.contacts} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
-        {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
-        {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
-        {page === 'notifications' && <NotificationsPage rows={data.notifications} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
-        {page === 'ai' && <AiReview />}
+        {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('touch', id, action); }} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
+        {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('approval', id, action); }} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
+        {page === 'notifications' && <NotificationsPage rows={data.notifications} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('notification', id, action); }} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
+        {page === 'ai' && <AiReview rows={data.aiSuggestions} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('ai_suggestion', id, action); }} />}
         {page === 'settings' && <SettingsPanel
           sheetStatus={sheetStatus}
           session={session}
@@ -281,7 +297,7 @@ function ContactsPage({ rows, mutationKey, onStatus }: { rows: ContactRecord[]; 
     <Header eyebrow="West Peek Network" title="People in the West Peek Network" subtitle="Active relationships appear first. Archived contacts stay recoverable and out of normal work surfaces." />
     <RouteGuide purpose="Find and manage finalized relationship records." primaryAction="Search or review active contacts." secondary="Archive stale records without deleting history." caution="Intake belongs in the Intake Queue until reviewed." />
     <div className="filter-bar"><input aria-label="Search contacts" placeholder="Search name, email, company, context, or tags" value={search} onChange={(event) => setSearch(event.target.value)} /><div className="segmented"><button className={view === 'active' ? 'active' : ''} onClick={() => setView('active')}>Active</button><button className={view === 'archived' ? 'active' : ''} onClick={() => setView('archived')}>Archived</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visible.length} records</span></div>
-    <div className="grid cols-2">{visible.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No contacts match this view' : 'No contacts yet'}</h3></div> : visible.map((c) => { const busy = mutationKey?.startsWith(`contact:${c.contact_id}:`); return <article className="card record-card" key={c.contact_id}><div className="record-header"><div><h3>{c.full_name}</h3><p className="muted">{c.company || 'No company'} • Owner: {c.relationship_owner}</p></div><span className="badge">{humanize(c.status)}</span></div><p>{c.context_summary}</p><p><span className="badge">{c.priority}</span>{c.person_type && c.person_type !== 'unknown' && <span className="badge badge-gap">{humanize(c.person_type)}</span>}{c.deal_flow_prospect === 'yes' && <span className="badge warn badge-gap">Deal-flow prospect</span>}{c.touch_needed && <span className="badge warn badge-gap">Needs touch</span>}</p><footer className="action-footer">{c.status === 'active' ? <button className="btn danger" disabled={Boolean(busy)} onClick={() => { if (window.confirm(`Archive ${c.full_name}? The record will leave Active but remain restorable.`)) onStatus(c.contact_id, 'archived'); }}>{busy ? 'Archiving…' : 'Archive contact'}</button> : <button className="btn primary" disabled={Boolean(busy)} onClick={() => onStatus(c.contact_id, 'active')}>{busy ? 'Restoring…' : 'Restore contact'}</button>}</footer></article>})}</div>
+    <div className="grid cols-2">{visible.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No contacts match this view' : 'No contacts yet'}</h3></div> : visible.map((c) => { const busy = mutationKey?.startsWith(`contact:${c.contact_id}:`); return <article className="card record-card" key={c.contact_id}><div className="record-header"><div><h3>{clippedText(c.full_name, 100, 'Unnamed contact')}</h3><p className="muted">{c.company || 'No company'} • Owner: {c.relationship_owner}</p></div><span className="badge">{humanize(c.status)}</span></div><p>{clippedText(c.context_summary, 420, 'No context yet.')}</p><p><span className="badge">{c.priority}</span>{c.person_type && c.person_type !== 'unknown' && <span className="badge badge-gap">{humanize(c.person_type)}</span>}{c.deal_flow_prospect === 'yes' && <span className="badge warn badge-gap">Deal-flow prospect</span>}{c.touch_needed && <span className="badge warn badge-gap">Needs touch</span>}</p><footer className="action-footer">{c.status === 'active' ? <button className="btn danger" disabled={Boolean(busy)} onClick={() => { if (window.confirm(`Archive ${c.full_name}? The record will leave Active but remain restorable.`)) onStatus(c.contact_id, 'archived'); }}>{busy ? 'Archiving…' : 'Archive contact'}</button> : <button className="btn primary" disabled={Boolean(busy)} onClick={() => onStatus(c.contact_id, 'active')}>{busy ? 'Restoring…' : 'Restore contact'}</button>}</footer></article>})}</div>
   </>;
 }
 
@@ -305,21 +321,23 @@ function IntakePage({ rows, mutationKey, onCapture, onConvert, onAttach, onDismi
   </>;
 }
 
-function TouchesPage({ rows, contacts, onFulfillmentUpdate }: { rows: RelationshipTouch[]; contacts: ContactRecord[]; onFulfillmentUpdate: (touch: RelationshipTouch, update: Partial<RelationshipTouch>) => void }) {
+function TouchesPage({ rows, contacts, mutationKey, onLifecycle, onFulfillmentUpdate }: { rows: RelationshipTouch[]; contacts: ContactRecord[]; mutationKey: string | null; onLifecycle: (id: string, action: 'archive' | 'restore') => void; onFulfillmentUpdate: (touch: RelationshipTouch, update: Partial<RelationshipTouch>) => void }) {
+  const [view, setView] = useState<'active' | 'archived'>('active');
+  const visibleRows = rows.filter((row) => view === 'archived' ? row.status === 'cancelled' : row.status !== 'cancelled');
   return <>
     <Header eyebrow="Relationship Touches" title="Intentional follow-through" subtitle="Actions that say: I remembered, I appreciated it, I followed through. Handwritten notes stay manual until a human chooses vendor or self-fulfillment." />
     <RouteGuide purpose="Review relationship follow-through without confusing drafts with completed outreach." primaryAction="Work the next due touch, then record the fulfillment state." secondary="Use the recipient, method, due date, and reason to distinguish similar records." caution="Network OS never sends, orders, pays, or mails on its own." />
-    <div className="grid cols-2">{rows.length === 0 ? <div className="empty-state"><h3>No relationship touches yet</h3><p>Approved follow-up drafts and thank-you actions will appear here.</p></div> : rows.map((t) => {
+    <div className="filter-bar"><div className="segmented"><button className={view === 'active' ? 'active' : ''} onClick={() => setView('active')}>Active</button><button className={view === 'archived' ? 'active' : ''} onClick={() => setView('archived')}>Archived</button></div><span className="result-count">{visibleRows.length} records</span></div><div className="grid cols-2">{visibleRows.length === 0 ? <div className="empty-state"><h3>No relationship touches yet</h3><p>Approved follow-up drafts and thank-you actions will appear here.</p></div> : visibleRows.map((t) => {
       const contact = contacts.find((c) => c.contact_id === t.contact_id);
       const methodLabel = t.method.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
       const selectedVendor = HANDWRITTEN_VENDORS.find((vendor) => vendor.name === t.vendor_name) || HANDWRITTEN_VENDORS[0];
       const isHandwritten = t.method === 'handwritten_note' || t.card_type?.includes('handwritten');
       return <article className="card record-card" key={t.touch_id}>
         <div className="record-header"><div><div className="kicker">{humanize(t.method)} • {humanize(t.status)}{t.created_at ? ` • ${relativeWhen(t.created_at)}` : ''}</div><h3>{contact?.full_name || t.recipient_name || t.reason}</h3><p className="muted">{t.company || contact?.company || 'No company'} • Owner: {t.owner}</p></div><span className="badge warn">{humanize(t.fulfillment_status || t.status)}</span></div>
-        <p className="record-summary">{t.reason}</p>
+        <p className="record-summary">{clippedText(t.reason, 420)}</p>
         <dl className="metadata compact-metadata"><dt>Method</dt><dd>{methodLabel}</dd><dt>Due</dt><dd>{friendlyWhen(t.due_date)}</dd>{t.recipient_email && <><dt>Recipient</dt><dd>{t.recipient_email}</dd></>}</dl>
-        {t.draft_message && <details><summary>Preview draft</summary><p className="record-summary">{t.draft_message}</p></details>}
-        {isHandwritten && <HandwrittenFulfillmentPanel touch={t} selectedVendor={selectedVendor} onFulfillmentUpdate={onFulfillmentUpdate} />}
+        {t.draft_message && <details><summary>Preview draft</summary><p className="record-summary">{clippedText(t.draft_message, 1200)}</p></details>}
+        {isHandwritten && <HandwrittenFulfillmentPanel touch={t} selectedVendor={selectedVendor} onFulfillmentUpdate={onFulfillmentUpdate} />}<footer className="action-footer">{t.status === 'cancelled' ? <button className="btn" disabled={Boolean(mutationKey)} onClick={() => onLifecycle(t.touch_id, 'restore')}>Restore touchpoint</button> : <button className="btn danger" disabled={Boolean(mutationKey)} onClick={() => { if (window.confirm('Archive this touchpoint?')) onLifecycle(t.touch_id, 'archive'); }}>{mutationKey === `touch:${t.touch_id}:archive` ? 'Archiving…' : 'Archive touchpoint'}</button>}</footer>
       </article>;
     })}</div>
   </>;
@@ -393,28 +411,28 @@ function HandwrittenFulfillmentPanel({ touch, selectedVendor, onFulfillmentUpdat
   </div>;
 }
 
-function ApprovalsPage({ rows, mutationKey, onApprove, onReject }: { rows: ApprovalRecord[]; mutationKey: string | null; onApprove: (id: string) => void; onReject: (id: string) => void }) {
-  const [view, setView] = useState<'pending' | 'history'>('pending');
-  const visible = rows.filter((row) => view === 'pending' ? row.status === 'pending' : row.status !== 'pending');
+function ApprovalsPage({ rows, mutationKey, onLifecycle, onApprove, onReject }: { rows: ApprovalRecord[]; mutationKey: string | null; onLifecycle: (id: string, action: 'archive' | 'restore') => void; onApprove: (id: string) => void; onReject: (id: string) => void }) {
+  const [view, setView] = useState<'pending' | 'history' | 'archived'>('pending');
+  const visible = rows.filter((row) => view === 'pending' ? row.status === 'pending' : view === 'archived' ? row.status === 'cancelled' : row.status !== 'pending' && row.status !== 'cancelled');
   return <>
     <Header eyebrow="Approvals" title="Approvals Needed" subtitle="Pending decisions appear first; completed decisions remain in History." />
     <RouteGuide purpose="Make explicit decisions on sensitive or external actions." primaryAction="Review the payload and approve or reject." secondary="Use History to audit completed decisions." caution="Approval never means automatic payment, sending, or vendor execution." />
-    <div className="filter-bar"><div className="segmented"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button></div><span className="result-count">{visible.length} records</span></div>
-    <div className="list">{visible.length === 0 ? <div className="empty-state"><h3>{view === 'pending' ? 'No approvals need a decision' : 'No decided approvals yet'}</h3></div> : visible.map((a) => { const busy = mutationKey?.startsWith(`approval:${a.approval_id}:`); return <article className="card record-card" key={a.approval_id}><div className="record-header"><div><div className="kicker">{humanize(a.approval_type)} • {humanize(a.risk_level)} risk{a.created_at ? ` • ${relativeWhen(a.created_at)}` : ''}</div><h3>{humanize(a.status)}</h3><p className="muted">Assigned to {a.assigned_to}{a.requested_by ? ` • Requested by ${a.requested_by}` : ''}</p></div><span className={`badge ${a.risk_level === 'high' ? 'warn' : ''}`}>{humanize(a.risk_level)} risk</span></div><p className="record-summary">{a.suggested_payload}</p>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onApprove(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:approve` ? 'Approving…' : 'Approve'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onReject(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:reject` ? 'Rejecting…' : 'Reject'}</button></footer>}</article>})}</div>
+    <div className="filter-bar"><div className="segmented"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button><button className={view === 'archived' ? 'active' : ''} onClick={() => setView('archived')}>Archived</button></div><span className="result-count">{visible.length} records</span></div>
+    <div className="list">{visible.length === 0 ? <div className="empty-state"><h3>{view === 'pending' ? 'No approvals need a decision' : 'No decided approvals yet'}</h3></div> : visible.map((a) => { const busy = mutationKey?.startsWith(`approval:${a.approval_id}:`); return <article className="card record-card" key={a.approval_id}><div className="record-header"><div><div className="kicker">{humanize(a.approval_type)} • {humanize(a.risk_level)} risk{a.created_at ? ` • ${relativeWhen(a.created_at)}` : ''}</div><h3>{humanize(a.status)}</h3><p className="muted">Assigned to {a.assigned_to}{a.requested_by ? ` • Requested by ${a.requested_by}` : ''}</p></div><span className={`badge ${a.risk_level === 'high' ? 'warn' : ''}`}>{humanize(a.risk_level)} risk</span></div><p className="record-summary">{clippedText(a.suggested_payload, 1200)}</p>{view === 'pending' && <footer className="action-footer"><button className="btn primary" disabled={Boolean(busy)} onClick={() => onApprove(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:approve` ? 'Approving…' : 'Approve'}</button><button className="btn danger" disabled={Boolean(busy)} onClick={() => onReject(a.approval_id)}>{mutationKey === `approval:${a.approval_id}:reject` ? 'Rejecting…' : 'Reject'}</button></footer>}{view === 'history' && a.status !== 'cancelled' && <footer className="action-footer"><button className="btn danger" disabled={Boolean(busy)} onClick={() => { if (window.confirm('Archive this approval record from active history?')) onLifecycle(a.approval_id, 'archive'); }}>Archive record</button></footer>}{view === 'archived' && <footer className="action-footer"><button className="btn" disabled={Boolean(busy)} onClick={() => onLifecycle(a.approval_id, 'restore')}>Restore record</button></footer>}</article>})}</div>
   </>;
 }
 
-function NotificationsPage({ rows, onRead }: { rows: NotificationRecord[]; onRead: (id: string, recipientEmail?: string) => void }) {
-  const [view, setView] = useState<'unread' | 'all'>('unread');
-  const visible = rows.filter((row) => view === 'all' || row.status === 'unread');
+function NotificationsPage({ rows, mutationKey, onLifecycle, onRead }: { rows: NotificationRecord[]; mutationKey: string | null; onLifecycle: (id: string, action: 'archive' | 'restore') => void; onRead: (id: string, recipientEmail?: string) => void }) {
+  const [view, setView] = useState<'unread' | 'all' | 'dismissed'>('unread');
+  const visible = rows.filter((row) => view === 'dismissed' ? row.status === 'dismissed' : view === 'all' ? row.status !== 'dismissed' : row.status === 'unread');
   return <>
     <Header eyebrow="Notifications" title="Calm reminders, not approvals" subtitle="Notification links open authenticated approval pages. They do not approve actions directly." />
     <RouteGuide purpose="See what needs attention without mixing reminders with decisions." primaryAction="Open the relevant workflow, then mark the reminder read." caution="Notifications cannot approve or execute actions." />
-    <div className="filter-bar"><div className="segmented"><button className={view === 'unread' ? 'active' : ''} onClick={() => setView('unread')}>Unread</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visible.length} records</span></div><div className="list">{visible.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No unread notifications' : 'No notifications need attention'}</h3><p>Operational reminders will appear here without becoming approvals.</p></div> : visible.map((n) => <article className="card record-card" key={n.notification_id}><div className="record-header"><div><div className="kicker">{humanize(n.priority)} priority • {humanize(n.status)}{n.created_at ? ` • ${relativeWhen(n.created_at)}` : ''}</div><h3>{n.subject}</h3><p className="muted">Recipient: {n.recipient_email || 'Operator'}</p></div>{n.status === 'unread' && <span className="badge warn">Needs attention</span>}</div>{n.body_preview && <p className="record-summary">{n.body_preview}</p>}<footer className="action-footer"><button className="btn" disabled={n.status !== 'unread'} onClick={() => onRead(n.notification_id, n.recipient_email)}>{n.status === 'unread' ? 'Mark read' : 'Read'}</button></footer></article>)}</div>
+    <div className="filter-bar"><div className="segmented"><button className={view === 'unread' ? 'active' : ''} onClick={() => setView('unread')}>Unread</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button><button className={view === 'dismissed' ? 'active' : ''} onClick={() => setView('dismissed')}>Dismissed</button></div><span className="result-count">{visible.length} records</span></div><div className="list">{visible.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No unread notifications' : 'No notifications need attention'}</h3><p>Operational reminders will appear here without becoming approvals.</p></div> : visible.map((n) => <article className="card record-card" key={n.notification_id}><div className="record-header"><div><div className="kicker">{humanize(n.priority)} priority • {humanize(n.status)}{n.created_at ? ` • ${relativeWhen(n.created_at)}` : ''}</div><h3>{clippedText(n.subject, 120, 'Notification')}</h3><p className="muted">Recipient: {n.recipient_email || 'Operator'}</p></div>{n.status === 'unread' && <span className="badge warn">Needs attention</span>}</div>{n.body_preview && <p className="record-summary">{clippedText(n.body_preview, 800)}</p>}<footer className="action-footer"><button className="btn" disabled={n.status !== 'unread'} onClick={() => onRead(n.notification_id, n.recipient_email)}>{n.status === 'unread' ? 'Mark read' : 'Read'}</button>{n.status !== 'dismissed' ? <button className="btn danger" disabled={Boolean(mutationKey)} onClick={() => onLifecycle(n.notification_id, 'archive')}>Dismiss</button> : <button className="btn" disabled={Boolean(mutationKey)} onClick={() => onLifecycle(n.notification_id, 'restore')}>Restore</button>}</footer></article>)}</div>
   </>;
 }
 
-function AiReview() {
+function AiReview({ rows, mutationKey, onLifecycle }: { rows: AiSuggestionRecord[]; mutationKey: string | null; onLifecycle: (id: string, action: 'archive' | 'restore') => void }) {
   const [result, setResult] = useState<string>('No live Claude smoke test has run in this browser session. Sign in with Google first, then run this once when you want to spend a tiny live API call.');
   const [busy, setBusy] = useState(false);
 
@@ -449,7 +467,7 @@ function AiReview() {
     <div className="grid cols-2">
       <div className="card"><h3>Live Claude suggestion route</h3><p>Runs one authenticated smoke test against the deployed Cloudflare Function and writes a pending_human_review ai_suggestions row to Google Sheets.</p><p className="muted">Requires Google session. Uses a real Anthropic API call, so it may consume a small amount of Claude API credit.</p><button className="btn primary" disabled={busy} onClick={runSmokeTest}>{busy ? 'Testing Claude...' : 'Run Claude smoke test'}</button><pre>{result}</pre></div>
       <div className="card"><h3>Human-review guardrail</h3><p>The AI route returns <strong>human_review_required: true</strong> and <strong>execution_allowed: false</strong>. It does not send email, order gifts, merge contacts, delete records, or approve actions.</p><span className="badge warn">Pending human approval only</span></div>
-    </div>
+    </div><div className="list">{rows.filter((row) => row.status !== 'dismissed').map((row) => <article className="card record-card" key={row.suggestion_id}><div className="record-header"><div><div className="kicker">{humanize(row.suggestion_type)} • {humanize(row.status)}</div><h3>{clippedText(row.reasoning_summary, 120, 'AI suggestion')}</h3></div><span className="badge">{humanize(row.confidence)}</span></div><p className="record-summary">{clippedText(row.suggested_payload, 1000)}</p><footer className="action-footer"><button className="btn danger" disabled={Boolean(mutationKey)} onClick={() => onLifecycle(row.suggestion_id, 'archive')}>Dismiss suggestion</button></footer></article>)}</div>
   </>;
 }
 
@@ -644,7 +662,7 @@ function humanize(value: unknown) { return String(value || '').replaceAll('_', '
 function friendlyWhen(value: unknown) { const date = new Date(String(value || '')); return Number.isNaN(date.getTime()) ? String(value || 'Not scheduled') : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined }); }
 function relativeWhen(value: unknown) { const date = new Date(String(value || '')); if (Number.isNaN(date.getTime())) return ''; const days = Math.floor((Date.now() - date.getTime()) / 86400000); if (days <= 0) return 'Today'; if (days === 1) return 'Yesterday'; if (days < 7) return `${days} days ago`; return friendlyWhen(value); }
 function humanizeList(value: unknown) { return String(value || '').split(',').map((item) => humanize(item.trim())).filter(Boolean).join(', '); }
-function bounded(value: unknown, max: number) { const text = String(value || '').trim(); return text.length > max ? `${text.slice(0, max).trim()}…` : text; }
+function bounded(value: unknown, max: number) { const text = displayText(value); return text.length > max ? `${text.slice(0, max).trim()}…` : text; }
 
 export function Header({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return <div className="topbar"><div><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p className="subtitle">{subtitle}</p></div></div>;

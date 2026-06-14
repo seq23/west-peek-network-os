@@ -1,0 +1,5 @@
+{
+  "route": "Intake Queue",
+  "value": "<html><style>.x{display:none}</style><body><p>Hello &amp; welcome</p><blockquote>Forwarded: <b>Founder</b></blockquote><img src=\"track.gif\" width=\"1\"></body></html>",
+  "expect": "Hello & welcome Forwarded: Founder"
+}

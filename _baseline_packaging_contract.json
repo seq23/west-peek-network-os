@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "repo_name": "west-peek-network-os",
+  "required_root_files": [
+    ".gitignore",
+    "README.md",
+    "package.json",
+    "_repo_update_contract.json",
+    "_repo_validation_matrix.json",
+    "docs/runbooks/PRE_UPDATER_BASELINE_CHECKLIST.md",
+    ".env.example",
+    ".env.local.example",
+    ".env.preview.example",
+    ".env.production.example",
+    ".env.test.example",
+    "secrets/network-os.local.env.gpg"
+  ],
+  "forbidden_paths_or_globs": [
+    ".git/",
+    "node_modules/",
+    "dist/",
+    "build/",
+    "out/",
+    ".next/",
+    ".open-next/",
+    "coverage/",
+    "playwright-report/",
+    "test-results/",
+    ".auth/",
+    "artifacts/diagnostics/",
+    ".runtime-data/",
+    "tsconfig.tsbuildinfo",
+    ".env",
+    ".env.local",
+    ".env.preview",
+    ".env.production"
+  ],
+  "notes": "Required files are derived from executable updater/prepush/environment contracts. Documentation-only checks are insufficient."
+}

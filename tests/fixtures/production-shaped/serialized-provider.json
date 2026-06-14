@@ -1,0 +1,15 @@
+{
+  "route": "AI Smoke Test / Approvals",
+  "value": {
+    "decision_trace": [
+      {
+        "step": "classify",
+        "confidence": 0.71
+      }
+    ],
+    "metadata": {
+      "provider": "synthetic"
+    }
+  },
+  "expect": "JSON rendered as safe text/source detail"
+}

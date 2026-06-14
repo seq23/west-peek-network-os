@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0.0",
+  "repo": "network",
+  "fullPacketRequiredFor": [
+    "dependency_install",
+    "typecheck",
+    "production_build",
+    "platform_build",
+    "auth_session",
+    "authorization",
+    "persistence_mutation_readback",
+    "provider_call",
+    "cleanup",
+    "browser_route",
+    "console_error",
+    "network_failure",
+    "hallmark_rendering",
+    "postdeploy_audit",
+    "updater_packaging"
+  ],
+  "lightweightOnlyFor": [
+    "documentation_freshness",
+    "naming_drift",
+    "optional_link",
+    "formatting",
+    "coverage_metric",
+    "optimization_suggestion"
+  ],
+  "requiredFields": [
+    "error_code",
+    "command",
+    "repo_revision",
+    "environment",
+    "expected",
+    "actual",
+    "log_paths",
+    "remediation_classification",
+    "verdict"
+  ],
+  "browserAdditionalFields": [
+    "route",
+    "persona",
+    "viewport",
+    "screenshots",
+    "trace"
+  ],
+  "dataAdditionalFields": [
+    "fixture_ids",
+    "mutation_id",
+    "readback_result",
+    "cleanup_result"
+  ]
+}

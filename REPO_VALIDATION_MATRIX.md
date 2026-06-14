@@ -100,3 +100,8 @@ Typecheck, local build, static validators, documentation governance, and ZIP che
 | Hallmark expert review | `~/run_hallmark_audit.sh <repo> ...` plus expert review | HUMAN UX REVIEW | STRONG WARNING / HARD FAIL when trust or usability is materially damaged | Human-hostile or brand-damaging UX | Evidence pack plus expert findings and remediation | Runtime correctness | Implement approved findings and run browser proof |
 
 | Browserless mocked web contracts | `npm run test:web-contracts:mocked` | LOCAL INTEGRATION | HARD FAIL | Client/API contract drift | Request routing, serialization, snapshot normalization, fresh-read metadata, structured error propagation | DOM, navigation, layout, real browser, deployment, live providers | Fix client contract or objectively wrong fixture | No |
+
+
+## Authenticated Product Usability Addendum — 2026-06-13
+
+This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT_USABILITY_2026-06-13.md`. Route-complete authenticated usability, production-shaped rendering, control-to-persistence proof, refresh/re-entry, maintenance scale, post-cleanup audit, and route-complete Hallmark are distinct mandatory proof layers.
