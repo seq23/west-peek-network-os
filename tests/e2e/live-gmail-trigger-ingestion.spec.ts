@@ -78,6 +78,11 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
     expect(snap.ok(), await snap.text()).toBeTruthy();
     const snapPayload = await snap.json();
     const rows = snapPayload.data?.intake_queue || [];
+    const unregisteredExisting = rows.filter((r:any)=>
+      seeded.some((item)=>String(r.raw_text||'').includes(item.marker)) &&
+      (!r.proof_run_id || sheetBoolean(r.proof_fixture) !== 'true' || !r.proof_test_id)
+    );
+    expect(unregisteredExisting, 'UNREGISTERED_TIER4_FIXTURE: pre-fix Gmail rows cannot be adopted or deleted as proof fixtures. Reset the unused workbook, reconnect Gmail, resend the five messages with a new run ID, and rerun.').toHaveLength(0);
     const created:any[] = [];
     for (const item of seeded) {
       const matches = rows.filter((r:any)=>

@@ -239,6 +239,7 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
   const parsedName = fields.name || envelope.name || '';
   const parsedEmail = fields.email || envelope.email || '';
   const parsedNotes = fields.context || fields.notes || stripTrigger(input.rawText) || 'Minimal Gmail trigger capture. Review email thread for context.';
+  const tier4ProofRun = /^wpno-tier4-[A-Za-z0-9._:-]+$/.test(input.runId);
   return {
     intake_id: deterministicIntakeId(input.mailboxEmail, input.message.id),
     created_at: now,
@@ -288,7 +289,15 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
     ]),
     human_review_required: 'true',
     execution_allowed: 'false',
-    review_status: 'pending_human_review'
+    review_status: 'pending_human_review',
+    proof_run_id: tier4ProofRun ? input.runId : '',
+    proof_test_id: tier4ProofRun ? `live-gmail-trigger-ingestion:${classification.source_trigger}` : '',
+    proof_fixture: tier4ProofRun ? 'true' : '',
+    proof_status: tier4ProofRun ? 'active' : '',
+    proof_created_at: tier4ProofRun ? now : '',
+    proof_expires_at: '',
+    proof_cleaned_at: '',
+    proof_cleanup_run_id: ''
   };
 }
 

@@ -53,3 +53,8 @@ The test must fail when the selected mode lacks its required inputs. A missing A
 ## Retry and interrupted-run behavior
 
 The live proof is resumable. If a prior attempt already created some or all exact-run fixtures, rerun with the same `WEST_PEEK_E2E_RUN_ID`. The sync may legitimately report fewer than five new imports, including zero, while reporting the remainder as duplicates. The test must reconstruct and verify exactly one row per alias from the Sheet, then continue through second-sync dedupe and exact cleanup. Do not send duplicate manual emails merely because a prior test stopped after persistence.
+
+
+## Proof registration requirement
+
+Every Gmail row created with a `WEST_PEEK_E2E_RUN_ID` matching `wpno-tier4-*` must persist `proof_run_id`, `proof_test_id`, `proof_fixture=true`, `proof_status=active`, and `proof_created_at` in the initial append. A pre-existing row missing any of those fields is unregistered and must not be adopted, relabeled, or deleted by proof cleanup. For an unused workbook, use the authenticated workbook reset, reconnect Gmail, resend the five messages with a new run ID, and rerun the proof.

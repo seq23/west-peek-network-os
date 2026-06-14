@@ -86,6 +86,9 @@ assert.match(sheets,/SHEETS_READBACK_STALE/,'writes must require readback');
 assert.match(sheets,/columnCount: headers\.length/,'reset must remove extra columns by resizing to canonical width');
 assert.doesNotMatch(gmail,/oauth_tokens', \{ ensureHeaders: false \}/,'OAuth reads may not bypass schema validation');
 assert.doesNotMatch(gmail,/intake_queue', \{ ensureHeaders: false \}/,'intake reads may not bypass schema validation');
+for (const token of ['proof_run_id: tier4ProofRun ? input.runId', 'proof_test_id: tier4ProofRun ?', "proof_fixture: tier4ProofRun ? 'true'", "proof_status: tier4ProofRun ? 'active'", 'proof_created_at: tier4ProofRun ? now']) {
+  assert.match(gmail, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')), `Gmail Tier 4 import must persist ${token.split(':')[0]}`);
+}
 
 const liveGmailProof = fs.readFileSync('tests/e2e/live-gmail-trigger-ingestion.spec.ts','utf8');
 assert.match(liveGmailProof, /imported_records\.length \+ preexistingCount/, 'live Gmail proof must resume safely from existing exact-run fixtures');
