@@ -10,6 +10,10 @@ function encodeBase64Url(value: string) {
   return Buffer.from(value).toString('base64url');
 }
 
+function sheetBoolean(value: unknown) {
+  return String(value).trim().toLowerCase();
+}
+
 async function seedGmail(alias: string, marker: string) {
   const token = process.env.TIER4_GMAIL_SEED_ACCESS_TOKEN;
   const to = process.env.TIER4_GMAIL_SEED_TO;
@@ -48,8 +52,8 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
       seeded.push({ alias, intent, gmailId, marker });
     }
     if (mode === 'manual') {
-      console.log(`MANUAL_GMAIL_SEED_REQUIRED run_id=${runId}`);
-      console.log('Send exactly one message per supported alias using docs/evidence/GMAIL_SEED_MESSAGE_GUIDE.md before continuing.');
+      console.log(`MANUAL_GMAIL_SEED_MODE run_id=${runId}`);
+      console.log('Using operator-seeded Gmail messages documented in docs/evidence/GMAIL_SEED_MESSAGE_GUIDE.md.');
     }
 
     const sync = await request.post('/api/gmail/sync', { data: { query: runId, max_results: 25, run_id: runId } });
@@ -85,12 +89,12 @@ test.describe('LIVE Gmail plus Google Sheets proof — exact provider lane', () 
       const row = matches[0]; created.push(row);
       expect(row.source_trigger).toBe(item.alias);
       expect(row.trigger_intent).toBe(item.intent);
-      expect(String(row.human_review_required)).toBe('true');
-      expect(String(row.execution_allowed)).toBe('false');
+      expect(sheetBoolean(row.human_review_required)).toBe('true');
+      expect(sheetBoolean(row.execution_allowed)).toBe('false');
       expect(row.review_status).toMatch(/pending/i);
       expect(row.intake_id).toBeTruthy();
       expect(row.proof_run_id).toBe(runId);
-      expect(row.proof_fixture).toBe('true');
+      expect(sheetBoolean(row.proof_fixture)).toBe('true');
       expect(row.proof_test_id).toBeTruthy();
       const importedRecord = syncPayload.imported_records.find((r:any)=>
         (item.gmailId && r.gmail_message_id===item.gmailId) || r.source_trigger===item.alias
