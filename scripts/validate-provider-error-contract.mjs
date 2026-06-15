@@ -30,5 +30,7 @@ if (!cleanup.includes('wpno-(?:tier4|runtime-gmail)')) failures.push('Exact clea
 const runtimeProof = read('tests/e2e/live-gmail-forward-only-runtime.spec.ts', failures);
 for (const fragment of ['LIVE Gmail combined trigger and forward-only production lifecycle', 'Eight matching messages must force at least one real Gmail continuation page', '#wpnetwork', '#addtowestpeek', '#westpeeknetwork', '#wpdealflow', '#dealflow', 'GMAIL_BACKFILL_CONFIRMATION_REQUIRED', 'ledgerAfterCleanup', 'reimported']) if (!runtimeProof.includes(fragment)) failures.push(`Live forward-only runtime proof missing ${fragment}`);
 
+for (const fragment of ["runStartedAt", "mailboxRows", "A concurrent or prior sync must leave a durable mailbox watermark", "rowsBeforeSync.length === 7"]) if (!runtimeProof.includes(fragment)) failures.push(`Live forward-only runtime proof resumability contract missing ${fragment}`);
+
 if (!/REPLAY_DETECTED/.test(pitchProfile + pitchPacket + pitchShared)) failures.push('Pitch Lab handoff must include replay detection.');
 failOrPass('validate-provider-error-contract', failures);

@@ -99,3 +99,7 @@ Seed emails remain in Gmail. Permanent ledger entries prevent their re-import.
 ## Completion rule
 
 Gmail ingestion is runtime-proven only after this combined deployed command passes against the exact deployed artifact hash.
+
+## Interrupted or parallel sync recovery
+
+The deployed proof is resumable. If the operator clicks the UI sync button before or during the proof, or if another sync creates the mailbox watermark between the proof snapshot and initialization request, rerun the same proof with the same run ID. The proof must re-read durable Sheets state, adopt the existing seven exact-run Intake rows, verify run-time ledger/cursor/watermark evidence, and continue through exact cleanup and no-reimport verification. A successful UI sync must not force another email packet.

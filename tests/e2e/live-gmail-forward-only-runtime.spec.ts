@@ -51,6 +51,32 @@ async function snapshot(request: any) {
 
 function markerFor(runId: string, index: number) { return `${runId}-normal-${index}`; }
 
+function runStartedAt(runId: string) {
+  const match = runId.match(/^wpno-runtime-gmail-(\d{8}T\d{6}Z)$/);
+  if (!match) return 0;
+  const stamp = match[1];
+  const iso = `${stamp.slice(0, 4)}-${stamp.slice(4, 6)}-${stamp.slice(6, 8)}T${stamp.slice(9, 11)}:${stamp.slice(11, 13)}:${stamp.slice(13, 15)}Z`;
+  return Date.parse(iso);
+}
+
+function atOrAfterRun(row: any, runId: string) {
+  const floor = runStartedAt(runId);
+  if (!floor) return true;
+  return Math.max(
+    Date.parse(String(row.created_at || '')) || 0,
+    Date.parse(String(row.submitted_at || '')) || 0
+  ) >= floor;
+}
+
+function mailboxRows(rows: any[], provider: string, mailbox: string, runId: string) {
+  return rows.filter(
+    (row: any) =>
+      row.provider === provider &&
+      String(row.source_ip || '').toLowerCase() === mailbox &&
+      atOrAfterRun(row, runId)
+  );
+}
+
 function assertAliasCoverage(rows: any[], runId: string) {
   expect(rows).toHaveLength(7);
   for (let index = 0; index < aliasPlan.length; index += 1) {
@@ -78,13 +104,26 @@ test.describe('LIVE Gmail combined trigger and forward-only production lifecycle
 
     const before = await snapshot(request);
     const replayBefore = before.data?.provider_replay_guard || [];
-    const hasWatermark = replayBefore.some((row: any) => row.provider === 'gmail_sync_watermark' && String(row.source_ip || '').toLowerCase() === connectedMailbox);
+    let hasWatermark = replayBefore.some((row: any) => row.provider === 'gmail_sync_watermark' && String(row.source_ip || '').toLowerCase() === connectedMailbox);
     if (!hasWatermark) {
       const initialize = await request.post('/api/gmail/sync', { data: { mailbox_email: connectedMailbox, run_id: runId, max_results: 5 } });
       expect(initialize.ok(), await initialize.text()).toBeTruthy();
       const initialized = await initialize.json();
-      expect(initialized.watermark_initialized).toBe(true);
-      if (mode === 'manual') throw new Error('Mailbox watermark was initialized now. Generate a new combined manual seed packet, send those new eight emails, then rerun this proof.');
+      if (initialized.watermark_initialized === true) {
+        if (mode === 'manual') throw new Error('Mailbox watermark was initialized now. Generate a new combined manual seed packet, send those new eight emails, then rerun this proof.');
+        hasWatermark = true;
+      } else {
+        const afterInitialize = await snapshot(request);
+        hasWatermark = (afterInitialize.data?.provider_replay_guard || []).some(
+          (row: any) =>
+            row.provider === 'gmail_sync_watermark' &&
+            String(row.source_ip || '').toLowerCase() === connectedMailbox
+        );
+        expect(
+          hasWatermark,
+          'A concurrent or prior sync must leave a durable mailbox watermark before the proof continues.'
+        ).toBe(true);
+      }
     }
 
     const apiSeedIds = new Set<string>();
@@ -102,25 +141,61 @@ test.describe('LIVE Gmail combined trigger and forward-only production lifecycle
       await waitForSeedVisibility(token, runId, apiSeedIds);
     }
 
-    let importedTotal = 0;
-    let rejectedTier4Total = 0;
     let sawContinuation = false;
     let sawWatermarkAdvance = false;
     for (let attempt = 0; attempt < 30; attempt += 1) {
-      const response = await request.post('/api/gmail/sync', { data: { mailbox_email: connectedMailbox, run_id: runId, max_results: 5 } });
+      const stateBeforeSync = await snapshot(request);
+      const rowsBeforeSync = (stateBeforeSync.data?.intake_queue || []).filter(
+        (row: any) => row.proof_run_id === runId
+      );
+      const replayBeforeSync = stateBeforeSync.data?.provider_replay_guard || [];
+      const rejectedBeforeSync = mailboxRows(
+        replayBeforeSync,
+        'gmail_ingestion_ledger',
+        connectedMailbox,
+        runId
+      ).filter((row: any) => row.status === 'rejected_proof_fixture');
+      const cursorsBeforeSync = mailboxRows(
+        replayBeforeSync,
+        'gmail_sync_cursor',
+        connectedMailbox,
+        runId
+      );
+      const watermarkBeforeSync = mailboxRows(
+        replayBeforeSync,
+        'gmail_sync_watermark',
+        connectedMailbox,
+        runId
+      );
+
+      sawContinuation ||= cursorsBeforeSync.some((row: any) => row.status === 'active');
+      sawWatermarkAdvance ||=
+        cursorsBeforeSync.some((row: any) => row.status === 'completed') ||
+        watermarkBeforeSync.length > 0;
+
+      if (
+        rowsBeforeSync.length === 7 &&
+        rejectedBeforeSync.length >= 1 &&
+        sawContinuation &&
+        sawWatermarkAdvance
+      ) {
+        break;
+      }
+
+      const response = await request.post('/api/gmail/sync', {
+        data: {
+          mailbox_email: connectedMailbox,
+          run_id: runId,
+          max_results: 5
+        }
+      });
       expect(response.ok(), await response.text()).toBeTruthy();
       const payload = await response.json();
       expect(payload.sync_mode).toBe('normal');
       expect(payload.mailbox).toBe(connectedMailbox);
       expect(payload.batch_limit).toBe(5);
-      importedTotal += Number(payload.imported_count || 0);
-      rejectedTier4Total += Number(payload.skipped_tier4_count || 0);
       if (payload.has_more) sawContinuation = true;
       if (payload.watermark_advanced) sawWatermarkAdvance = true;
-      const state = await snapshot(request);
-      const rows = (state.data?.intake_queue || []).filter((row: any) => row.proof_run_id === runId);
-      const rejected = (state.data?.provider_replay_guard || []).filter((row: any) => row.provider === 'gmail_ingestion_ledger' && row.status === 'rejected_proof_fixture' && String(row.source_ip || '').toLowerCase() === connectedMailbox);
-      if (rows.length === 7 && (rejectedTier4Total >= 1 || rejected.length >= 1) && !payload.has_more) break;
       await sleep(4000);
     }
 
@@ -129,8 +204,6 @@ test.describe('LIVE Gmail combined trigger and forward-only production lifecycle
     const createdRows = intakeRows.filter((row: any) => row.proof_run_id === runId);
     assertAliasCoverage(createdRows, runId);
     expect(createdRows.every((row: any) => String(row.proof_fixture).toLowerCase() === 'true')).toBe(true);
-    expect(importedTotal).toBe(7);
-    expect(rejectedTier4Total).toBeGreaterThanOrEqual(1);
     expect(sawContinuation, 'Eight matching messages must force at least one real Gmail continuation page').toBe(true);
     expect(sawWatermarkAdvance, 'The watermark must advance only after the final successful page').toBe(true);
 
@@ -138,9 +211,9 @@ test.describe('LIVE Gmail combined trigger and forward-only production lifecycle
     const gmailIds = new Set(createdRows.map((row: any) => String(row.gmail_message_id || '')).filter(Boolean));
     const importedLedgerRows = replayRows.filter((row: any) => row.provider === 'gmail_ingestion_ledger' && gmailIds.has(String(row.signature_hash || '').split(':').pop() || ''));
     expect(importedLedgerRows).toHaveLength(7);
-    const rejectedLedgerRows = replayRows.filter((row: any) => row.provider === 'gmail_ingestion_ledger' && row.status === 'rejected_proof_fixture' && String(row.source_ip || '').toLowerCase() === connectedMailbox);
+    const rejectedLedgerRows = mailboxRows(replayRows, 'gmail_ingestion_ledger', connectedMailbox, runId).filter((row: any) => row.status === 'rejected_proof_fixture');
     expect(rejectedLedgerRows.length).toBeGreaterThanOrEqual(1);
-    const mailboxCursors = replayRows.filter((row: any) => row.provider === 'gmail_sync_cursor' && String(row.source_ip || '').toLowerCase() === connectedMailbox);
+    const mailboxCursors = mailboxRows(replayRows, 'gmail_sync_cursor', connectedMailbox, runId);
     expect(mailboxCursors.some((row: any) => row.status === 'active')).toBe(true);
     expect(mailboxCursors.some((row: any) => row.status === 'completed')).toBe(true);
 
