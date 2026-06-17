@@ -5,7 +5,8 @@ import { batchReadTabs, sheetsUnavailable, type RuntimeEnv, type SheetTab } from
 type Env = RuntimeEnv & AuthEnv;
 type Context = { request: Request; env: Env };
 
-const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees'];
+const BASE_TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees'];
+const PROOF_TABS: SheetTab[] = ['provider_replay_guard'];
 const IDS: Record<string, string> = {
   contacts: 'contact_id',
   intake_queue: 'intake_id',
@@ -14,10 +15,11 @@ const IDS: Record<string, string> = {
   notifications: 'notification_id',
   ai_suggestions: 'suggestion_id',
   events: 'event_id',
-  event_attendees: 'event_attendee_id'
+  event_attendees: 'event_attendee_id',
+  provider_replay_guard: 'replay_id'
 };
 
-let snapshotCache: { userEmail: string; payload: unknown; expiresAt: number } | null = null;
+let snapshotCache: { userEmail: string; includeProof: boolean; payload: unknown; expiresAt: number } | null = null;
 const SNAPSHOT_CACHE_TTL_MS = 45_000;
 
 export async function onRequestGet({ request, env }: Context) {
@@ -25,16 +27,18 @@ export async function onRequestGet({ request, env }: Context) {
     const user = await requireAuthenticatedUser(request, env);
     const url = new URL(request.url);
     const forceFresh = url.searchParams.get('fresh') === '1';
+    const includeProof = url.searchParams.get('include_proof') === '1';
+    const tabs = includeProof ? [...BASE_TABS, ...PROOF_TABS] : BASE_TABS;
 
-    if (!forceFresh && snapshotCache && snapshotCache.userEmail === user.email && Date.now() < snapshotCache.expiresAt) {
+    if (!forceFresh && snapshotCache && snapshotCache.userEmail === user.email && snapshotCache.includeProof === includeProof && Date.now() < snapshotCache.expiresAt) {
       return json({ ...(snapshotCache.payload as Record<string, unknown>), source: 'google_sheets_batch_cache', freshness_requested: false, cache_age_ms: Math.max(0, SNAPSHOT_CACHE_TTL_MS - (snapshotCache.expiresAt - Date.now())) }, { headers: { 'cache-control': 'private, no-store, max-age=0' } });
     }
 
-    // One batchGet request replaces eight tab reads and avoids per-tab header reads.
-    const raw = await batchReadTabs(env, TABS);
-    const data = Object.fromEntries(TABS.map((tab) => [tab, latestById(raw[tab] || [], IDS[tab]).filter((row) => String(row.proof_status || '') !== 'proof_cleaned')]));
-    const payload = { ok: true, persistence: 'google_sheets', source: 'google_sheets_batch', freshness_requested: forceFresh, cache_age_ms: 0, refreshed_at: new Date().toISOString(), user_email: user.email, data };
-    snapshotCache = { userEmail: user.email, payload, expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS };
+    // One batchGet request replaces per-tab reads and avoids repeated header requests.
+    const raw = await batchReadTabs(env, tabs);
+    const data = Object.fromEntries(tabs.map((tab) => [tab, latestById(raw[tab] || [], IDS[tab]).filter((row) => String(row.proof_status || '') !== 'proof_cleaned')]));
+    const payload = { ok: true, persistence: 'google_sheets', source: 'google_sheets_batch', freshness_requested: forceFresh, proof_data_included: includeProof, cache_age_ms: 0, refreshed_at: new Date().toISOString(), user_email: user.email, data };
+    snapshotCache = { userEmail: user.email, includeProof, payload, expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS };
     return json(payload, { headers: { 'cache-control': 'private, no-store, max-age=0' } });
   } catch (error) {
     const detail = error instanceof Error ? error.message : 'Google Sheets snapshot unavailable.';

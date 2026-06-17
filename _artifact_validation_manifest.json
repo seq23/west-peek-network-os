@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "repo": "west-peek-network-os",
   "profile": "container",
-  "generated_at": "2026-06-17T13:50:00Z",
+  "generated_at": "2026-06-17T14:19:38Z",
   "release_prepush_container": "PASS",
   "ui_test_parity": "PASS",
   "browser_suite_contract": "PASS_63_COLLECTED_2_REGISTERED_SKIPS",
@@ -19,14 +19,16 @@
     "intake_attach_target_existence": "PASS",
     "intake_assignment_and_deal_flow_override": "PASS",
     "contact_email_display_contract": "PASS",
-    "hostile_trigger_sheet_suite_in_validate_all": "PASS"
+    "hostile_trigger_sheet_suite_in_validate_all": "PASS",
+    "gmail_live_proof_snapshot_watermark_visibility": "PASS",
+    "gmail_proof_snapshot_cache_isolation": "PASS"
   },
   "artifact_source_parity": "PASS_PACKAGED_FROM_VALIDATED_SOURCE_ROOT_AND_REQUIRED_EXCLUSIONS_VERIFIED",
   "reopened_container_validation": "PASS_REOPENED_CANDIDATE_RELEASE_PREPUSH_CONTAINER",
-  "local_browser_validation": "NOT_EXECUTED_BROWSER_UNAVAILABLE_IN_CONTAINER_REQUIRED_BY_UPDATER",
-  "deployed_provider_proof": "REQUIRED_AFTER_DEPLOY",
+  "local_browser_validation": "NOT_EXECUTED_FOR_THIS_REPLACEMENT_ARTIFACT_REQUIRED_BY_UPDATER",
+  "deployed_provider_proof": "PARTIAL_PREVIOUS_RUN_EXPOSED_PROOF_SNAPSHOT_DEFECT_RERUN_REQUIRED_AFTER_DEPLOY",
   "required_local_command": "npm run release:prepush:local",
   "required_deployed_command": "npm run release:close-lifecycle",
   "status": "STRUCTURALLY_CHECKED_LOCAL_VALIDATION_REQUIRED",
-  "repair_note": "Hostile review repaired plain-text Gmail email deletion, multi-part forward loss, canonical archive projection, explicit Pitch Lab no-touch enforcement, runtime review validation, attach target verification, company completeness, documentation parity, and mandatory hostile-suite release gating."
+  "repair_note": "Tier 4 follow-up repaired the proof plumbing mismatch: authenticated live Gmail proof can explicitly request provider_replay_guard rows through include_proof=1, while normal UI snapshots remain unchanged and cache-isolated."
 }

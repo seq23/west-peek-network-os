@@ -101,3 +101,8 @@ Repair:
 - deployed signed Pitch Lab handoff.
 
 These remain local/deployed lifecycle gates and are not simulated in the container.
+
+
+## Tier 4 follow-up defect — proof ledger visibility
+
+The deployed Gmail lifecycle proof failed because `/api/sheets/snapshot` did not include `provider_replay_guard`, while the live proof expected to inspect Gmail watermark, cursor, and ingestion-ledger rows through that endpoint. The product Gmail import itself succeeded. The repair adds an authenticated `include_proof=1` snapshot mode and updates the live proof to request it explicitly. Normal UI snapshots remain unchanged.

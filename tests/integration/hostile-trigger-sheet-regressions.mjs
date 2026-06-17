@@ -99,6 +99,14 @@ for (const token of ['proof_run_id: registeredProofRun ? input.runId', 'proof_te
   assert.match(gmail, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')), `Gmail Tier 4 import must persist ${token.split(':')[0]}`);
 }
 
+
+const snapshotRoute = fs.readFileSync('functions/api/sheets/snapshot.ts','utf8');
+assert.match(snapshotRoute, /include_proof/, 'live proof snapshot must use an explicit proof-data gate');
+assert.match(snapshotRoute, /provider_replay_guard/, 'proof snapshot must include the Gmail watermark and ledger tab');
+assert.match(snapshotRoute, /proof_data_included:\s*includeProof/, 'snapshot response must disclose whether proof data was included');
+assert.match(snapshotRoute, /snapshotCache\.includeProof === includeProof/, 'normal UI snapshots must never reuse a proof-ledger cache entry');
+assert.match(fs.readFileSync('tests\/e2e\/live-gmail-forward-only-runtime.spec.ts','utf8'), /snapshot\?fresh=1&include_proof=1/, 'live Gmail proof must request proof ledger data explicitly');
+
 const liveGmailProof = fs.readFileSync('tests/e2e/live-gmail-trigger-ingestion.spec.ts','utf8');
 assert.match(liveGmailProof, /imported_records\.length \+ preexistingCount/, 'live Gmail proof must resume safely from existing exact-run fixtures');
 assert.match(liveGmailProof, /skipped_duplicate_count \|\| 0/, 'live Gmail proof must verify duplicates during resumable retries');

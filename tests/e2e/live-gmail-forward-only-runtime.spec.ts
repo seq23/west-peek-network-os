@@ -44,7 +44,7 @@ async function waitForSeedVisibility(token: string, runId: string, expectedIds: 
   throw new Error(`Gmail indexing timeout: fewer than ${expectedIds.size} combined-proof messages became searchable.`);
 }
 async function snapshot(request: any) {
-  const response = await request.get('/api/sheets/snapshot?fresh=1');
+  const response = await request.get('/api/sheets/snapshot?fresh=1&include_proof=1');
   expect(response.ok(), await response.text()).toBeTruthy();
   return response.json();
 }
