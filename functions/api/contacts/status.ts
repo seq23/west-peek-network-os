@@ -1,6 +1,7 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json, readJson } from '../../_shared/json';
-import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
+import { appendRecord, readTab, sheetsUnavailable, TAB_HEADERS, type RuntimeEnv } from '../../_shared/sheets';
+import { projectKnownFields } from '../../_shared/recordProjection';
 import { latestRecord } from '../../_shared/records';
 
 type Context = { request: Request; env: RuntimeEnv & AuthEnv };
@@ -18,9 +19,17 @@ export async function onRequestPost({ request, env }: Context) {
     const current = latestRecord(matches);
     if (!current) return json({ ok: false, error: 'Contact not found.' }, { status: 404 });
     const now = new Date().toISOString();
-    const next = { ...current, contact_id: contactId, updated_at: now, status, updated_by: user.email, context_summary: String(current.context_summary || ''), tags: String(current.tags || ''), source_detail: [String(current.source_detail || ''), body.reason ? `${status} reason: ${body.reason}` : ''].filter(Boolean).join(' | ') };
+    const next = projectKnownFields({
+      ...current,
+      contact_id: contactId,
+      updated_at: now,
+      status,
+      updated_by: user.email,
+      context_summary: String(current.context_summary || ''),
+      tags: String(current.tags || '')
+    }, TAB_HEADERS.contacts);
     await appendRecord(env, 'contacts', next);
-    return json({ ok: true, contact: next, persistence: 'google_sheets_append_only' });
+    return json({ ok: true, contact: next, lifecycle_reason: String(body.reason || ''), persistence: 'google_sheets_append_only' });
   } catch (error) {
     return sheetsUnavailable(error);
   }

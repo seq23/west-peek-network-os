@@ -28,7 +28,7 @@ Network OS validates the request, maps it to an `intake_queue` row, and returns 
 10. Network OS validates payload source, capture type, consent, founder identity, and Pitch Story Card fields.
 11. Network OS overwrites sensitive routing/status fields server-side.
 12. Network OS appends a single `intake_queue` row.
-13. Network OS returns `{ ok: true, review_status: "pending_network_review", database_write_status: "stored", profile_created: false, profile_created: false, contact_created: false, human_review_required: true, execution_allowed: false }` only after persistence succeeds.
+13. Network OS returns `{ ok: true, intake_id: "...", profile_id: "", review_status: "pending_network_review", database_write_status: "queued_for_network_review", profile_created: false, contact_created: false, human_review_required: true, execution_allowed: false }` only after the Intake Queue append and readback succeed.
 14. A human reviewer decides later whether to convert, attach, dismiss, or request more info.
 
 ## Hostile review verdict
@@ -55,7 +55,7 @@ This is the efficient implementation. The Network OS should remain the system of
 - Stale replay request accepted.
 - `execution_allowed: true` from client preserved.
 - `human_review_required: false` from client preserved.
-- Intake created as anything other than `pending_human_review`.
+- Intake created as anything other than `pending_network_review`.
 - Contact created automatically.
 - Success returned without persistence.
 - Raw shared secret logged or exposed.
@@ -93,7 +93,7 @@ No additional Network OS product surface is needed now. Keep the receiver boring
 
 Pitch Lab now sends two signed payloads:
 
-1. `founder_profile_lead` at the profile gate. This auto-writes a Network OS profile/intake event and contains no pitch answers.
-2. `founder_story_packet` after explicit share consent. This appends/enriches Network OS with the packet for network review and relationship routing.
+1. `founder_profile_lead` at the profile gate. This writes a Network OS Intake Queue record only and contains no pitch answers.
+2. `founder_story_packet` after explicit share consent. This appends a packet record to the Intake Queue for network review and relationship routing; it does not create or update a contact.
 
 Deprecated Pitch Lab payloads using `capture_type: pitch_practice`, `trigger_intent: deal_flow`, or `pitch_story_card` are rejected unless a future documented compatibility mode is added. No email notification is required in this build; Network OS is the source of truth.

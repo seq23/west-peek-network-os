@@ -53,7 +53,7 @@ export function validatePitchLabPacketPayload(payload: Record<string, unknown>) 
   return { ok: Object.keys(errors).length === 0, errors };
 }
 
-export function buildPitchLabProfileLeadIntake(payload: Record<string, unknown>, profile: { profile_id?: string; profile_created?: boolean; database_write_status?: string } = {}) {
+export function buildPitchLabProfileLeadIntake(payload: Record<string, unknown>) {
   const now = new Date().toISOString();
   const founder = objectAt(payload, 'founder');
   return {
@@ -68,20 +68,21 @@ export function buildPitchLabProfileLeadIntake(payload: Record<string, unknown>,
     source_trigger: 'pitch_lab_profile_gate',
     trigger_intent: 'relationship_routing',
     person_type: 'founder',
-    deal_flow_prospect: 'unknown',
+    deal_flow_prospect: 'yes',
     deal_context: 'Pitch Lab founder profile lead only; pitch answers remain private until packet consent.',
     raw_text: [`Pitch Lab profile lead`, `Founder: ${text(founder.name)}`, `Email: ${text(founder.email).toLowerCase()}`, `Company: ${text(founder.company_name)}`, `Website: ${text(founder.website)}`].join('\n'),
     email_subject: '', email_from: text(founder.email).toLowerCase(), email_to: '', email_date: '',
     parsed_name: text(founder.name), parsed_email: text(founder.email).toLowerCase(), parsed_phone: '', parsed_company: text(founder.company_name), parsed_title: '', parsed_website: text(founder.website),
-    parsed_notes: JSON.stringify({ pitch_lab_stage: 'profile_gate', ai_persona: text(payload.ai_persona || 'AI Scooter'), network_intake: true, profile_id: profile.profile_id || '', profile_created: profile.profile_created === true, database_write_status: profile.database_write_status || 'stored', consent: objectAt(payload, 'consent'), disclaimers_acknowledged: objectAt(payload, 'disclaimers_acknowledged') }),
+    parsed_notes: JSON.stringify({ pitch_lab_stage: 'profile_gate', ai_persona: text(payload.ai_persona || 'AI Scooter'), network_intake: true, profile_created: false, database_write_status: 'queued_for_network_review', consent: objectAt(payload, 'consent'), disclaimers_acknowledged: objectAt(payload, 'disclaimers_acknowledged') }),
     parsed_owner: 'Unassigned', parsed_touch: 'undecided', parsed_priority: 'Normal', parsed_due: '', parsed_needs_touch: 'false',
     extracted_text: '', transcript_text: '', missing_fields: '', ai_summary: `Pitch Lab profile lead: ${text(founder.company_name)}`, ai_confidence: 'medium',
-    internal_data_trace: JSON.stringify([{ stage: 'profile_capture', status: 'passed', detail: 'founder self-submitted minimal profile through Pitch Lab profile gate' }, { stage: 'database_write', status: 'passed', detail: profile.database_write_status || 'stored' }, { stage: 'privacy_boundary', status: 'passed', detail: 'no pitch answers included in profile lead' }]),
-    human_review_required: 'false', execution_allowed: 'false', review_status: 'lead_captured', reviewed_by: '', reviewed_at: '', converted_contact_id: '', attached_contact_id: profile.profile_id || '', dismiss_reason: '', event_id: '', event_name: '', event_slug: ''
+    internal_data_trace: JSON.stringify([{ stage: 'profile_capture', status: 'passed', detail: 'founder self-submitted minimal profile through Pitch Lab profile gate' }, { stage: 'queue_write', status: 'passed', detail: 'stored in Intake Queue only; no contact created' }, { stage: 'privacy_boundary', status: 'passed', detail: 'no pitch answers included in profile lead' }]),
+    human_review_required: 'true', execution_allowed: 'false', review_status: 'pending_network_review', reviewed_by: '', reviewed_at: '', converted_contact_id: '', attached_contact_id: '', dismiss_reason: '', event_id: '', event_name: '', event_slug: '',
+    profile_id: '', database_write_status: 'queued_for_network_review', profile_capture_intake_id: '', ai_persona: text(payload.ai_persona || 'AI Scooter'), network_intake: 'true', follow_up_guaranteed: 'false', investment_decision: 'not_made'
   };
 }
 
-export function buildPitchLabPacketIntake(payload: Record<string, unknown>, profile: { profile_id?: string; profile_created?: boolean; database_write_status?: string } = {}) {
+export function buildPitchLabPacketIntake(payload: Record<string, unknown>) {
   const now = new Date().toISOString();
   const founder = objectAt(payload, 'founder');
   const packet = objectAt(payload, 'packet');
@@ -112,16 +113,17 @@ export function buildPitchLabPacketIntake(payload: Record<string, unknown>, prof
     source_trigger: 'pitch_lab_founder_story_packet_shared',
     trigger_intent: 'relationship_routing',
     person_type: 'founder',
-    deal_flow_prospect: 'unknown',
+    deal_flow_prospect: 'yes',
     deal_context: text(packet.company_summary),
     raw_text: rawText,
     email_subject: '', email_from: text(founder.email).toLowerCase(), email_to: '', email_date: '',
     parsed_name: text(founder.name), parsed_email: text(founder.email).toLowerCase(), parsed_phone: '', parsed_company: text(founder.company_name), parsed_title: '', parsed_website: text(founder.website),
-    parsed_notes: JSON.stringify({ pitch_lab_stage: 'founder_story_packet_submitted', profile_capture_intake_id: profileLeadId, linked_profile_id: profile.profile_id || '', ai_persona: text(payload.ai_persona || 'AI Scooter'), network_intake: true, append_to_existing_profile: payload.append_to_existing_profile === true, packet, consent: objectAt(payload, 'consent'), disclaimers_acknowledged: objectAt(payload, 'disclaimers_acknowledged') }),
+    parsed_notes: JSON.stringify({ pitch_lab_stage: 'founder_story_packet_submitted', profile_capture_intake_id: profileLeadId, linked_profile_id: '', ai_persona: text(payload.ai_persona || 'AI Scooter'), network_intake: true, append_to_existing_profile: false, database_write_status: 'queued_for_network_review', packet, consent: objectAt(payload, 'consent'), disclaimers_acknowledged: objectAt(payload, 'disclaimers_acknowledged') }),
     parsed_owner: 'Unassigned', parsed_touch: 'undecided', parsed_priority: 'Normal', parsed_due: '', parsed_needs_touch: 'false',
     extracted_text: '', transcript_text: '', missing_fields: '', ai_summary: text(packet.one_liner), ai_confidence: 'medium',
-    internal_data_trace: JSON.stringify([{ stage: 'packet_consent', status: 'passed', detail: 'founder explicitly shared Founder Story Packet for network review and relationship routing' }, { stage: 'database_write', status: 'passed', detail: profile.database_write_status || 'stored' }, { stage: 'execution_guardrail', status: 'passed', detail: 'database intake only; no automatic outreach, funding review, intro, or follow-up' }]),
-    human_review_required: 'true', execution_allowed: 'false', review_status: 'pending_network_review', reviewed_by: '', reviewed_at: '', converted_contact_id: '', attached_contact_id: profile.profile_id || '', dismiss_reason: '', event_id: '', event_name: '', event_slug: ''
+    internal_data_trace: JSON.stringify([{ stage: 'packet_consent', status: 'passed', detail: 'founder explicitly shared Founder Story Packet for network review and relationship routing' }, { stage: 'queue_write', status: 'passed', detail: 'stored in Intake Queue only; no contact created' }, { stage: 'execution_guardrail', status: 'passed', detail: 'database intake only; no automatic outreach, funding review, intro, or follow-up' }]),
+    human_review_required: 'true', execution_allowed: 'false', review_status: 'pending_network_review', reviewed_by: '', reviewed_at: '', converted_contact_id: '', attached_contact_id: '', dismiss_reason: '', event_id: '', event_name: '', event_slug: '',
+    profile_id: '', database_write_status: 'queued_for_network_review', profile_capture_intake_id: profileLeadId, ai_persona: text(payload.ai_persona || 'AI Scooter'), network_intake: 'true', follow_up_guaranteed: 'false', investment_decision: 'not_made'
   };
 }
 

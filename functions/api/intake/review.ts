@@ -1,23 +1,41 @@
 import { requireAuthenticatedUser, type AuthEnv } from '../../_shared/auth';
 import { json, readJson } from '../../_shared/json';
 import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv } from '../../_shared/sheets';
+import { normalizeIntakeTouch, shouldCreateTouchFromIntake } from '../../_shared/intakeConversion';
 
 type Env = RuntimeEnv & AuthEnv;
 type Context = { request: Request; env: Env };
-type Body = { intake_id?: string; action?: 'convert' | 'attach' | 'dismiss'; attached_contact_id?: string; dismiss_reason?: string };
+type Body = {
+  intake_id?: string;
+  action?: 'convert' | 'attach' | 'dismiss';
+  attached_contact_id?: string;
+  dismiss_reason?: string;
+  deal_flow_prospect?: 'yes' | 'no' | 'unknown';
+  relationship_owner?: 'Sequoia' | 'Scooter' | 'Unassigned';
+};
 
 export async function onRequestPost({ request, env }: Context) {
   try {
     const user = await requireAuthenticatedUser(request, env);
     const body = await readJson<Body>(request);
     if (!body.intake_id || !body.action) return json({ ok: false, error: 'intake_id and action are required.' }, { status: 400 });
+    if (!['convert', 'attach', 'dismiss'].includes(body.action)) return json({ ok: false, error: 'action must be convert, attach, or dismiss.' }, { status: 400 });
+    if (body.deal_flow_prospect && !['yes', 'no', 'unknown'].includes(body.deal_flow_prospect)) return json({ ok: false, error: 'deal_flow_prospect must be yes, no, or unknown.' }, { status: 400 });
+    if (body.relationship_owner && !['Sequoia', 'Scooter', 'Unassigned'].includes(body.relationship_owner)) return json({ ok: false, error: 'relationship_owner must be Sequoia, Scooter, or Unassigned.' }, { status: 400 });
     const rows = await readTab(env, 'intake_queue');
     const intake = latestById(rows, 'intake_id').find((row) => String(row.intake_id) === body.intake_id);
     if (!intake) return json({ ok: false, error: 'Intake item not found in Google Sheets.' }, { status: 404 });
     const now = new Date().toISOString();
     let contact: Record<string, unknown> | undefined;
-    const decisionRow: Record<string, unknown> = {
+    const selectedDealFlowProspect = normalizeDealFlowProspect(body.deal_flow_prospect) || normalizeDealFlowProspect(intake.deal_flow_prospect) || 'unknown';
+    const selectedOwner = body.relationship_owner ? normalizeOwner(body.relationship_owner) : normalizeOwner(intake.parsed_owner || intake.captured_by);
+    const reviewedIntake: Record<string, unknown> = {
       ...intake,
+      deal_flow_prospect: selectedDealFlowProspect,
+      parsed_owner: selectedOwner
+    };
+    const decisionRow: Record<string, unknown> = {
+      ...reviewedIntake,
       updated_at: now,
       reviewed_by: user.email,
       reviewed_at: now,
@@ -27,17 +45,22 @@ export async function onRequestPost({ request, env }: Context) {
     };
 
     if (body.action === 'convert') {
-      contact = buildContactFromIntake(intake, user.email, now);
+      contact = buildContactFromIntake(reviewedIntake, user.email, now);
       const contacts = await readTab(env, 'contacts');
       const duplicate = contacts.find((row) => String(row.email || '').trim().toLowerCase() && String(row.email || '').trim().toLowerCase() === String(contact?.email || '').trim().toLowerCase());
       if (duplicate) return json({ ok: false, error: 'This person may already be in the West Peek Network.', duplicate }, { status: 409 });
       await appendRecord(env, 'contacts', contact);
       decisionRow.converted_contact_id = String(contact.contact_id);
-      const touch = buildTouchFromIntake(intake, contact, user.email, now);
+      const touch = buildTouchFromIntake(reviewedIntake, contact, user.email, now);
       if (touch) await appendRecord(env, 'relationship_touches', touch);
     }
 
-    if (body.action === 'attach' && !body.attached_contact_id) return json({ ok: false, error: 'attached_contact_id is required for attach.' }, { status: 400 });
+    if (body.action === 'attach') {
+      const attachedContactId = String(body.attached_contact_id || '').trim();
+      if (!attachedContactId) return json({ ok: false, error: 'attached_contact_id is required for attach.' }, { status: 400 });
+      const contacts = latestById(await readTab(env, 'contacts'), 'contact_id');
+      if (!contacts.some((row) => String(row.contact_id || '') === attachedContactId)) return json({ ok: false, error: 'Attached contact was not found in the West Peek Network.' }, { status: 404 });
+    }
 
     await appendRecord(env, 'intake_queue', decisionRow);
     return json({ ok: true, action: body.action, intake: decisionRow, contact, persistence: 'google_sheets', human_review_required: true, execution_allowed: false });
@@ -68,8 +91,8 @@ function buildContactFromIntake(intake: Record<string, unknown>, actor: string, 
     context_summary: buildContactContext(intake, raw),
     dealflow_relevance: normalizeDealFlowProspect(intake.deal_flow_prospect) === 'yes' ? String(intake.deal_context || intake.ai_summary || 'Prospective deal flow').trim() : '',
     founder_relevance: normalizePersonType(intake.person_type) === 'founder' ? String(intake.deal_context || intake.ai_summary || 'Founder relationship').trim() : '',
-    touch_needed: shouldCreateTouch(intake) ? 'true' : 'false',
-    touch_status: shouldCreateTouch(intake) ? 'needed' : '',
+    touch_needed: shouldCreateTouchFromIntake(intake) ? 'true' : 'false',
+    touch_status: shouldCreateTouchFromIntake(intake) ? 'needed' : '',
     created_by: actor,
     updated_by: actor
   };
@@ -77,8 +100,8 @@ function buildContactFromIntake(intake: Record<string, unknown>, actor: string, 
 
 
 function buildTouchFromIntake(intake: Record<string, unknown>, contact: Record<string, unknown>, actor: string, now: string) {
-  if (!shouldCreateTouch(intake)) return undefined;
-  const method = normalizeTouch(intake.parsed_touch || intake.touch || intake.method);
+  if (!shouldCreateTouchFromIntake(intake)) return undefined;
+  const method = normalizeIntakeTouch(intake.parsed_touch || intake.touch || intake.method);
   const recipientName = String(contact.full_name || intake.parsed_name || '').trim();
   const reason = String(intake.parsed_notes || intake.ai_summary || intake.raw_text || 'Relationship follow-up needed.').trim();
   return {
@@ -108,28 +131,6 @@ function buildTouchFromIntake(intake: Record<string, unknown>, contact: Record<s
     created_by: actor,
     updated_by: actor
   };
-}
-
-function shouldCreateTouch(intake: Record<string, unknown>) {
-  const explicit = String(intake.parsed_needs_touch || intake.needs_touch || '').toLowerCase();
-  if (['true', 'yes', 'y', '1', 'needed', 'required'].includes(explicit)) return true;
-  const method = normalizeTouch(intake.parsed_touch || intake.touch || intake.method);
-  if (method && method !== 'undecided') return true;
-  return /thank\s*-?\s*you|handwritten|follow\s*-?\s*up|circle back|send|intro|touch/i.test(String(intake.raw_text || intake.parsed_notes || ''));
-}
-
-function normalizeTouch(value: unknown) {
-  const text = String(value || '').toLowerCase().replace(/[_-]+/g, ' ');
-  if (text.includes('handwritten') || text.includes('hand written')) return 'handwritten_note';
-  if (text.includes('virtual') && text.includes('thank')) return 'virtual_thank_you_card';
-  if (text.includes('thank') && text.includes('card')) return 'virtual_thank_you_card';
-  if (text.includes('gift')) return 'gift';
-  if (text.includes('intro')) return 'intro';
-  if (text.includes('call')) return 'call';
-  if (text.includes('meeting')) return 'meeting';
-  if (text.includes('event')) return 'event_invite';
-  if (text.includes('email') || text.includes('follow')) return 'email';
-  return 'undecided';
 }
 
 function normalizeOwner(value: unknown) {

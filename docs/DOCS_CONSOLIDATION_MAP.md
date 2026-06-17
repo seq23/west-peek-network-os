@@ -97,6 +97,7 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `HOSTILE_FIXLOOP_FINAL_2026-06-14.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
 | `HOSTILE_RELEASE_VERIFICATION_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
 | `HOSTILE_REVIEW_REPORT_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
+| `HOSTILE_REVIEW_LAST_PASS_2026-06-17.md` | ACTIVE | Hostile audit and remediation record for Gmail target resolution, archive projection, and Pitch Lab intake conversion boundaries. | None |
 | `LOCAL_PLAYWRIGHT_FAILURE_REMEDIATION_2026-06-13.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
 | `MAINTENANCE_SCALE_AND_PLATFORM_LIMITS.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |
 | `ORIGINAL_TRIGGER_SHEETS_PLAN_COMPLETION_AUDIT_2026-06-14.md` | ACTIVE | Current active operator, architecture, validation, audit, or lifecycle documentation. | None |

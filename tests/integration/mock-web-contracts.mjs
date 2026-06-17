@@ -30,7 +30,7 @@ mock('GET', '/api/sheets/snapshot?fresh=1', {
   cache_age_ms: 0,
   data: {
     contacts: [{ contact_id: 'contact_1', full_name: 'Founder One', status: 'active', tags: 'founder, portfolio' }],
-    intake_queue: [{ intake_id: 'intake_1', source: 'gmail', raw_text: 'Founder pitch', review_status: 'pending_human_review', human_review_required: 'TRUE', execution_allowed: 'FALSE' }],
+    intake_queue: [{ intake_id: 'intake_1', source: 'pitch_lab', raw_text: 'Founder pitch', review_status: 'pending_network_review', human_review_required: 'TRUE', execution_allowed: 'FALSE', source_trigger: 'pitch_lab_profile_gate', trigger_intent: 'relationship_routing', person_type: 'founder', deal_flow_prospect: 'yes', deal_context: 'Prospective founder', parsed_owner: 'Unassigned', parsed_email: 'founder@example.com' }],
     relationship_touches: [], approvals: [], notifications: [], events: [], event_attendees: []
   }
 });
@@ -41,6 +41,10 @@ assert.equal(snapshot.contacts[0].full_name, 'Founder One');
 assert.deepEqual(snapshot.contacts[0].tags, ['founder', 'portfolio']);
 assert.equal(snapshot.intake[0].human_review_required, true);
 assert.equal(snapshot.intake[0].execution_allowed, false);
+assert.equal(snapshot.intake[0].deal_flow_prospect, 'yes');
+assert.equal(snapshot.intake[0].person_type, 'founder');
+assert.equal(snapshot.intake[0].trigger_intent, 'relationship_routing');
+assert.equal(snapshot.intake[0].parsed_owner, 'Unassigned');
 
 mock('POST', '/api/contacts/create', ({ init }) => ({ ok: true, contact: JSON.parse(init.body) }));
 await client.createSheetContact({
@@ -59,6 +63,11 @@ mock('POST', '/api/contacts/status', { ok: true, contact: { contact_id: 'contact
 await client.updateSheetContactStatus('contact_1', 'archived', 'mocked lifecycle proof');
 const archiveCall = calls.find((entry) => entry.key === 'POST /api/contacts/status');
 assert.deepEqual(JSON.parse(archiveCall.init.body), { contact_id: 'contact_1', status: 'archived', reason: 'mocked lifecycle proof' });
+
+mock('POST', '/api/intake/review', { ok: true, action: 'convert', contact: { contact_id: 'contact_3' } });
+await client.reviewSheetIntake('intake_1', 'convert', { deal_flow_prospect: 'no', relationship_owner: 'Scooter' });
+const conversionCall = calls.find((entry) => entry.key === 'POST /api/intake/review');
+assert.deepEqual(JSON.parse(conversionCall.init.body), { intake_id: 'intake_1', action: 'convert', deal_flow_prospect: 'no', relationship_owner: 'Scooter' });
 
 mock('POST', '/api/events/status', { ok: true, event: { event_id: 'event_1', status: 'revoked' } });
 await client.updateSheetEventStatus('event_1', 'revoke');

@@ -4,6 +4,7 @@ import { appendRecord, readTab, sheetsUnavailable, type RuntimeEnv } from '../..
 import { decryptTokenPayload, encryptTokenPayload, type TokenEnv } from '../../_shared/tokens';
 import { classifyTrigger, containsTrigger, inferNeedsTouch, normalizeOwner, normalizePriority, normalizeTouch, parseFields } from '../../_shared/triggers';
 import { classifyIntelligentInbox, type InboxClassification } from '../../_shared/providers/intelligent-inbox';
+import { combineGmailTextParts, normalizeGmailText, resolveGmailTarget } from '../../_shared/gmailTarget';
 
 type Env = RuntimeEnv & AuthEnv & TokenEnv & { GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string };
 type Context = { request: Request; env: Env };
@@ -145,7 +146,9 @@ export async function onRequestPost({ request, env }: Context) {
       const message = await getMessage(accessToken, item.id);
       if (!message.ok) { failedMessages.push({ message_id: item.id, status: message.status }); continue; }
       inspected.push(item.id);
-      const rawText = extractText(message.payload);
+      const extracted = extractText(message.payload);
+      const rawText = extracted.fullText;
+      const visibleText = extracted.visibleText;
       const headers = headerMap(message.payload);
       const searchableText = [headers.subject, headers.from, headers.to, rawText, message.payload.snippet].filter(Boolean).join('\n');
       const rfcMessageId = clean(headers['message-id']).toLowerCase();
@@ -174,7 +177,7 @@ export async function onRequestPost({ request, env }: Context) {
         ledgerKeys.add(ingestionKey);
         continue;
       }
-      const intake = buildGmailIntake({ rawText: searchableText, headers, message: message.payload, userEmail: user.email, mailboxEmail: tokenOwner, mailboxPolicy, ingestionKey, rfcMessageId, runId, runtimeProofRun, inboxClassification });
+      const intake = buildGmailIntake({ rawText: searchableText, visibleText: [headers.subject, visibleText].filter(Boolean).join('\n'), headers, message: message.payload, userEmail: user.email, mailboxEmail: tokenOwner, mailboxPolicy, ingestionKey, rfcMessageId, runId, runtimeProofRun, inboxClassification });
       if (!body.dry_run) {
         const writeResult = await appendRecord(env, 'intake_queue', intake);
         await appendLedgerRecord(env, tokenOwner, item.id, message.payload.internalDate, 'imported');
@@ -430,15 +433,25 @@ async function storeRefreshedToken(env: Env, userEmail: string, token: TokenPayl
   });
 }
 
-function buildGmailIntake(input: { rawText: string; headers: Record<string, string>; message: GmailMessage; userEmail: string; mailboxEmail: string; mailboxPolicy: MailboxPolicy; ingestionKey: string; rfcMessageId: string; runId: string; runtimeProofRun: boolean; inboxClassification?: InboxClassification }) {
-  const fields = parseFields(input.rawText);
+function buildGmailIntake(input: { rawText: string; visibleText: string; headers: Record<string, string>; message: GmailMessage; userEmail: string; mailboxEmail: string; mailboxPolicy: MailboxPolicy; ingestionKey: string; rfcMessageId: string; runId: string; runtimeProofRun: boolean; inboxClassification?: InboxClassification }) {
+  const operatorText = input.visibleText || input.rawText;
+  const fields = parseFields(operatorText);
   const smart = input.inboxClassification;
   const classification = smart ? { source_trigger: `shared_inbox_${smart.category}`, trigger_intent: smart.triggerIntent, person_type: smart.personType, deal_flow_prospect: smart.dealFlowProspect, deal_context: `Intelligent shared-inbox classification: ${smart.category}; score ${smart.score}; ${smart.reasons.join(', ')}` } : classifyTrigger(input.rawText);
   const now = new Date().toISOString();
-  const envelope = inferFromEnvelope(input.headers, input.userEmail, input.mailboxEmail);
-  const parsedName = fields.name || envelope.name || '';
-  const parsedEmail = fields.email || envelope.email || '';
-  const parsedNotes = fields.context || fields.notes || stripTrigger(input.rawText) || 'Minimal Gmail trigger capture. Review email thread for context.';
+  const target = resolveGmailTarget({
+    headers: input.headers,
+    bodyText: input.rawText,
+    userEmail: input.userEmail,
+    mailboxEmail: input.mailboxEmail,
+    structuredName: fields.name,
+    structuredEmail: fields.email,
+    structuredCompany: fields.company
+  });
+  const parsedName = target.name || fields.name || '';
+  const parsedEmail = target.email || '';
+  const parsedCompany = fields.company || target.company || inferCompanyFromText(input.rawText, parsedEmail) || '';
+  const parsedNotes = fields.context || fields.notes || boundedContext(stripTrigger(operatorText)) || boundedContext(stripTrigger(input.rawText)) || 'Minimal Gmail trigger capture. Review email thread for context.';
   const tier4ProofRun = /^wpno-tier4-[A-Za-z0-9._:-]+$/.test(input.runId);
   const registeredProofRun = tier4ProofRun || input.runtimeProofRun;
   const proofTestPrefix = input.runtimeProofRun ? 'live-gmail-forward-only-runtime' : 'live-gmail-trigger-ingestion';
@@ -462,7 +475,7 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
     person_type: classification.person_type,
     deal_flow_prospect: classification.deal_flow_prospect,
     deal_context: classification.deal_context,
-    raw_text: cleanEmailText(input.rawText).slice(0, 6000),
+    raw_text: normalizeGmailText(input.rawText).slice(0, 6000),
     email_subject: input.headers.subject || '',
     email_from: input.headers.from || '',
     email_to: input.headers.to || '',
@@ -470,23 +483,24 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
     parsed_name: parsedName,
     parsed_email: parsedEmail,
     parsed_phone: fields.phone || '',
-    parsed_company: fields.company || inferCompanyFromText(input.rawText) || '',
+    parsed_company: parsedCompany,
     parsed_title: fields.title || '',
     parsed_website: fields.website || '',
     parsed_notes: parsedNotes,
-    parsed_owner: normalizeOwner(fields.owner) || inferOwner(input.rawText, input.userEmail),
+    parsed_owner: normalizeOwner(fields.owner) || inferOwner(operatorText, input.userEmail),
     parsed_touch: normalizeTouch(fields.touch) || 'undecided',
     parsed_priority: normalizePriority(fields.priority) || 'Normal',
     parsed_due: fields.due || '',
-    parsed_needs_touch: inferNeedsTouch(input.rawText, fields.needs_touch, normalizeTouch(fields.touch)) ? 'true' : 'false',
+    parsed_needs_touch: inferNeedsTouch(operatorText, fields.needs_touch, normalizeTouch(fields.touch)) ? 'true' : 'false',
     extracted_text: '',
     transcript_text: '',
-    missing_fields: missingFields(parsedName, parsedEmail, fields.company).join(', '),
+    missing_fields: missingFields(parsedName, parsedEmail, parsedCompany).join(', '),
     ai_summary: classification.trigger_intent === 'deal_flow' ? `Founder / prospective deal flow. ${parsedNotes}` : parsedNotes,
     ai_confidence: smart ? (smart.score >= 6 ? 'high' : 'medium') : (parsedName || parsedEmail ? 'medium' : 'low'),
     internal_data_trace: JSON.stringify([
       { stage: 'gmail_search', status: 'passed', detail: `imported by Gmail sync ${input.runId}` },
       { stage: 'trigger_detected', status: 'passed', detail: classification.source_trigger || 'accepted trigger' },
+      { stage: 'target_resolution', status: parsedEmail ? 'passed' : 'needs_review', detail: parsedEmail ? `external target resolved from ${target.source}` : 'no external founder/contact email resolved after excluding West Peek internal addresses' },
       { stage: 'execution_guardrail', status: 'passed', detail: 'Gmail sync creates review queue row only; no email, intro, or contact is executed automatically' }
     ]),
     human_review_required: 'true',
@@ -503,29 +517,12 @@ function buildGmailIntake(input: { rawText: string; headers: Record<string, stri
   };
 }
 
-function cleanEmailText(value: string) {
-  return value
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/(?:On .+? wrote:|From:.+?Sent:.+?To:.+?Subject:)[\s\S]*$/i, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 function extractText(message: GmailMessage) {
   const plain: string[] = [];
   const html: string[] = [];
   collectParts(message.payload?.parts || [], plain, html);
   if (message.payload?.body?.data) plain.push(decodeBody(message.payload.body.data));
-  const preferred = plain.find((value) => cleanEmailText(value).length > 0) || html.find((value) => cleanEmailText(value).length > 0) || message.snippet || '';
-  return cleanEmailText(preferred);
+  return combineGmailTextParts({ plain, html, snippet: message.snippet || '' });
 }
 function collectParts(parts: GmailPart[], plain: string[], html: string[]) {
   for (const part of parts) {
@@ -544,25 +541,19 @@ function headerMap(message: GmailMessage) {
   for (const header of message.payload?.headers || []) out[header.name.toLowerCase()] = header.value;
   return out;
 }
-function inferFromEnvelope(headers: Record<string, string>, userEmail: string, mailboxEmail: string) {
-  const excluded = new Set([userEmail, mailboxEmail].map((value) => value.toLowerCase()));
-  const candidates = [headers.from, headers['reply-to'], headers.to].filter(Boolean).map(parseMailbox).filter(Boolean) as Array<{ name: string; email: string }>;
-  return candidates.find((candidate) => !excluded.has(candidate.email.toLowerCase())) || candidates[0] || { name: '', email: '' };
-}
-
 function deterministicIntakeId(mailboxEmail: string, gmailMessageId: string) {
   const stable = `${mailboxEmail}:${gmailMessageId}`.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(-96);
   return `intake_gmail_${stable}`;
 }
-function parseMailbox(value: string) {
-  const angle = value.match(/([^<]*)<([^>]+)>/);
-  if (angle) return { name: angle[1].trim().replace(/^"|"$/g, ''), email: angle[2].trim() };
-  const email = value.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] || '';
-  return email ? { name: value.replace(email, '').replace(/[<>"']/g, '').trim(), email } : undefined;
-}
 function stripTrigger(text: string) { return text.replace(/#wpnetwork|#addtowestpeek|#westpeeknetwork|#wpdealflow|#dealflow/gi, '').trim(); }
 function inferOwner(text: string, email: string) { const lower = `${text} ${email}`.toLowerCase(); if (lower.includes('scooter')) return 'Scooter'; if (lower.includes('sequoia')) return 'Sequoia'; return 'Unassigned'; }
-function inferCompanyFromText(text: string) { const emailDomain = text.match(/[A-Z0-9._%+-]+@([A-Z0-9.-]+\.[A-Z]{2,})/i)?.[1] || ''; return emailDomain && !/gmail|yahoo|outlook|icloud|hotmail/i.test(emailDomain) ? emailDomain.split('.')[0].replace(/\b\w/g, (c) => c.toUpperCase()) : ''; }
+function inferCompanyFromText(text: string, targetEmail = '') {
+  const explicit = text.match(/^\s*>*\s*(?:company|company name|startup|organization)\s*:\s*(.+?)\s*$/im)?.[1];
+  if (explicit) return explicit.trim();
+  const emailDomain = targetEmail.split('@')[1] || '';
+  return emailDomain && !/gmail|yahoo|outlook|icloud|hotmail|aol|proton/i.test(emailDomain) ? emailDomain.split('.')[0].replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
+}
+function boundedContext(value: string) { return normalizeGmailText(value).slice(0, 3000); }
 function missingFields(name: string, email: string, company: string | undefined) { const missing: string[] = []; if (!name) missing.push('name'); if (!email) missing.push('email'); if (!company) missing.push('company'); return missing; }
 function clean(value: unknown) { return String(value || '').trim(); }
 function timestamp(value: unknown) { const parsed = Date.parse(String(value || '')); return Number.isFinite(parsed) ? parsed : 0; }

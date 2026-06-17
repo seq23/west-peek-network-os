@@ -41,17 +41,18 @@ for (const fragment of [
   "capture_type: 'founder_story_packet'",
   "trigger_intent: 'relationship_routing'",
   "person_type: 'founder'",
+  "deal_flow_prospect: 'yes'",
   "execution_allowed: 'false'",
   "review_status: 'pending_network_review'",
-  "review_status: 'lead_captured'"
+  "database_write_status: 'queued_for_network_review'"
 ]) {
   assert.ok(helper.includes(fragment), `Pitch Lab intake mapping missing ${fragment}`);
 }
 
 assert.ok(endpoint.includes("appendRecord(env, 'intake_queue', intake)"), 'Pitch Lab packet endpoint must append to intake_queue.');
 assert.ok(profileEndpoint.includes("appendRecord(env, 'intake_queue', intake)"), 'Pitch Lab profile endpoint must append to intake_queue.');
-assert.ok(endpoint.includes('ensureSelfSubmittedNetworkProfile'), 'Pitch Lab packet endpoint must auto-write/link Network OS profile.');
-assert.ok(profileEndpoint.includes('ensureSelfSubmittedNetworkProfile'), 'Pitch Lab profile endpoint must auto-write/link Network OS profile.');
+assert.ok(!endpoint.includes('ensureSelfSubmittedNetworkProfile'), 'Pitch Lab packet endpoint must not auto-create a Network contact.');
+assert.ok(!profileEndpoint.includes('ensureSelfSubmittedNetworkProfile'), 'Pitch Lab profile endpoint must not auto-create a Network contact.');
 assert.ok(endpoint.includes('contact_created: false'), 'Pitch Lab endpoint must avoid auto-outreach/contact-claim semantics.');
 assert.ok(!helper.includes("capture_type: 'pitch_practice'"), 'Pitch Lab helper must not map new payloads to old pitch_practice.');
 assert.ok(!helper.includes("trigger_intent: 'deal_flow'"), 'Pitch Lab helper must not map new payloads to old deal_flow.');
@@ -62,10 +63,10 @@ for (const fragment of [
   'founder_profile_lead',
   'founder_story_packet',
   'relationship_routing',
-  'No approval gate',
+  'Intake Queue',
   'No email notification'
 ]) {
   assert.ok(contract.includes(fragment), `Pitch Lab contract missing ${fragment}`);
 }
 
-console.log('PITCH LAB HANDOFF CHECK OK — signed profile/packet receivers, replay guard, Network OS database write, no email, and no stale deal_flow framing are present.');
+console.log('PITCH LAB HANDOFF CHECK OK — signed profile/packet receivers, replay guard, Intake Queue-only persistence, no automatic contact creation, and no email are present.');

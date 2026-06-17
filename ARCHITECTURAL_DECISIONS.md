@@ -293,3 +293,37 @@ The admitted recovery path is dry-run-first `all_tier4_markers` cleanup. It scan
 * **Risks Accepted:** A single provider outage blocks both alias and lifecycle proof at once.
 * **Validation Impact:** Generator integration test, TypeScript collection, validation registry parity, local prepush, and deployed provider execution are required.
 * **Future Reversal Conditions:** Split only if the combined proof becomes nondeterministic or platform limits require independent runs.
+
+## ADR-2026-06-16-INTAKE-BOUNDARY-AND-GMAIL-TARGET-RESOLUTION
+
+Decision ID: ADR-2026-06-16-INTAKE-BOUNDARY-AND-GMAIL-TARGET-RESOLUTION  
+Date: 2026-06-16  
+Status: Accepted
+
+Context: Pitch Lab founder submissions were creating/updating `contacts` before operator review, causing them to appear directly in the West Peek Network. Gmail trigger ingestion also stripped quoted/forwarded content before identity resolution and could select Sequoia, Scooter, or `info@westpeek.ventures` as the target instead of the external founder. Contact archive writes additionally sent the non-canonical `source_detail` key and failed closed against the Sheets schema.
+
+Decision: Pitch Lab profile and packet payloads persist to `intake_queue` only, default founder submissions to `deal_flow_prospect = yes`, and remain `pending_network_review` until an authenticated operator selects assignment/deal-flow status and explicitly converts or attaches the record. Gmail target resolution preserves quoted/forwarded content, excludes all `@westpeek.ventures` addresses, and prioritizes the original external sender. Contact archive/restore writes only canonical `contacts` columns.
+
+Alternatives Considered: Add `source_detail` to the contacts schema; keep auto-created Pitch Lab contacts and hide them in the UI; rely on current Gmail envelope headers; use an external AI parser.
+
+Reasoning: The Intake Queue is the required human decision boundary. Canonical schema-only writes eliminate archive failures without a migration. Deterministic external-participant resolution handles replies and forwards without a new provider, cost, or opaque classification layer.
+
+Tradeoffs: Existing Pitch Lab-created contacts are not silently deleted or migrated. Ambiguous multi-party email threads may still require human review. Assignment and deal-flow status are operator decisions at conversion time.
+
+Risks Accepted: Email signatures and complex mailing-list threads can contain multiple external addresses; the resolver uses deterministic priority and records low-confidence cases for review rather than executing outreach.
+
+Validation Impact: Typecheck, production build, mocked request serialization, Sheets schema contract, hostile reply/forward target tests, Pitch Lab queue-only contract tests, UI/test parity, and local real-browser validation through the updater.
+
+Future Reversal Conditions: Introduce a richer participant graph only if real Gmail evidence shows material ambiguity that deterministic original-sender resolution cannot handle.
+
+### Decision ID: ADR-2026-06-17-HOSTILE-INTAKE-GMAIL-HARDENING
+* **Date:** 2026-06-17
+* **Status:** Accepted
+* **Context:** Hostile review of the June 16 intake/Gmail pass found that plain-text angle-bracket emails were removed as HTML, multi-part forwards could discard the original message, explicit Pitch Lab no-touch state could be overridden by text inference, and archive rows were not explicitly projected before append.
+* **Decision:** Separate plain-text and HTML normalization, combine all relevant Gmail MIME segments, parse operator wrapper fields separately from quoted content, project archive rows to canonical Contacts headers, make explicit no-touch authoritative, validate review inputs at runtime, verify attach targets, and make the hostile trigger/Sheets suite part of `validate:all`.
+* **Alternatives Considered:** Keep direct resolver-only tests; rely on TypeScript request types; accept live-row spreads; infer touches from all packet text; leave the hostile suite as an optional command.
+* **Reasoning:** Production paths must be tested through their real normalization and persistence boundaries. Explicit human-review state must beat heuristic inference.
+* **Tradeoffs:** Gmail raw context may contain duplicate normalized alternative parts, though target candidates are deduplicated. Attach now requires an additional Contacts read.
+* **Risks Accepted:** Highly unusual proprietary email encodings may still require human review; no automatic outreach occurs.
+* **Validation Impact:** `validate:trigger-sheet-proof` is mandatory inside `validate:all`; local browser and deployed provider proof remain required for COMPLETE.
+* **Future Reversal Conditions:** Replace deterministic MIME/participant parsing only after a stronger provider-native participant graph is proven against real reply and forward fixtures.

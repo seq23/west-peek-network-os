@@ -9,6 +9,15 @@ const cleanup = fs.readFileSync('functions/api/proof-fixtures/cleanup.ts','utf8'
 const triggerTs = fs.readFileSync('functions/_shared/triggers.ts','utf8');
 const triggerJs = ts.transpileModule(triggerTs,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const triggers = await import(`data:text/javascript;base64,${Buffer.from(triggerJs).toString('base64')}`);
+const targetTs = fs.readFileSync('functions/_shared/gmailTarget.ts','utf8');
+const targetJs = ts.transpileModule(targetTs,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const gmailTarget = await import(`data:text/javascript;base64,${Buffer.from(targetJs).toString('base64')}`);
+const projectionTs = fs.readFileSync('functions/_shared/recordProjection.ts','utf8');
+const projectionJs = ts.transpileModule(projectionTs,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const recordProjection = await import(`data:text/javascript;base64,${Buffer.from(projectionJs).toString('base64')}`);
+const conversionTs = fs.readFileSync('functions/_shared/intakeConversion.ts','utf8');
+const conversionJs = ts.transpileModule(conversionTs,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const intakeConversion = await import(`data:text/javascript;base64,${Buffer.from(conversionJs).toString('base64')}`);
 
 function validate(expected, actual) {
   const duplicates = actual.filter((v,i)=>v && actual.indexOf(v)!==i);
@@ -86,7 +95,7 @@ assert.match(sheets,/SHEETS_READBACK_STALE/,'writes must require readback');
 assert.match(sheets,/columnCount: headers\.length/,'reset must remove extra columns by resizing to canonical width');
 assert.doesNotMatch(gmail,/oauth_tokens', \{ ensureHeaders: false \}/,'OAuth reads may not bypass schema validation');
 assert.doesNotMatch(gmail,/intake_queue', \{ ensureHeaders: false \}/,'intake reads may not bypass schema validation');
-for (const token of ['proof_run_id: tier4ProofRun ? input.runId', 'proof_test_id: tier4ProofRun ?', "proof_fixture: tier4ProofRun ? 'true'", "proof_status: tier4ProofRun ? 'active'", 'proof_created_at: tier4ProofRun ? now']) {
+for (const token of ['proof_run_id: registeredProofRun ? input.runId', 'proof_test_id: registeredProofRun ?', "proof_fixture: registeredProofRun ? 'true'", "proof_status: registeredProofRun ? 'active'", 'proof_created_at: registeredProofRun ? now']) {
   assert.match(gmail, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')), `Gmail Tier 4 import must persist ${token.split(':')[0]}`);
 }
 
@@ -108,7 +117,7 @@ for (const file of failClosedRuntimeFiles) {
 }
 const oauthStatus = fs.readFileSync('functions/api/oauth/status.ts','utf8');
 assert.match(oauthStatus, /oauth_tokens:schema_validated_read/, 'OAuth status diagnostics must disclose schema-validated reads');
-for (const token of ['skipped_duplicate_count','nextPageToken','TRIGGER_ALIASES.map','imported_records','sync_diagnostics','readback_verified']) assert.match(gmail,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+for (const token of ['skipped_duplicate_count','nextPageToken',"TRIGGER_ALIASES.join(' ')",'imported_records','sync_diagnostics','readback_verified']) assert.match(gmail,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 for (const token of ['proof_fixture','proof_run_id','proof_test_id','CLEANUP_EXPECTED_IDS_MISMATCH','CLEANUP_UNRELATED_ROW_CHANGED']) assert.match(cleanup,new RegExp(token));
 assert.doesNotMatch(cleanup,/Tier Four Founder|tier4-network-|company_name|full_name.*includes/i,'cleanup may not use fuzzy business-field matching');
 
@@ -119,4 +128,77 @@ for (const [alias,intent] of cases) assert.equal(triggers.classifyTrigger(`Subje
 assert.equal(triggers.detectSourceTrigger('HTML <p>#wpnetwork</p>'),'#wpnetwork');
 assert.equal(triggers.detectSourceTrigger('Fwd: context\n----- Forwarded message -----\n#dealflow'),'#dealflow');
 assert.equal(triggers.detectSourceTrigger('#wpnetwork and #dealflow'),'#wpnetwork','multiple aliases must resolve deterministically to one record intent');
-console.log('hostile-trigger-sheet-regressions: PASS — behavioral schema, fail-closed runtime reads, append, failure, cleanup isolation, dedupe, pagination, HTML, forwarded content, and production contract checks passed.');
+
+const replied = gmailTarget.resolveGmailTarget({
+  headers: {
+    from: 'Sequoia Taylor <sequoia@westpeek.ventures>',
+    to: 'Gerzell Brooks <gbrooks1986@yahoo.com>',
+    subject: 'Re: Pitch Lab'
+  },
+  bodyText: '#wpdealflow\nThanks — adding this to our review queue.\n\nOn Jun 16, 2026, Gerzell Brooks <gbrooks1986@yahoo.com> wrote:\nCompany: Idk\nWe are building a founder platform.',
+  userEmail: 'sequoia@westpeek.ventures',
+  mailboxEmail: 'sequoia@westpeek.ventures'
+});
+assert.equal(replied.email, 'gbrooks1986@yahoo.com', 'reply must resolve the external founder, not Sequoia');
+assert.equal(replied.name, 'Gerzell Brooks');
+assert.equal(replied.company, 'Idk');
+
+const forwarded = gmailTarget.resolveGmailTarget({
+  headers: {
+    from: 'Sequoia Taylor <sequoia@westpeek.ventures>',
+    to: 'Scooter Taylor <scooter@westpeek.ventures>, West Peek <info@westpeek.ventures>',
+    subject: 'Fwd: Founder intro #wpdealflow'
+  },
+  bodyText: '#wpdealflow\n\n---------- Forwarded message ---------\nFrom: Maya Chen <maya@northstarrobotics.com>\nDate: Tue, Jun 16, 2026\nSubject: Northstar Robotics\nTo: Sequoia Taylor <sequoia@westpeek.ventures>\n\nFounder and CEO at Northstar Robotics. Raising a seed round.',
+  userEmail: 'sequoia@westpeek.ventures',
+  mailboxEmail: 'info@westpeek.ventures'
+});
+assert.equal(forwarded.email, 'maya@northstarrobotics.com', 'forward to an internal mailbox must resolve the quoted founder');
+assert.equal(forwarded.name, 'Maya Chen');
+assert.equal(forwarded.company, 'Northstar Robotics');
+assert.equal(gmailTarget.isWestPeekInternalEmail('info@westpeek.ventures'), true);
+assert.equal(gmailTarget.isWestPeekInternalEmail('maya@northstarrobotics.com'), false);
+
+const projectedContact = recordProjection.projectKnownFields({ contact_id: 'contact_1', status: 'archived', source_detail: 'legacy column', context_summary: 'keep me' }, ['contact_id', 'status', 'context_summary']);
+assert.deepEqual(projectedContact, { contact_id: 'contact_1', status: 'archived', context_summary: 'keep me' }, 'contact lifecycle projection must remove legacy or unknown Sheet keys before append');
+
+const multipart = gmailTarget.combineGmailTextParts({
+  plain: [
+    '#wpdealflow\nForwarding this founder for review.',
+    'From: Maya Chen <maya@northstarrobotics.com>\nCompany: Northstar Robotics\nFounder and CEO.'
+  ],
+  html: [],
+  snippet: ''
+});
+assert.match(multipart.fullText, /maya@northstarrobotics\.com/, 'multi-part forwards must preserve the nested/original founder message');
+assert.doesNotMatch(multipart.visibleText, /maya@northstarrobotics\.com/, 'operator-only parsing must not treat a nested forwarded body as the current wrapper');
+const multipartTarget = gmailTarget.resolveGmailTarget({ headers: { from: 'Sequoia Taylor <sequoia@westpeek.ventures>', to: 'info@westpeek.ventures' }, bodyText: multipart.fullText, userEmail: 'sequoia@westpeek.ventures', mailboxEmail: 'info@westpeek.ventures' });
+assert.equal(multipartTarget.email, 'maya@northstarrobotics.com');
+assert.equal(multipartTarget.company, 'Northstar Robotics');
+
+const htmlForward = gmailTarget.combineGmailTextParts({ plain: [], html: ['<div>#wpdealflow</div><div>---------- Forwarded message ---------</div><div>From: Ana Ruiz &lt;ana@orbitlabs.ai&gt;</div><div>Company: Orbit Labs</div>'] });
+assert.match(htmlForward.fullText, /^#wpdealflow/m);
+const htmlTarget = gmailTarget.resolveGmailTarget({ headers: { from: 'Scooter Taylor <scooter@westpeek.ventures>', to: 'sequoia@westpeek.ventures' }, bodyText: htmlForward.fullText, userEmail: 'scooter@westpeek.ventures', mailboxEmail: 'sequoia@westpeek.ventures' });
+assert.equal(htmlTarget.email, 'ana@orbitlabs.ai');
+assert.equal(htmlTarget.company, 'Orbit Labs');
+
+const explicitAngleTarget = gmailTarget.resolveGmailTarget({ headers: {}, bodyText: 'Email: Founder Name <founder@acme.com>', structuredEmail: 'Founder Name <founder@acme.com>', structuredName: 'Founder Name' });
+assert.equal(explicitAngleTarget.email, 'founder@acme.com', 'structured angle-bracket mailboxes must normalize to the actual address');
+assert.equal(explicitAngleTarget.name, 'Founder Name');
+
+assert.equal(intakeConversion.shouldCreateTouchFromIntake({ parsed_needs_touch: 'false', parsed_touch: 'undecided', raw_text: 'Help needed: introductions to customers' }), false, 'explicit false must block inferred auto-touch creation');
+assert.equal(intakeConversion.shouldCreateTouchFromIntake({ parsed_needs_touch: 'true', raw_text: '' }), true, 'explicit true must still create a pending touch');
+assert.equal(intakeConversion.shouldCreateTouchFromIntake({ parsed_touch: 'email', raw_text: '' }), true, 'an explicit touch method must create a pending touch');
+
+const contactStatus = fs.readFileSync('functions/api/contacts/status.ts','utf8');
+assert.match(contactStatus, /projectKnownFields/, 'contact lifecycle writes must project live rows to the canonical contacts schema');
+assert.match(contactStatus, /TAB_HEADERS\.contacts/, 'contact lifecycle projection must use the canonical contacts header set');
+assert.match(contactStatus, /lifecycle_reason/, 'contact lifecycle response may return the operator reason without persisting an unknown column');
+const intakeReview = fs.readFileSync('functions/api/intake/review.ts','utf8');
+assert.match(intakeReview, /action must be convert, attach, or dismiss/, 'intake review must reject unsupported runtime actions');
+assert.match(intakeReview, /deal_flow_prospect must be yes, no, or unknown/, 'intake review must validate deal-flow values at runtime');
+assert.match(intakeReview, /relationship_owner must be Sequoia, Scooter, or Unassigned/, 'intake review must validate owner values at runtime');
+assert.match(intakeReview, /Attached contact was not found in the West Peek Network/, 'attach must reject nonexistent contact ids');
+assert.match(intakeReview, /shouldCreateTouchFromIntake/, 'conversion must use the explicit-false-safe touch policy');
+
+console.log('hostile-trigger-sheet-regressions: PASS — behavioral schema, fail-closed runtime reads, strict archive projection, MIME-complete reply/forward founder resolution, internal-address exclusion, runtime review validation, dedupe, pagination, cleanup isolation, and production contract checks passed.');

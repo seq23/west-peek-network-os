@@ -367,3 +367,50 @@ select {
     min-width: 0;
   }
 }
+
+.contact-email {
+  margin-top: 5px;
+  color: var(--wp-muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.intake-decision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.intake-decision-grid label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--wp-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.intake-decision-grid select {
+  width: 100%;
+  min-height: 42px;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .intake-decision-grid { grid-template-columns: 1fr; }
+}
+
+.intake-decision-block {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--wp-line);
+}
+
+.intake-decision-note {
+  margin: 0 0 10px;
+  color: var(--wp-muted);
+  font-size: 13px;
+}

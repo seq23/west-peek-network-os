@@ -1,6 +1,5 @@
 import { json } from '../../_shared/json';
 import { appendRecord, sheetsUnavailable } from '../../_shared/sheets';
-import { ensureSelfSubmittedNetworkProfile } from '../../_shared/profileStore';
 import { buildPitchLabPacketIntake, requirePitchLabSignature, validatePitchLabPacketPayload } from '../../_shared/pitchLabIntake';
 
 export async function onRequestPost({ request, env }: { request: Request; env: Record<string, string> }) {
@@ -11,13 +10,10 @@ export async function onRequestPost({ request, env }: { request: Request; env: R
   try { payload = JSON.parse(bodyText) as Record<string, unknown>; } catch { return json({ ok: false, error_code: 'INVALID_JSON', message: 'Request body must be valid JSON.' }, { status: 400 }); }
   const validation = validatePitchLabPacketPayload(payload);
   if (!validation.ok) return json({ ok: false, error_code: 'VALIDATION_FAILED', errors: validation.errors }, { status: 400 });
-  const founder = payload.founder as Record<string, unknown>;
-  const packet = payload.packet as Record<string, unknown>;
   try {
-    const profile = await ensureSelfSubmittedNetworkProfile(env, { name: founder.name, email: founder.email, company: founder.company_name, website: founder.website, personType: 'founder', source: 'pitch_lab', captureType: 'founder_story_packet', contextSummary: String(packet.company_summary || 'Pitch Lab Founder Story Packet.') });
-    const intake = buildPitchLabPacketIntake(payload, profile);
+    const intake = buildPitchLabPacketIntake(payload);
     await appendRecord(env, 'intake_queue', intake);
-    return json({ ok: true, intake_id: intake.intake_id, profile_id: profile.profile_id, linked_profile_intake_id: String(payload.profile_capture_intake_id || ''), review_status: 'pending_network_review', database_write_status: profile.database_write_status, profile_created: profile.profile_created === true, contact_created: false, human_review_required: true, execution_allowed: false, follow_up_guaranteed: false });
+    return json({ ok: true, intake_id: intake.intake_id, profile_id: '', linked_profile_intake_id: String(payload.profile_capture_intake_id || ''), review_status: 'pending_network_review', database_write_status: 'queued_for_network_review', profile_created: false, contact_created: false, human_review_required: true, execution_allowed: false, follow_up_guaranteed: false });
   } catch (error) {
     return sheetsUnavailable(error);
   }

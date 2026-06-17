@@ -141,14 +141,14 @@ Event rows are wrappers over Intake Queue. Public form submissions also append a
 
 Pitch Lab now sends two signed payloads:
 
-1. `founder_profile_lead` at the profile gate. This auto-writes a Network OS profile/intake event and contains no pitch answers.
+1. `founder_profile_lead` at the profile gate. This writes an Intake Queue record only and contains no pitch answers.
 2. `founder_story_packet` after explicit share consent. This appends/enriches Network OS with the packet for network review and relationship routing.
 
 Deprecated Pitch Lab payloads using `capture_type: pitch_practice`, `trigger_intent: deal_flow`, or `pitch_story_card` are rejected unless a future documented compatibility mode is added. No email notification is required in this build; Network OS is the source of truth.
 
 ## Current Network Database Intake Rule — 2026-06-10
 
-Self-submitted user details auto-write to Network OS. Public event forms use `capture_type=event_registration`, upsert/link a profile by email, append an `intake_queue` event, and set `execution_allowed=false`. Pitch Lab profile leads use `founder_profile_lead`; Pitch Lab packets use `founder_story_packet`; both use `trigger_intent=relationship_routing`. Approval gates downstream action only; approval must not gate intake persistence.
+Public event forms use `capture_type=event_registration`, upsert/link a profile by email, append an `intake_queue` event, and set `execution_allowed=false`. Pitch Lab is stricter: profile leads use `founder_profile_lead`, packets use `founder_story_packet`, both use `trigger_intent=relationship_routing`, default `deal_flow_prospect=yes`, and write to `intake_queue` only. An authenticated operator must explicitly convert or attach the founder before a `contacts` row is created or updated.
 
 ### Gmail lifecycle records in `provider_replay_guard`
 
@@ -157,3 +157,7 @@ Self-submitted user details auto-write to Network OS. Public event forms use `ca
 - `provider=gmail_sync_cursor`: `source_ip` identifies the approved mailbox, `signature_hash` stores the provider continuation token, `submitted_at` stores the server-owned sync-start boundary, and `status` is `active` or `completed`.
 
 These rows are permanent production evidence and are excluded from Tier 4 cleanup.
+
+### Intake persistence versus downstream approval
+
+Approval must not gate intake persistence. Approval gates downstream action only: outreach, conversion into the Network, assignment, and any other execution remain blocked until the applicable human review is completed.
