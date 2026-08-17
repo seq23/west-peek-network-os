@@ -1,3 +1,18 @@
 name = "west-peek-network-os"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-06-07"
+
+# ── Non-secret configuration ────────────────────────────────────────────────
+#
+# ADMIN_EMAIL_ALLOWLIST is who may sign in to Network OS. It is CONFIGURATION, not a credential:
+# knowing the list grants nobody access — Google OAuth still has to prove the identity — while
+# encrypting it meant nobody could audit who had access without a dashboard trip.
+#
+# Kept here rather than in the dashboard so a change to who can reach the firm's relationship data
+# shows up in a diff and in review, which is the whole argument for it being plaintext.
+#
+# Order of operations when changing this: the plaintext var is added and deployed BEFORE the
+# encrypted secret of the same name is deleted. Deleting first would leave production with no
+# allowlist and lock everyone out until the next build landed.
+[vars]
+ADMIN_EMAIL_ALLOWLIST = "info@westpeek.ventures,sequoia@westpeek.ventures,scooter@westpeek.ventures"
