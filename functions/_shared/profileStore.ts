@@ -6,6 +6,11 @@ function clean(value: unknown, max = 1000) {
 }
 function email(value: unknown) { return clean(value, 220).toLowerCase(); }
 function slugId(prefix: string) { return `${prefix}_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`; }
+function personType(value: unknown, fallback = 'general_tech_adjacent') {
+  const text = clean(value, 80).toLowerCase();
+  if (text === 'general') return 'general_tech_adjacent';
+  return ['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general_tech_adjacent', 'unknown'].includes(text) ? text : fallback;
+}
 
 export interface NetworkProfileInput {
   name?: unknown;
@@ -37,7 +42,7 @@ export async function ensureSelfSubmittedNetworkProfile(env: RuntimeEnv, input: 
       full_name: normalizedName || clean(existing.full_name || existing.name) || normalizedEmail,
       email: normalizedEmail,
       company: clean(input.company, 180) || clean(existing.company, 180),
-      person_type: clean(input.personType || existing.person_type || 'general', 80) || 'general',
+      person_type: personType(input.personType || existing.person_type),
       deal_flow_prospect: clean(existing.deal_flow_prospect || 'unknown', 80) || 'unknown',
       relationship_type: clean(input.source || existing.relationship_type || 'self_submitted', 120),
       relationship_owner: clean(existing.relationship_owner || 'Unassigned', 120) || 'Unassigned',
@@ -68,7 +73,7 @@ export async function ensureSelfSubmittedNetworkProfile(env: RuntimeEnv, input: 
     full_name: normalizedName || normalizedEmail,
     email: normalizedEmail,
     company: clean(input.company, 180),
-    person_type: clean(input.personType || 'founder', 80) || 'founder',
+    person_type: personType(input.personType || 'founder', 'founder'),
     deal_flow_prospect: 'unknown',
     relationship_type: clean(input.source || 'self_submitted', 120),
     relationship_owner: 'Unassigned',

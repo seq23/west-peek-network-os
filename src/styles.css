@@ -414,3 +414,19 @@ select {
   color: var(--wp-muted);
   font-size: 13px;
 }
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  color: var(--wp-muted);
+  font-size: .92rem;
+}
+
+.pagination-controls span { min-width: 220px; text-align: center; }
+
+@media (max-width: 640px) {
+  .pagination-controls { flex-wrap: wrap; }
+  .pagination-controls span { order: -1; width: 100%; }
+}

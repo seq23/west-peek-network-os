@@ -10,7 +10,7 @@ export const intakeReviewStatusSchema = z.enum(['new', 'ai_reviewed', 'pending_h
 export const approvalStatusSchema = z.enum(['pending', 'approved', 'edited', 'rejected', 'executed', 'failed', 'cancelled']);
 export const approvalRiskSchema = z.enum(['low', 'medium', 'high']);
 export const notificationStatusSchema = z.enum(['unread', 'read', 'dismissed', 'resolved', 'failed']);
-export const personTypeSchema = z.enum(['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general', 'unknown']);
+export const personTypeSchema = z.enum(['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general_tech_adjacent', 'unknown']);
 export const dealFlowProspectSchema = z.enum(['yes', 'no', 'unknown']);
 export const triggerIntentSchema = z.enum(['network', 'deal_flow', 'relationship_routing', 'event_participation', 'network_membership']);
 

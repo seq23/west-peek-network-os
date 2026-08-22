@@ -141,7 +141,7 @@ function normalizeContact(row: Record<string, unknown>): ContactRecord {
     full_name: str(row.full_name, 'Unnamed contact'),
     email: emptyToUndefined(row.email),
     company: emptyToUndefined(row.company),
-    person_type: emptyToUndefined(row.person_type) as ContactRecord['person_type'],
+    person_type: personType(row.person_type),
     deal_flow_prospect: emptyToUndefined(row.deal_flow_prospect) as ContactRecord['deal_flow_prospect'],
     relationship_type: emptyToUndefined(row.relationship_type),
     relationship_owner: owner(row.relationship_owner),
@@ -200,6 +200,7 @@ function str(value: unknown, fallback = '') { return String(value || fallback).t
 function emptyToUndefined(value: unknown) { const text = str(value); return text || undefined; }
 function split(value: unknown) { return str(value).split(',').map((item) => item.trim()).filter(Boolean); }
 function bool(value: unknown) { return String(value).toLowerCase() === 'true' || value === true || String(value).toLowerCase() === 'on'; }
+function personType(value: unknown) { const text = str(value).toLowerCase(); return (text === 'general' ? 'general_tech_adjacent' : text || undefined) as ContactRecord['person_type']; }
 function owner(value: unknown) { const text = str(value).toLowerCase(); return text.includes('sequoia') ? 'Sequoia' : text.includes('scooter') ? 'Scooter' : 'Unassigned'; }
 function priority(value: unknown) { const text = str(value).toLowerCase(); return text.includes('high') ? 'High' : text.includes('low') ? 'Low' : 'Normal'; }
 function confidence(value: unknown) { const text = str(value).toLowerCase(); return text === 'low' || text === 'high' ? text : 'medium'; }

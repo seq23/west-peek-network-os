@@ -8,7 +8,7 @@ export const dealFlowTriggers = [canonicalDealFlowTrigger, ...acceptedDealFlowAl
 export const allTriggers = [...networkTriggers, ...dealFlowTriggers];
 
 export type TriggerIntent = 'network' | 'deal_flow';
-export type PersonType = 'investor' | 'founder' | 'operator' | 'lawyer' | 'service_provider' | 'media' | 'general' | 'unknown';
+export type PersonType = 'investor' | 'founder' | 'operator' | 'lawyer' | 'service_provider' | 'media' | 'general_tech_adjacent' | 'unknown';
 export type DealFlowProspect = 'yes' | 'no' | 'unknown';
 
 export type ParsedWestPeekTriggerFields = {

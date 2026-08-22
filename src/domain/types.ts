@@ -12,7 +12,7 @@ export type IntakeSource = 'gmail_trigger' | 'manual_note' | 'pasted_notes' | 'b
 export type CaptureType = 'email_thread' | 'self_email_note' | 'forwarded_email' | 'manual_add' | 'business_card' | 'notes_screenshot' | 'voice_note' | 'thank_you_card' | 'event_public_form' | 'event_private_note' | 'pitch_practice' | 'founder_profile_lead' | 'founder_story_packet' | 'network_profile_self_submission' | 'event_registration' | 'event_interest' | 'other';
 export type IntakeReviewStatus = 'new' | 'ai_reviewed' | 'pending_human_review' | 'needs_human_review' | 'converted' | 'attached' | 'dismissed' | 'needs_more_info' | 'lead_captured' | 'pending_network_review' | 'profile_updated' | 'event_intake_received' | 'archived';
 export type InteractionType = 'email' | 'call' | 'meeting' | 'intro' | 'event' | 'note' | 'touch' | 'gift' | 'handwritten_note' | 'other';
-export type PersonType = 'investor' | 'founder' | 'operator' | 'lawyer' | 'service_provider' | 'media' | 'general' | 'unknown';
+export type PersonType = 'investor' | 'founder' | 'operator' | 'lawyer' | 'service_provider' | 'media' | 'general_tech_adjacent' | 'unknown';
 export type DealFlowProspect = 'yes' | 'no' | 'unknown';
 export type TriggerIntent = 'network' | 'deal_flow' | 'relationship_routing' | 'event_participation' | 'network_membership';
 

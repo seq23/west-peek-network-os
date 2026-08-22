@@ -166,7 +166,8 @@ function timestamp(value: unknown) {
 
 function normalizePersonType(value: unknown) {
   const text = String(value || '').toLowerCase();
-  if (['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general', 'unknown'].includes(text)) return text;
+  if (text === 'general') return 'general_tech_adjacent';
+  if (['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general_tech_adjacent', 'unknown'].includes(text)) return text;
   return '';
 }
 

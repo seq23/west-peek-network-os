@@ -11,6 +11,14 @@ import { LocalSheetsProvider } from '../../scripts/testing/providers/local-sheet
 const fixtureDir = new URL('../fixtures/gmail/', import.meta.url);
 const files = (await fs.readdir(fixtureDir)).filter((name) => name.endsWith('.json')).sort();
 const fixtures = await Promise.all(files.map(async (name) => JSON.parse(await fs.readFile(new URL(name, fixtureDir), 'utf8'))));
+const releasePrepushRouter = await fs.readFile(new URL('../../scripts/release-prepush-router.mjs', import.meta.url), 'utf8');
+for (const token of [
+  'PLAYWRIGHT_BASE_URL:"http://127.0.0.1:3000"',
+  'SMOKE_BASE_URL:"http://127.0.0.1:3000"',
+  'env:childEnv'
+]) {
+  assert.equal(releasePrepushRouter.includes(token), true, `local prepush URL isolation missing ${token}`);
+}
 
 const messages = fixtures.map((fixture) => ({
   id: fixture.fixture_id,

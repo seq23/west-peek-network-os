@@ -43,7 +43,7 @@ export async function onRequestPost({ request, env, params }: Context) {
       private_context: '', private_voice_transcript: '', ai_summary: publicInterest || 'Public event form submission.', review_status: 'pending_human_review', confidence: 'medium', missing_fields: missingFields(publicName, publicEmail, publicCompany).join(', '),
       source_type: 'event_public_form', created_by: 'public_event_form', source_intake_id: intakeId, consent_follow_up: 'true'
     };
-    const profile = await ensureSelfSubmittedNetworkProfile(env, { name: publicName, email: publicEmail, company: publicCompany, website: publicLinkedin, personType: 'general', source: 'event_public_form', captureType: 'event_registration', contextSummary: publicInterest || `Event form submission for ${event.event_name}` });
+    const profile = await ensureSelfSubmittedNetworkProfile(env, { name: publicName, email: publicEmail, company: publicCompany, website: publicLinkedin, personType: 'general_tech_adjacent', source: 'event_public_form', captureType: 'event_registration', contextSummary: publicInterest || `Event form submission for ${event.event_name}` });
     const intake = {
       intake_id: intakeId, created_at: now, updated_at: now, source: 'event_public_form', capture_type: 'event_registration', captured_by: 'public_event_form', source_user_email: publicEmail,
       source_file_name: '', source_file_type: '', gmail_message_id: '', gmail_thread_id: '',

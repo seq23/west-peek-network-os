@@ -1,8 +1,15 @@
 import assert from 'node:assert/strict';
 import { displayText, clippedText } from '../../src/ui/text.ts';
+import { CONTACTS_PAGE_SIZE, clampContactPage, contactPageCount, paginateContacts } from '../../src/domain/contactPagination.ts';
 assert.equal(displayText('<style>x</style><p>Hello &amp; welcome</p><script>bad()</script>'), 'Hello & welcome');
 assert.equal(displayText('Founderâ€™s update â€” Q2 Â notes'), 'Founder’s update — Q2 notes');
 assert.equal(displayText('&#x1F680; &#39;ok&#39;'), "🚀 'ok'");
 assert.match(displayText({ decision_trace: [{ step: 'classify' }] }), /decision_trace/);
 assert.equal(clippedText('A'.repeat(500), 20).length, 21);
+const fiveThousandContacts = Array.from({ length: 5000 }, (_, index) => ({ contact_id: `contact_${index + 1}` }));
+assert.equal(CONTACTS_PAGE_SIZE, 50);
+assert.equal(contactPageCount(fiveThousandContacts.length), 100);
+assert.equal(paginateContacts(fiveThousandContacts, 1).length, 50);
+assert.equal(paginateContacts(fiveThousandContacts, 100)[0]?.contact_id, 'contact_4951');
+assert.equal(clampContactPage(999, fiveThousandContacts.length), 100);
 console.log('display-normalization: PASS');

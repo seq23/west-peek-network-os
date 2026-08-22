@@ -7,7 +7,7 @@ export interface ParsedCapture {
   trigger?: string;
   sourceTrigger?: string;
   triggerIntent: 'network' | 'deal_flow';
-  personType: 'investor' | 'founder' | 'operator' | 'lawyer' | 'service_provider' | 'media' | 'general' | 'unknown';
+  personType: 'investor' | 'founder' | 'operator' | 'lawyer' | 'service_provider' | 'media' | 'general_tech_adjacent' | 'unknown';
   dealFlowProspect: 'yes' | 'no' | 'unknown';
   dealContext?: string;
   name?: string;

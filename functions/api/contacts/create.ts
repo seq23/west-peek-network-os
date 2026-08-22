@@ -51,7 +51,8 @@ export async function onRequestPost({ request, env }: Context) {
 
 function normalizePersonType(value: unknown) {
   const text = String(value || '').toLowerCase();
-  return ['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general', 'unknown'].includes(text) ? text : '';
+  if (text === 'general') return 'general_tech_adjacent';
+  return ['investor', 'founder', 'operator', 'lawyer', 'service_provider', 'media', 'general_tech_adjacent', 'unknown'].includes(text) ? text : '';
 }
 
 function normalizeDealFlowProspect(value: unknown) {
