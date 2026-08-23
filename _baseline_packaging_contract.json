@@ -15,7 +15,6 @@
     ".env.test.example",
     "secrets/network-os.local.env.gpg",
     ".github/workflows/validate.yml",
-    ".github/workflows/deploy-cloudflare-pages.yml",
     "scripts/tier4_ai_helper_approval_live.mjs",
     "tests/integration/critical-ui-data-flow.mjs",
     "docs/runbooks/CONTAINER_BROWSER_FALLBACK_CONTRACT.md",

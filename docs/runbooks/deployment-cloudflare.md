@@ -7,27 +7,24 @@ Deployment target: Cloudflare Pages.
 
 ## Automatic push deploy path
 
-This repo now includes `.github/workflows/deploy-cloudflare-pages.yml`.
+Cloudflare Pages is connected directly to this GitHub repository. The Cloudflare
+Git integration is the single deployment authority for pushes to `main`.
 
-On push to `main`, GitHub Actions will:
+On push to `main`:
 
-1. install dependencies with `npm ci`
-2. run `npm run validate:everything -- --tier=1`
-3. build with `NODE_OPTIONS=--max-old-space-size=3072 npm run build`
-4. deploy `dist` to Cloudflare Pages using Wrangler
+1. GitHub Actions runs `.github/workflows/validate.yml`.
+2. Cloudflare's native Git integration builds and deploys the same commit.
+3. The deployed application is verified with the strict postdeploy checks.
 
-Required GitHub Secrets:
+The repository does not run a second Wrangler-based Pages deployment workflow.
+Consequently, these duplicate deployment secrets are not required in GitHub:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 
-Required GitHub variable or env:
-
-- `CLOUDFLARE_PROJECT_NAME=west-peek-network-os`
-
-## Cloudflare Git integration note
-
-If Cloudflare Pages dashboard Git integration is also connected, pushes to `main` may deploy through Cloudflare directly. That connection must be proven from Cloudflare/GitHub evidence; repo files alone cannot prove it.
+The connected Cloudflare project remains `west-peek-network-os`. Deployment
+status is verified in Cloudflare; GitHub validation proves the repository checks
+but is not a second deployment mechanism.
 
 ## Postdeploy
 

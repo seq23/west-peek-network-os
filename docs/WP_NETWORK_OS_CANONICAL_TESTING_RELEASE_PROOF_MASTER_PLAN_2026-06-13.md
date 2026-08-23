@@ -844,7 +844,7 @@ Target workflows:
 
 - `validate.yml` — Tier 1, Tier 2, selected Tier 3A
 - `predeploy.yml` — canonical predeploy gate
-- `deploy-cloudflare-pages.yml` — deploy only after predeploy approval
+- Cloudflare Pages native Git integration — deploy the validated `main` commit without a duplicate GitHub Actions deploy lane
 - `postdeploy-smoke.yml` — deployed smoke and guarded critical paths
 - `live-provider-proof.yml` — manual protected Gmail/Sheets proof
 - `release-proof.yml` — aggregate proof reports and run IDs
@@ -1056,4 +1056,3 @@ The new architecture is accepted only when:
 - **Postdeploy:** The deployed runtime is actually working.
 - **Diagnostics:** Failures are explainable without guessing.
 - **Fixture lifecycle:** Real proof does not pollute the product.
-
