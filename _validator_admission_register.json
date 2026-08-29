@@ -2637,14 +2637,20 @@
       "script": "validate:self-heal-contract",
       "command": "node scripts/validate-self-heal-contract.mjs",
       "status": "ACTIVE",
-      "admission": "registered_proof_lane",
-      "parentOrMatrixAuthority": "validate:all",
+      "admission": "direct_matrix_row",
+      "parentOrMatrixAuthority": "validate:self-heal-contract",
       "category": "validation",
       "severity": "HARD FAIL",
       "productionRisk": "release_lifecycle",
       "whatItProves": "The release self-heal loop and post-deploy remediation planner classify failures and report repairs honestly.",
       "whatItDoesNotProve": "Does not prove layers outside the command actually executed; repair capability of the autofix steps remains UNPROVEN.",
-      "failureHandling": "HARD FAIL — blocks validate:all."
+      "failureHandling": "HARD FAIL — blocks validate:all.",
+      "ownerDecisionNeeded": "NO unless owner-interruption budget applies.",
+      "expectedFailureFrequency": "Low; fails only if the self-heal loop's classifier, source hash, or outcome reporting regresses.",
+      "runtimeCost": "Low; pure static/unit checks plus two short subprocess runs.",
+      "maintenanceCost": "Review whenever release-self-heal.mjs or release-postdeploy-remediate.mjs changes.",
+      "removalConditions": "Retire only after replacement proof is admitted and docs consolidation records the change.",
+      "blockerPolicy": "HARD FAIL; blocks validate:all and the release lifecycle."
     }
   ],
   "severityPolicy": {

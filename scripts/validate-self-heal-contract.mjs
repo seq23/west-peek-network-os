@@ -83,13 +83,33 @@ await check('postdeploy: missing CLICK_AUDIT_SUMMARY is a NAMED stop, never a si
 });
 
 // --- 4. treeHash must ignore gitignored build caches.
-await check('treeHash ignores gitignored files (tsconfig.tsbuildinfo class)', async () => {
-  const ignored = execFileSync('git', ['check-ignore', 'tsconfig.tsbuildinfo'], { encoding: 'utf8' }).trim();
-  if (!ignored) throw new Error('tsconfig.tsbuildinfo is no longer gitignored; this guard needs a new fixture');
-  if (trackedFiles().includes('tsconfig.tsbuildinfo')) {
-    throw new Error('gitignored build cache is inside the self-heal source hash');
-  }
+// tsconfig.tsbuildinfo is the cache that actually caused the false
+// "Source changed: true"; the synthetic fixture pins the general rule so this
+// guard is portable to sibling repos that carry the same loop.
+await check('treeHash excludes gitignored files (synthetic fixture)', async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'self-heal-ignored-'));
+  execFileSync('git', ['init', '-q'], { cwd: tmp });
+  fs.writeFileSync(path.join(tmp, '.gitignore'), 'cache.tmp\n');
+  fs.writeFileSync(path.join(tmp, 'real-source.txt'), 'a');
+  fs.writeFileSync(path.join(tmp, 'cache.tmp'), 'v1');
+  const h1 = await treeHash(tmp);
+  fs.writeFileSync(path.join(tmp, 'cache.tmp'), 'v2-changed');
+  const h2 = await treeHash(tmp);
+  if (h1 !== h2) throw new Error('a gitignored build cache changed the self-heal source hash');
+  fs.writeFileSync(path.join(tmp, 'real-source.txt'), 'b');
+  if (await treeHash(tmp) === h1) throw new Error('a real source change did not change the hash');
 });
+await check('treeHash never hashes node_modules or other ignored trees in this repo', () => {
+  const bad = trackedFiles().filter((f) => /^(node_modules|dist|coverage)\//.test(f));
+  if (bad.length) throw new Error(`ignored tree inside the source hash: ${bad.slice(0, 3).join(', ')}`);
+});
+if (fs.existsSync('tsconfig.tsbuildinfo')) {
+  await check('treeHash excludes tsconfig.tsbuildinfo (the cache that caused the false positive)', () => {
+    if (trackedFiles().includes('tsconfig.tsbuildinfo')) {
+      throw new Error('gitignored build cache is inside the self-heal source hash');
+    }
+  });
+}
 
 // --- 5. treeHash must refuse to report a hash over zero files.
 await check('treeHash hard-fails when it examines zero files', async () => {
