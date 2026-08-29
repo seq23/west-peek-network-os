@@ -2632,6 +2632,19 @@
       "maintenanceCost": "Review on Gmail proof changes",
       "removalConditions": "Only after replacement proof input workflow exists.",
       "blockerPolicy": "Blocks Gmail lifecycle artifact delivery."
+    },
+    {
+      "script": "validate:self-heal-contract",
+      "command": "node scripts/validate-self-heal-contract.mjs",
+      "status": "ACTIVE",
+      "admission": "registered_proof_lane",
+      "parentOrMatrixAuthority": "validate:all",
+      "category": "validation",
+      "severity": "HARD FAIL",
+      "productionRisk": "release_lifecycle",
+      "whatItProves": "The release self-heal loop and post-deploy remediation planner classify failures and report repairs honestly.",
+      "whatItDoesNotProve": "Does not prove layers outside the command actually executed; repair capability of the autofix steps remains UNPROVEN.",
+      "failureHandling": "HARD FAIL — blocks validate:all."
     }
   ],
   "severityPolicy": {
