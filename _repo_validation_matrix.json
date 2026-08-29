@@ -563,7 +563,7 @@
       "category": "visual e2e",
       "severity": "INFO / NO VALIDATION",
       "productionRisk": "critical browser states not human-visible reviewed",
-      "proofLayer": "VISUAL ARTIFACTS GENERATED \u2014 HUMAN REVIEW NOT PROVEN",
+      "proofLayer": "VISUAL ARTIFACTS GENERATED — HUMAN REVIEW NOT PROVEN",
       "doesNotProve": "human approval unless reviewed",
       "blockerPolicy": "Orchestration/alias/reporting lane; status derives from child validators.",
       "failureHandling": "Diagnostic/orchestration only; no independent pass claim."
@@ -1538,6 +1538,17 @@
       "failureHandling": "Repair generator or contract and rerun before packaging.",
       "ownerDecisionNeeded": "NO",
       "blockerPolicy": "Blocks Gmail lifecycle artifact delivery."
+    },
+    {
+      "name": "Release self-heal honesty contract",
+      "command": "npm run validate:self-heal-contract",
+      "tier": "tier1",
+      "category": "release_lifecycle",
+      "severity": "HARD FAIL",
+      "productionRisk": "The release self-heal loop misreports what it repaired or misclassifies a benign failure as an authorization incident, escalating post-deploy remediation to SEV-1 rollback.",
+      "proofLayer": "STRUCTURAL / RELEASE LIFECYCLE",
+      "whatItProves": "classify() and the post-deploy severity planner match real authorization signals only (401/403/unauthorized/forbidden/permission denied) and not the substring 'auth' inside routine schema text such as authMode; the self-heal source hash covers git-tracked files only, so a gitignored build cache cannot fake 'source changed'; treeHash hard-fails on zero files; missing CLICK_AUDIT_SUMMARY is a named stop rather than a silent exit 0; every terminal state of the loop names its outcome.",
+      "whatItDoesNotProve": "Does not prove the loop can repair any given defect class, nor that any workflow invokes it."
     }
   ],
   "validatorAdmissionRegister": "_validator_admission_register.json",

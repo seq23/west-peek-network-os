@@ -31,7 +31,7 @@
     "test:pitchlab-profile-lead": "node tests/domain/pitch-lab-profile-lead.mjs",
     "typecheck": "tsc --noEmit",
     "validate:9c": "npm run test:pitchlab-handoff",
-    "validate:all": "npm run validate:structure && npm run validate:secrets && npm run validate:google-private-key-contract && npm run validate:no-raw-atob-errors && npm run validate:oauth-connect-contract && npm run validate:provider-error-contract && npm run validate:tier4-live-proof-contract && npm run validate:tier4-lane-registry && npm run validate:tier4-report-schema && npm run validate:tier4-cleanup-contract && npm run validate:authenticated-usability-contract && npm run test:ai-helper-approval-flow && npm run test:critical-ui-data-flow && npm run test:display-normalization && npm run test:latest-record && npm run validate:repo-matrix-consistency && npm run validate:trigger-sheet-proof && npm run test:domain && npm run test:pitchlab-handoff && npm run test:pitchlab-profile-lead && npm run test:event-database-intake && npm run build && npm run validate:playwright:maxdepth",
+    "validate:all": "npm run validate:structure && npm run validate:secrets && npm run validate:google-private-key-contract && npm run validate:no-raw-atob-errors && npm run validate:oauth-connect-contract && npm run validate:provider-error-contract && npm run validate:tier4-live-proof-contract && npm run validate:tier4-lane-registry && npm run validate:tier4-report-schema && npm run validate:tier4-cleanup-contract && npm run validate:authenticated-usability-contract && npm run test:ai-helper-approval-flow && npm run test:critical-ui-data-flow && npm run test:display-normalization && npm run test:latest-record && npm run validate:self-heal-contract && npm run validate:repo-matrix-consistency && npm run validate:trigger-sheet-proof && npm run test:domain && npm run test:pitchlab-handoff && npm run test:pitchlab-profile-lead && npm run test:event-database-intake && npm run build && npm run validate:playwright:maxdepth",
     "validate:docs-consolidation": "node scripts/validate-docs-consolidation.mjs",
     "validate:e2e-coverage": "node scripts/validate-e2e-coverage-matrix.mjs",
     "validate:env": "node scripts/validate-env.mjs",
@@ -187,7 +187,8 @@
     "validate:trigger-sheet-proof": "npm run test:trigger-sheet-safety && npm run test:hostile-trigger-sheet-regressions",
     "sheets:migrate-schema": "node scripts/sheets/migrate-schema.mjs",
     "gmail:forward-only:generate-seeds": "node scripts/testing/generate-forward-only-gmail-seeds.mjs",
-    "test:gmail-forward-only-seed-generator": "node tests/integration/forward-only-gmail-seed-generator.mjs"
+    "test:gmail-forward-only-seed-generator": "node tests/integration/forward-only-gmail-seed-generator.mjs",
+    "validate:self-heal-contract": "node scripts/validate-self-heal-contract.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
