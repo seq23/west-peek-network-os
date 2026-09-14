@@ -19,7 +19,7 @@ const IDS: Record<string, string> = {
   provider_replay_guard: 'replay_id'
 };
 
-let snapshotCache: { userEmail: string; includeProof: boolean; payload: unknown; expiresAt: number } | null = null;
+let snapshotCache: { userEmail: string; includeProof: boolean; tabs: string; payload: unknown; expiresAt: number } | null = null;
 const SNAPSHOT_CACHE_TTL_MS = 45_000;
 
 export async function onRequestGet({ request, env }: Context) {
@@ -28,9 +28,20 @@ export async function onRequestGet({ request, env }: Context) {
     const url = new URL(request.url);
     const forceFresh = url.searchParams.get('fresh') === '1';
     const includeProof = url.searchParams.get('include_proof') === '1';
-    const tabs = includeProof ? [...BASE_TABS, ...PROOF_TABS] : BASE_TABS;
+    const allTabs = includeProof ? [...BASE_TABS, ...PROOF_TABS] : BASE_TABS;
+    // ONLY THE TABS ASKED FOR. West Peek OS pulls this every 15 minutes for two tabs (contacts,
+    // relationship_touches) and was being served all eight — every row of every tab parsed and
+    // re-keyed inside one invocation. On 14 Sep 2026 that crossed the Free plan's CPU limit and
+    // every pull answered 503 / error 1102 for two hours. A caller that names its tabs gets those
+    // and pays for those; a caller that names none gets the whole snapshot as before. Unknown names
+    // are refused rather than silently dropped.
+    const asked = (url.searchParams.get('tabs') || '').split(',').map((t) => t.trim()).filter(Boolean);
+    const unknown = asked.filter((t) => !allTabs.includes(t as SheetTab));
+    if (unknown.length) return json({ ok: false, error: `Unknown tab(s): ${unknown.join(', ')}` }, { status: 400 });
+    const tabs = asked.length ? allTabs.filter((t) => asked.includes(t)) : allTabs;
+    const cacheKey = tabs.join(',');
 
-    if (!forceFresh && snapshotCache && snapshotCache.userEmail === user.email && snapshotCache.includeProof === includeProof && Date.now() < snapshotCache.expiresAt) {
+    if (!forceFresh && snapshotCache && snapshotCache.userEmail === user.email && snapshotCache.includeProof === includeProof && snapshotCache.tabs === cacheKey && Date.now() < snapshotCache.expiresAt) {
       return json({ ...(snapshotCache.payload as Record<string, unknown>), source: 'google_sheets_batch_cache', freshness_requested: false, cache_age_ms: Math.max(0, SNAPSHOT_CACHE_TTL_MS - (snapshotCache.expiresAt - Date.now())) }, { headers: { 'cache-control': 'private, no-store, max-age=0' } });
     }
 
@@ -38,7 +49,7 @@ export async function onRequestGet({ request, env }: Context) {
     const raw = await batchReadTabs(env, tabs);
     const data = Object.fromEntries(tabs.map((tab) => [tab, latestById(raw[tab] || [], IDS[tab]).filter((row) => String(row.proof_status || '') !== 'proof_cleaned')]));
     const payload = { ok: true, persistence: 'google_sheets', source: 'google_sheets_batch', freshness_requested: forceFresh, proof_data_included: includeProof, cache_age_ms: 0, refreshed_at: new Date().toISOString(), user_email: user.email, data };
-    snapshotCache = { userEmail: user.email, includeProof, payload, expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS };
+    snapshotCache = { userEmail: user.email, includeProof, tabs: cacheKey, payload, expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS };
     return json(payload, { headers: { 'cache-control': 'private, no-store, max-age=0' } });
   } catch (error) {
     const detail = error instanceof Error ? error.message : 'Google Sheets snapshot unavailable.';
