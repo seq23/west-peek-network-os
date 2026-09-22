@@ -22,6 +22,7 @@
  */
 
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 let checks = 0;
@@ -42,7 +43,27 @@ function equal(actual, expected, message) {
 // transcription of it. Node strips the types on import.
 // --------------------------------------------------------------------------
 
-const mod = await import(new URL('../../functions/_shared/siteFormContact.ts', import.meta.url).href);
+const CONTACT_MODULE = new URL('../../functions/_shared/siteFormContact.ts', import.meta.url);
+
+/**
+ * Load the shipping TypeScript module and run it.
+ *
+ * Types are erased with the repo's own `typescript`, not with Node's built-in
+ * stripping: CI runs Node 20, which cannot import a .ts file at all, and a test
+ * that only runs on the author's machine is not a gate. Transpiling here keeps
+ * the test executing the real module on every Node this repo supports.
+ */
+async function loadContactModule() {
+  const ts = (await import('typescript')).default;
+  const source = readFileSync(CONTACT_MODULE, 'utf8');
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+    fileName: 'siteFormContact.ts'
+  });
+  return import(`data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`);
+}
+
+const mod = await loadContactModule();
 
 /** A minimal Headers stand-in: the gate only ever calls .get(). */
 function headers(map) {
@@ -192,12 +213,15 @@ ok(updated.context_summary.startsWith('Met at a dinner.'), 'prior context is kep
 ok(updated.context_summary.includes('newsletter_events'), 'the new submission is appended to context');
 
 // The shared-secret gate, driven rather than pattern-matched.
-const SECRET = 'a-test-secret-at-least-16';
+// Generated, never literal. A secret-shaped constant in a tracked file is
+// exactly what scripts/check-no-plaintext-secrets.mjs exists to refuse, and it
+// is right to: the next reader cannot tell a test fixture from a real leak.
+const SECRET = `t-${randomUUID()}`;
 const GATE_ENV = { WP_NETWORK_OS_INTAKE_SECRET: SECRET };
 equal(mod.checkSiteFormSecret(headers({ [mod.SITE_FORM_SECRET_HEADER]: SECRET }), GATE_ENV).ok, true, 'the correct secret opens the door');
 equal(mod.checkSiteFormSecret(headers({}), GATE_ENV).error_code, 'SHARED_SECRET_REQUIRED', 'no header is refused 401');
 equal(mod.checkSiteFormSecret(headers({}), GATE_ENV).status, 401, 'a missing secret header is a 401');
-equal(mod.checkSiteFormSecret(headers({ [mod.SITE_FORM_SECRET_HEADER]: 'wrong-secret-but-long' }), GATE_ENV).error_code, 'BAD_SHARED_SECRET', 'a wrong secret is refused');
+equal(mod.checkSiteFormSecret(headers({ [mod.SITE_FORM_SECRET_HEADER]: `x-${randomUUID()}` }), GATE_ENV).error_code, 'BAD_SHARED_SECRET', 'a wrong secret is refused');
 equal(mod.checkSiteFormSecret(headers({ [mod.SITE_FORM_SECRET_HEADER]: SECRET }), {}).error_code, 'SHARED_SECRET_MISSING', 'an unconfigured door 503s rather than accepting anything');
 equal(mod.checkSiteFormSecret(headers({ [mod.SITE_FORM_SECRET_HEADER]: SECRET }), {}).status, 503, 'an unconfigured door is a 503, not a silent pass');
 equal(
