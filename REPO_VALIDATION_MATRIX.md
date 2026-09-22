@@ -116,3 +116,14 @@ This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT
 | Browser behavior | `npm run test:e2e:maxdepth` or `npm run test:e2e:container` | Sequential three-mailbox batch, connected/not-connected reporting, partial/malformed failure isolation, automatic refresh, and repeated-click lock |
 
 Browser collection without execution is not behavior proof. A runtime without an admitted Chromium executable must report the browser lane as UNPROVEN and defer it to the local updater's real-browser prepush.
+
+### Site form intake door — 2026-09-22
+
+`test:site-form-intake` (`tests/domain/site-form-intake.mjs`) is a tier 1 HARD FAIL
+lane, admitted in `_validator_admission_register.json` and selected in
+`_repo_validation_matrix.json`, so `npm run validate:everything -- --tier=1` runs
+it. It imports `functions/_shared/siteFormContact.ts` and executes it: the
+decision module holds no I/O precisely so the test runs the shipping code rather
+than a transcription. 98 checks. It does not prove a deployed door or a live
+Google Sheets write; the proof-fixture flow through production does that.
+

@@ -67,6 +67,44 @@ export async function appendRecord(env: RuntimeEnv, tab: SheetTab, record: Recor
   return { ...payload, row_number: rowNumber, record: readback };
 }
 
+/**
+ * Overwrite one existing physical row with a complete record.
+ *
+ * `appendRecord` is the only write path this module had, so a caller that
+ * needed to update a row it had already found (the site-form intake door, which
+ * must update rather than duplicate a contact who submits twice) had no way to
+ * do it. This is the same contract as `appendRecord` — headers validated,
+ * unknown keys refused, the written row read back and compared — applied to a
+ * row number rather than the end of the tab.
+ */
+export async function updateRecordByRowNumber(env: RuntimeEnv, tab: SheetTab, rowNumber: number, record: Record<string, unknown>) {
+  assertSheetsConfigured(env);
+  if (!Number.isInteger(rowNumber) || rowNumber < 2) throw new Error(`SHEETS_ROW_MAPPING_FAILED:${tab}:invalid_row_number`);
+  const token = await getServiceAccountToken(env);
+  await validateTabHeaders(env, token, tab);
+  const headers = TAB_HEADERS[tab];
+  const unknownKeys = Object.keys(record).filter((key) => !headers.includes(key as never));
+  if (unknownKeys.length) throw new Error(`SHEETS_ROW_MAPPING_FAILED:${tab}:unknown_keys:${unknownKeys.join(',')}`);
+  const row = headers.map((header) => serializeCell(record[header]));
+  const writeRange = encodeURIComponent(`${tab}!A${rowNumber}:${columnName(headers.length)}${rowNumber}`);
+  const response = await sheetsFetch(env, token, `values/${writeRange}?valueInputOption=USER_ENTERED`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [row] })
+  });
+  if (!response.ok) throw new Error(`SHEETS_UPDATE_FAILED:${tab}:${response.status}:${await response.text()}`);
+  const readRange = encodeURIComponent(`${tab}!A${rowNumber}:ZZ${rowNumber}`);
+  const readbackResponse = await sheetsFetch(env, token, `values/${readRange}`);
+  if (!readbackResponse.ok) throw new Error(`SHEETS_READBACK_STALE:${tab}:${readbackResponse.status}:${await readbackResponse.text()}`);
+  const readbackPayload = await readbackResponse.json() as { values?: string[][] };
+  const readback = rowToObject([...headers], readbackPayload.values?.[0] || []);
+  const uniqueKey = headers[0];
+  if (serializeCell(readback[uniqueKey]) !== serializeCell(record[uniqueKey])) {
+    throw new Error(`SHEETS_READBACK_STALE:${tab}:${uniqueKey}`);
+  }
+  return { row_number: rowNumber, record: readback };
+}
+
 export async function readTab(env: RuntimeEnv, tab: SheetTab, options: { ensureHeaders?: boolean } = {}) {
   assertSheetsConfigured(env);
   const token = await getServiceAccountToken(env);

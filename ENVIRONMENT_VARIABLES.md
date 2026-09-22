@@ -22,6 +22,7 @@ Required production runtime variables include:
 - `AI_PROVIDER`
 - `APP_BASE_URL`
 - `PITCH_LAB_SHARED_SECRET`
+- `WP_NETWORK_OS_INTAKE_SECRET`
 
 Optional provider variables include:
 
@@ -30,6 +31,30 @@ Optional provider variables include:
 - `GMAIL_TRIGGER_PHRASE`
 - `ACCEPTED_TRIGGER_ALIASES`
 - `PITCH_LAB_ALLOWED_ORIGIN`
+- `WP_NETWORK_OS_INTAKE_ALLOWED_ORIGINS`
+
+## Site form intake door
+
+`POST /api/intake/site-form` is the default destination for every West Peek
+website form (the three sites in `join-west-peek-main`, and Pitch Lab). It
+writes the `contacts` tab.
+
+- `WP_NETWORK_OS_INTAKE_SECRET` — the shared secret, presented by the caller in
+  the `x-wp-network-os-intake-secret` header. The SAME value is set as a Pages
+  secret on `west-peek-network-os`, `join-west-peek-main`, `west-peek-ventures`,
+  `west-peek-productions` and `west-peek-pitch-lab`, and is held in the West Peek
+  OS vault under the same name. Under 16 characters is treated as unconfigured
+  and the door answers 503.
+- `WP_NETWORK_OS_INTAKE_ALLOWED_ORIGINS` — optional, comma separated. ADDS to
+  the allow-list constant `SITE_FORM_ALLOWED_HOSTS` in
+  `functions/_shared/siteFormContact.ts`; it never replaces it. An absent
+  `Origin` header is allowed, because a server-to-server call from a Pages
+  Function sends none — the shared secret is the real gate.
+
+The name is vendor-prefixed (`WP_NETWORK_OS_`) so it can never collide with a
+reserved runtime name. `/api/health` reports the door's readiness under
+`siteFormIntake`, because the calling sites deliberately still answer the
+visitor `ok:true` when only the email succeeded.
 
 `ANTHROPIC_MODEL` and `ANTHROPIC_VISION_MODEL` must be synchronized to Cloudflare with the other production runtime values. Omitting `ANTHROPIC_MODEL` causes production to use the code fallback, which may become unavailable even when `.env.local` contains a valid model.
 

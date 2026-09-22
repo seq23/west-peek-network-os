@@ -1549,6 +1549,18 @@
       "proofLayer": "STRUCTURAL / RELEASE LIFECYCLE",
       "whatItProves": "classify() and the post-deploy severity planner match real authorization signals only (401/403/unauthorized/forbidden/permission denied) and not the substring 'auth' inside routine schema text such as authMode; the self-heal source hash covers git-tracked files only, so a gitignored build cache cannot fake 'source changed'; treeHash hard-fails on zero files; missing CLICK_AUDIT_SUMMARY is a named stop rather than a silent exit 0; every terminal state of the loop names its outcome.",
       "whatItDoesNotProve": "Does not prove the loop can repair any given defect class, nor that any workflow invokes it."
+    },
+    {
+      "name": "site form intake door",
+      "command": "npm run test:site-form-intake",
+      "tier": "tier1",
+      "category": "integration contract",
+      "severity": "HARD FAIL",
+      "productionRisk": "site form submissions never reaching the contacts tab",
+      "proofLayer": "INTEGRATION TESTS PASSED",
+      "doesNotProve": "deployed door, live sheet write, or site-side configuration",
+      "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk.",
+      "failureHandling": "Juniper repairs and reruns. Selected lifecycle stage remains blocked."
     }
   ],
   "validatorAdmissionRegister": "_validator_admission_register.json",

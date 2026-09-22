@@ -188,7 +188,8 @@
     "sheets:migrate-schema": "node scripts/sheets/migrate-schema.mjs",
     "gmail:forward-only:generate-seeds": "node scripts/testing/generate-forward-only-gmail-seeds.mjs",
     "test:gmail-forward-only-seed-generator": "node tests/integration/forward-only-gmail-seed-generator.mjs",
-    "validate:self-heal-contract": "node scripts/validate-self-heal-contract.mjs"
+    "validate:self-heal-contract": "node scripts/validate-self-heal-contract.mjs",
+    "test:site-form-intake": "node tests/domain/site-form-intake.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
