@@ -89,6 +89,7 @@ This index classifies documentation without deleting historical evidence. Only r
 - `docs/security/GOOGLE_PRIVATE_KEY_FORMATS.md`
 
 ## Operational runbooks and proof contracts
+- `RUNBOOK.md` — plan-time entry point for AI employees; points at the runbooks below (guard: `npm run validate:runbook`)
 - `AUTHENTICATED_ROUTE_MANIFEST.md`
 - `AUTONOMOUS_TERMINAL_RUNBOOK.md`
 - `DIAGNOSTICS_STANDARD.md`

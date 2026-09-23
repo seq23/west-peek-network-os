@@ -164,5 +164,9 @@ Purpose: every Markdown document is classified so active documentation stays int
 | `docs/WP_NETWORK_OS_REPO_SPECIFIC_TEST_IMPLEMENTATION_ADDENDUM_2026-06-13.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
 | `tests/fixtures/README.md` | ACTIVE | Canonical 2026-06-13 testing, diagnostics, release, fixture, vault, or Hallmark migration authority. | None |
 | `AUTH_STATE_VAULT.md` | ACTIVE | External encrypted authenticated browser-state backup/restore and shared Tier 4/Hallmark execution authority. | None |
+| `RUNBOOK.md` | ACTIVE | Plan-time operator runbook read by AI employees (Porter, Danielle) before a change; paths and scripts pinned by `npm run validate:runbook`. | None |
+| `AGENTS.md` | ACTIVE | Repo agent bootstrap: Repo Operator entry points and merge law read by coding agents. | None |
+| `artifacts/manual-gmail-seeds/wpno-runtime-gmail-20260614T235343Z/seed-emails.md` | ACTIVE | Generated manual Gmail forward-only proof seed (`npm run gmail:forward-only:generate-seeds`); evidence input, not operating authority. | None |
+| `artifacts/manual-gmail-seeds/wpno-runtime-gmail-20260615T001306Z/seed-emails.md` | ACTIVE | Generated manual Gmail forward-only proof seed (`npm run gmail:forward-only:generate-seeds`); evidence input, not operating authority. | None |
 
 - `WEST_PEEK_BRAND_SYSTEM.md` — canonical cross-suite visual authority; active and locked.

@@ -127,3 +127,11 @@ decision module holds no I/O precisely so the test runs the shipping code rather
 than a transcription. 98 checks. It does not prove a deployed door or a live
 Google Sheets write; the proof-fixture flow through production does that.
 
+### Root runbook — 2026-09-23
+
+`validate:runbook` (`scripts/validate-runbook.mjs`) is a tier 1 HARD FAIL lane, admitted in
+`_validator_admission_register.json` and selected in `_repo_validation_matrix.json`, so
+`npm run validate:everything -- --tier=1` runs it. It fails if `RUNBOOK.md` is missing, names no
+paths or no npm scripts, names a backticked repo path or root file that does not exist, names an
+`npm run` script package.json does not define, or omits the command `.github/workflows/validate.yml`
+gates on. It does not prove the prose is accurate.
