@@ -2341,6 +2341,25 @@
       "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk."
     },
     {
+      "script": "validate:runbook",
+      "command": "node scripts/validate-runbook.mjs",
+      "status": "ACTIVE",
+      "admission": "direct_matrix_row",
+      "parentOrMatrixAuthority": "validate:runbook",
+      "category": "validation",
+      "severity": "HARD FAIL",
+      "productionRisk": "RUNBOOK.md, which AI employees read at plan time before changing this repo, names a path or npm script that no longer exists, or stops naming the command CI gates on, sending the planner to the wrong place.",
+      "whatItProves": "RUNBOOK.md exists at the root; every backticked repo path and root file it names exists; every `npm run <x>` it names is defined in package.json; it names every npm command .github/workflows/validate.yml runs. Hard-fails when it names no paths or no scripts.",
+      "whatItDoesNotProve": "Does not prove the prose is accurate, that hosts answer, or that the standing rules are still the owner's decisions.",
+      "failureHandling": "HARD FAIL — fix RUNBOOK.md (or restore the renamed path/script) and rerun.",
+      "ownerDecisionNeeded": "NO unless owner-interruption budget applies.",
+      "expectedFailureFrequency": "Low; fails only when a named path or script is renamed or removed.",
+      "runtimeCost": "Low; reads three files.",
+      "maintenanceCost": "Review whenever RUNBOOK.md, package.json scripts or the CI workflow change.",
+      "removalConditions": "Retire only if RUNBOOK.md is retired and the West Peek OS web-property change lane no longer reads it.",
+      "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk."
+    },
+    {
       "script": "validate:secret-policy",
       "command": "node scripts/testing/validate-secret-policy.mjs",
       "status": "ACTIVE",

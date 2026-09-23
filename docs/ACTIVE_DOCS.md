@@ -17,6 +17,7 @@ Purpose: single operator entrypoint that prevents doc sprawl. If a document is n
 - `KNOWN_EDGE_CASE_INVENTORY.md`
 - `PLACEHOLDER_LEDGER.md`
 - `README.md`
+- `RUNBOOK.md` — plan-time entry point for AI employees
 - `REPO_IDENTITY.md`
 - `REPO_PRODUCT_PROMISE_LEDGER.md`
 - `REPO_VALIDATION_MATRIX.md`

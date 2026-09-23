@@ -1561,6 +1561,18 @@
       "doesNotProve": "deployed door, live sheet write, or site-side configuration",
       "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk.",
       "failureHandling": "Juniper repairs and reruns. Selected lifecycle stage remains blocked."
+    },
+    {
+      "name": "root runbook names real paths",
+      "command": "npm run validate:runbook",
+      "tier": "tier1",
+      "category": "documentation contract",
+      "severity": "HARD FAIL",
+      "productionRisk": "plan-time runbook sends AI employees to paths or scripts that do not exist",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "accuracy of the runbook prose or live host behaviour",
+      "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk.",
+      "failureHandling": "Juniper repairs and reruns. Selected lifecycle stage remains blocked."
     }
   ],
   "validatorAdmissionRegister": "_validator_admission_register.json",
