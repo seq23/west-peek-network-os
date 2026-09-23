@@ -135,3 +135,13 @@ Google Sheets write; the proof-fixture flow through production does that.
 paths or no npm scripts, names a backticked repo path or root file that does not exist, names an
 `npm run` script package.json does not define, or omits the command `.github/workflows/validate.yml`
 gates on. It does not prove the prose is accurate.
+
+### Release lifecycle contract — 2026-09-23
+
+`validate:release-lifecycle-contract` is now a tier 1 HARD FAIL (was STRONG WARNING, and had failed
+unseen since 2026-06-14: it expected stage ids the orchestrator never had). It executes
+`scripts/release-close-lifecycle.mjs --dry-run` and requires the recorded sequence to equal
+`_repo_lifecycle_profile.json` (the profile `docs/runbooks/SUITE_RELEASE_LIFECYCLE_CONTRACT.md` names),
+the populated click audit to run with `CLICK_AUDIT_PHASE=populated` and a run-scoped
+`CLICK_AUDIT_RUN_ID`, the default proof run id to be `wpno-tier4-*`, and `REPO_UPDATE_LIFECYCLE.md`
+section 3 to list the same commands in order. It does not execute deployed stages.
