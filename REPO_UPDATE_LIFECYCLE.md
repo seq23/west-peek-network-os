@@ -30,9 +30,9 @@
 
 1. `npm run release:postpush`
 2. `npm run release:live-proof` — Tier 4 postdeploy provider/data testing and controlled test-data population
-3. `npm run postdeploy:authenticated-click-audit` — populated-state audit against the matching Tier 4 run
+3. `npm run postdeploy:authenticated-click-audit` — populated-state audit against the matching Tier 4 run (`CLICK_AUDIT_PHASE=populated`, so it refuses a run whose Tier 4 report did not pass)
 4. `npm run release:cleanup` — exact registered-fixture cleanup
-5. `npm run postdeploy:authenticated-click-audit` — post-cleanup integrity audit
+5. `npm run postcleanup:integrity` — post-cleanup integrity audit (Tier 4 report check, auth boundary, provider health), per `_repo_lifecycle_profile.json` and `docs/runbooks/SUITE_RELEASE_LIFECYCLE_CONTRACT.md`
 6. `npm run release:report`
 
 The orchestrator:
@@ -86,7 +86,7 @@ A failed required-file, secret, generated-artifact, ZIP-integrity, or root-layou
 - There is no pre-Tier-4 authenticated route audit. The first authenticated audit runs only after Tier 4 has populated controlled production-shaped test data.
 - Desktop covers every authenticated route. Mobile covers the seven declared high-risk/data-heavy routes.
 - The populated audit must match the successful Tier 4 proof run ID and detect raw HTML, malformed encoding, JSON/debug leakage, unbounded long text, horizontal overflow, and column collisions.
-- The second authenticated audit runs only after exact cleanup and proves real data/UI integrity remains intact.
+- The post-cleanup integrity check (`npm run postcleanup:integrity`) runs only after exact cleanup passed and proves the deployed auth boundary and provider health remain intact.
 
 ## Container Browser Unavailable — Mandatory Snapshot/Screenshot Fallback
 
