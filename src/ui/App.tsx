@@ -221,6 +221,19 @@ export function App() {
     }
   }
 
+  async function handleIntroPreference(id: string, noIntros: boolean) {
+    const key = `contact:${id}:intro-preference`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      const response = await fetch('/api/contacts/intro-preference', {method:'POST', credentials:'same-origin', headers:{'content-type':'application/json'}, body:JSON.stringify({contact_id:id,no_intros:noIntros})});
+      const result = await response.json() as {error?:string};
+      if (!response.ok) throw new Error(result.error || 'Could not update intro preference.');
+      await reloadSheetsSnapshot(noIntros ? 'Excluded from introduction suggestions.' : 'Introduction suggestions enabled.', true);
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Could not update intro preference.'); }
+    finally { setMutationKey(null); }
+  }
+
   async function handleLifecycle(entity: 'intake' | 'touch' | 'approval' | 'notification' | 'ai_suggestion' | 'event_attendee', id: string, action: 'archive' | 'restore') {
     const key = `${entity}:${id}:${action}`;
     if (mutationKey) return;
@@ -280,7 +293,7 @@ export function App() {
         {page === 'events' && <EventsPage events={data.events} attendees={data.eventAttendees} onAttendeeLifecycle={(id, action) => { void handleLifecycle('event_attendee', id, action); }} onSaved={(nextMessage) => void reloadSheetsSnapshot(nextMessage || 'Event data saved to Google Sheets.')} />}
         {page === 'add' && <><div className="segmented add-mode-tabs" role="group" aria-label="Add person method"><button type="button" className={addMode === 'manual' ? 'active' : ''} aria-pressed={addMode === 'manual'} onClick={() => setAddMode('manual')}>Enter details</button><button type="button" className={addMode === 'capture' ? 'active' : ''} aria-pressed={addMode === 'capture'} onClick={() => setAddMode('capture')}>Card / voice capture</button></div>{addMode === 'manual' ? <AddPerson onAdded={handleAdded} /> : <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}</>}
         {page === 'intake' && <IntakePage gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id, conversion) => { void handleIntakeReview(id, 'convert', conversion); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
-        {page === 'contacts' && <NetworkPage rows={data.contacts} initialSelectedId={pendingContactId} onInitialSelectionApplied={() => setPendingContactId(null)} onFindIntro={openIntro} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
+        {page === 'contacts' && <NetworkPage rows={data.contacts} initialSelectedId={pendingContactId} onInitialSelectionApplied={() => setPendingContactId(null)} onFindIntro={openIntro} onIntroPreference={(id, noIntros) => { void handleIntroPreference(id, noIntros); }} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
         {page === 'introductions' && <Introductions contacts={data.contacts} introductions={data.introductions} initialContactId={introContactId} onRefresh={() => reloadSheetsSnapshot(undefined,true)} />}
         {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('touch', id, action); }} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
         {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('approval', id, action); }} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}

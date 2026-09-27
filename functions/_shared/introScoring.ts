@@ -6,7 +6,7 @@ export type IntroContact = {
   created_at?: string; updated_at?: string;
 };
 export type IntroSubject = Partial<IntroContact> & { contact_id?: string; full_name: string; email: string; need_text: string };
-export type IntroRow = { person_a_id?: string; person_b_id?: string; status?: string; updated_at?: string; created_at?: string };
+export type IntroRow = { person_a_id?: string; person_b_id?: string; status?: string; updated_at?: string; created_at?: string; dismissed_reason?: string; decline_reason?: string };
 export type ScoredIntro = { contact: IntroContact; score: number; breakdown: Record<string, number> };
 
 const STOP = new Set('the and for with who this that from have they them will what where when about into your their need needs can are was were our you his her she he its'.split(' '));
@@ -50,7 +50,9 @@ export function scoreCandidates(subject: IntroSubject, contacts: IntroContact[],
     const strength = (c.priority === 'High' ? 10 : c.priority === 'Normal' ? 5 : 2) + (c.relationship_owner && c.relationship_owner !== 'Unassigned' ? 5 : 0);
     const created = Date.parse(String(c.updated_at || c.created_at || ''));
     const recency = Number.isFinite(created) && now - created <= 180 * 86400000 ? 5 : 0;
-    const breakdown = { lexical, role, relevance, strength, recency };
+    // Recent feedback about a candidate lowers future suggestions for other pairs, without turning it into an opt-out.
+    const feedback = introductions.some((row) => row.person_b_id === c.contact_id && ['dismissed','declined'].includes(String(row.status)) && now - Date.parse(String(row.updated_at || row.created_at || '')) < 90 * 86400000 && /wrong fit|timing|already know|reject/i.test(String(row.dismissed_reason || row.decline_reason || ''))) ? -10 : 0;
+    const breakdown = { lexical, role, relevance, strength, recency, feedback };
     const score = Object.values(breakdown).reduce((a,b)=>a+b,0);
     output.push({ contact:c,score,breakdown });
   }
