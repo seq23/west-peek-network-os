@@ -788,6 +788,26 @@ test('dashboard action: People metric opens the West Peek Network', async ({ pag
   await expect(page.getByRole('main').getByRole('heading', { name: 'Existing Investor' })).toBeVisible();
 });
 
+test('theme: dark is the default and the toggle persists across reload', async ({ page }) => {
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('button', { name: 'Switch to light mode' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await nav(page, 'Settings');
+  await page.getByRole('group', { name: 'Theme' }).getByRole('button', { name: 'Dark' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+});
+
+test('side-by-side: at 1024px the nav rail keeps every route reachable without the Menu button', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 800 });
+  await expect(page.getByRole('button', { name: /^Menu$/i })).toBeHidden();
+  for (const label of sidebar) {
+    await nav(page, label);
+    await mainText(page, contentBySidebar[label]);
+  }
+});
+
 test('dashboard action: Open the network button opens the West Peek Network', async ({ page }) => {
   await nav(page, 'Dashboard');
   await page.getByRole('main').getByRole('button', { name: /^Open the network$/i }).click();

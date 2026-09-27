@@ -6,6 +6,7 @@ Status: IMPLEMENTATION BASELINE ACTIVE — BROWSER EVIDENCE STILL REQUIRED
 Preserve West Peek identity, existing approved colors, logo, typography intent, and investor/operator tone. Do not replace the product with a generic neutral SaaS aesthetic.
 
 ## Required review surfaces
+- Dark default + side-by-side rail: review Dashboard, Network list and drawer, and Settings at 1440px, 1024px, 960px, and 390px in both themes. Screenshot evidence IDs belong in the Phase 3 validation receipt; browser evidence is pending until captured.
 - Settings: Google Sheets refresh and maintenance explainers
 - Deal Flow Intake and intelligent inbox review
 - duplicate and concurrency feedback

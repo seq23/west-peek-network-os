@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, CreditCard, Home, Inbox, MailCheck, Menu, Plus, Settings, Sparkles, Users, X } from 'lucide-react';
+import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, CreditCard, Home, Inbox, MailCheck, Menu, Moon, Plus, Settings, Sparkles, Sun, Users, X } from 'lucide-react';
+import { useTheme, type Theme } from './theme';
 import { Dashboard } from './Dashboard';
 import { GmailSyncControl } from './GmailSyncControl';
 import { Instructions } from './Instructions';
@@ -52,6 +53,7 @@ type OAuthStatus = {
 
 
 export function App() {
+  const [theme, setTheme] = useTheme();
   const [page, setPage] = useState<Page>('dashboard');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -247,6 +249,7 @@ export function App() {
             <div className="brand-sub">West Peek internal</div>
           </div>
         </div>
+        <button className="sidebar-theme-toggle" type="button" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}<span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span></button>
         <nav id="primary-navigation" className="nav" aria-label="Primary">
           {navItems.map((item) => (
             <button key={item.page} className={page === item.page ? 'active' : ''} onClick={() => { setPage(item.page); setMobileNavOpen(false); }}>
@@ -254,7 +257,7 @@ export function App() {
             </button>
           ))}
         </nav>
-        <div className="sidebar-health" aria-label="System health"><span className={`health-dot ${session.authenticated && sheetData ? 'good' : ''}`} /><span>{session.authenticated && sheetData ? 'Systems ready' : 'Setup needs attention'}</span></div>
+        <div className="sidebar-health" aria-label="System health" title={session.authenticated && sheetData ? 'Systems ready' : 'Setup needs attention'}><span className={`health-dot ${session.authenticated && sheetData ? 'good' : ''}`} /><span>{session.authenticated && sheetData ? 'Systems ready' : 'Setup needs attention'}</span></div>
       </aside>
       <main className="main">
         {message && <div className="notice" style={{ marginBottom: 16 }}>{message}</div>}
@@ -279,6 +282,8 @@ export function App() {
         {page === 'notifications' && <NotificationsPage rows={data.notifications} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('notification', id, action); }} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
         {page === 'ai' && <AiReview rows={data.aiSuggestions} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('ai_suggestion', id, action); }} onCreated={async () => { await reloadSheetsSnapshot('AI Helper created a pending approval and notification.', true); setPage('approvals'); }} />}
         {page === 'settings' && <SettingsPanel
+          theme={theme}
+          setTheme={setTheme}
           sheetStatus={sheetStatus}
           session={session}
           oauthStatus={oauthStatus}
@@ -488,6 +493,8 @@ function AiReview({ rows, mutationKey, onLifecycle, onCreated }: { rows: AiSugge
 }
 
 function SettingsPanel({
+  theme,
+  setTheme,
   sheetStatus,
   session,
   oauthStatus,
@@ -497,6 +504,8 @@ function SettingsPanel({
   onMaintenanceComplete,
   gmailSyncControl
 }: {
+  theme: Theme;
+  setTheme: (next: Theme) => void;
   sheetStatus: string;
   session: SessionState;
   oauthStatus: OAuthStatus;
@@ -620,6 +629,7 @@ function SettingsPanel({
   return <>
     <Header eyebrow="Settings" title="Connections and operator settings" subtitle="Check OAuth, open the live spreadsheet, refresh data, and manage external handoff links." />
     <RouteGuide purpose="Maintain provider connections and operational health." primaryAction="Fix degraded connections before running sync or maintenance." secondary="Refresh data only when a current readback is needed." caution="Maintenance is non-destructive; shared inboxes require separate connection." />
+    <section className="card appearance-card" aria-label="Appearance"><h2>Appearance</h2><p className="muted">Choose the display theme for this browser.</p><div className="segmented" role="group" aria-label="Theme"><button type="button" aria-pressed={theme === 'dark'} className={theme === 'dark' ? 'active' : ''} onClick={() => setTheme('dark')}>Dark</button><button type="button" aria-pressed={theme === 'light'} className={theme === 'light' ? 'active' : ''} onClick={() => setTheme('light')}>Light</button></div></section>
     <div className="grid cols-2">
       <div className="card">
         <h3>Google Gmail OAuth</h3>
