@@ -291,6 +291,15 @@ async function harness(page: Page) {
     return send(route, { ok: true, contact });
   });
 
+  await page.route('**/api/contacts/status', async (route) => {
+    const body = route.request().postDataJSON() as { contact_id?: string; status?: string };
+    const contact = data.contacts.find((c) => c.contact_id === body.contact_id);
+    if (!contact) return send(route, { ok: false, error: 'Contact not found in the West Peek Network.' }, 404);
+    contact.status = body.status === 'archived' ? 'archived' : 'active';
+    contact.updated_at = now();
+    return send(route, { ok: true, contact_id: contact.contact_id, status: contact.status });
+  });
+
   await page.route('**/api/intake/create', async (route) => {
     const body = route.request().postDataJSON() as { raw_text?: string };
     const raw = body.raw_text || '';
@@ -770,4 +779,119 @@ test('gmail sync UI hostile: repeated click cannot launch a second concurrent ba
   await button.dblclick();
   await mainText(page, /Gmail sync complete/i);
   expect(calls).toBe(3);
+});
+
+test('dashboard action: People metric opens the West Peek Network', async ({ page }) => {
+  await nav(page, 'Dashboard');
+  await page.getByRole('main').getByRole('button', { name: /^People: \d+\./ }).click();
+  await mainText(page, /People in the West Peek Network/i);
+  await expect(page.getByRole('main').getByRole('heading', { name: 'Existing Investor' })).toBeVisible();
+});
+
+test('dashboard action: Open the network button opens the West Peek Network', async ({ page }) => {
+  await nav(page, 'Dashboard');
+  await page.getByRole('main').getByRole('button', { name: /^Open the network$/i }).click();
+  await mainText(page, /People in the West Peek Network/i);
+});
+
+test('network list: newest addition is the first row and opens in the detail panel', async ({ page }) => {
+  await nav(page, 'Add Person');
+  await page.getByPlaceholder('Jordan Miles').fill('Newest Person');
+  await page.getByPlaceholder('jordan@example.com').fill('newest@example.com');
+  await page.getByPlaceholder('Apex Family Office').fill('Newest Capital');
+  await page.getByPlaceholder(/helped West Peek/i).fill('Most recent addition should be on top.');
+  await page.getByRole('main').getByRole('button', { name: /^Save person$/i }).click();
+  await mainText(page, /Added to Google Sheets and refreshed/i);
+  await nav(page, 'West Peek Network');
+  await expect(page.getByLabel('Sort contacts')).toHaveValue('newest');
+  const rows = page.getByRole('main').locator('.network-row');
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first()).toContainText('Newest Person');
+  await expect(rows.nth(1)).toContainText('Existing Investor');
+  const detail = page.getByRole('complementary', { name: 'Contact detail' });
+  await expect(detail).toBeHidden();
+  await rows.first().click();
+  await expect(detail.getByRole('heading', { name: 'Newest Person' })).toBeVisible();
+  await expect(detail).toContainText(/Newest Capital/);
+  await expect(detail).toContainText(/newest@example.com/);
+  await expect(detail).toContainText(/Most recent addition should be on top/);
+  await expect(detail.getByRole('button', { name: /^Archive contact$/ })).toBeVisible();
+  await expect(rows.first()).toHaveAttribute('aria-current', 'true');
+  await detail.getByRole('button', { name: /Close contact record/i }).click();
+  await expect(detail).toBeHidden();
+});
+
+test('network list: sort and search controls reorder and narrow the list', async ({ page }) => {
+  await nav(page, 'Add Person');
+  await page.getByPlaceholder('Jordan Miles').fill('Aaron Alpha');
+  await page.getByPlaceholder('jordan@example.com').fill('aaron@example.com');
+  await page.getByPlaceholder('Apex Family Office').fill('Zenith Partners');
+  await page.getByRole('main').getByRole('button', { name: /^Save person$/i }).click();
+  await mainText(page, /Added to Google Sheets and refreshed/i);
+  await nav(page, 'West Peek Network');
+  const rows = page.getByRole('main').locator('.network-row');
+  await expect(rows.first()).toContainText('Aaron Alpha');
+  await page.getByLabel('Sort contacts').selectOption('company');
+  await expect(rows.first()).toContainText('Existing Investor');
+  await page.getByLabel('Sort contacts').selectOption('name');
+  await expect(rows.first()).toContainText('Aaron Alpha');
+  await page.getByLabel('Search contacts').fill('zenith');
+  await expect(rows).toHaveCount(1);
+  await mainText(page, /1 records/);
+  await page.getByLabel('Search contacts').fill('nobody-matches-this');
+  await mainText(page, /No contacts match this view/i);
+});
+
+test('network list: archive from the detail panel moves the person to Archived and restore brings them back', async ({ page }) => {
+  await nav(page, 'West Peek Network');
+  await page.getByRole('main').getByRole('heading', { name: 'Existing Investor' }).getByRole('button').click();
+  const detail = page.getByRole('complementary', { name: 'Contact detail' });
+  await expect(detail.getByRole('heading', { name: 'Existing Investor' })).toBeVisible();
+  page.once('dialog', (dialog) => dialog.accept());
+  await detail.getByRole('button', { name: /^Archive contact$/ }).click();
+  await mainText(page, /Contact archived and removed from Active/i);
+  const rows = page.getByRole('main').locator('.network-row');
+  await expect(rows).toHaveCount(0);
+  await mainText(page, /No contacts match this view/i);
+  await expect(detail.getByRole('button', { name: /^Restore contact$/ })).toBeVisible();
+  await page.getByRole('group', { name: 'Contact status view' }).getByRole('button', { name: 'Archived' }).click();
+  await expect(rows.filter({ hasText: 'Existing Investor' })).toBeVisible();
+  await detail.getByRole('button', { name: /^Restore contact$/ }).click();
+  await mainText(page, /Contact restored to Active/i);
+  await page.getByRole('group', { name: 'Contact status view' }).getByRole('button', { name: 'Active' }).click();
+  await expect(rows.filter({ hasText: 'Existing Investor' })).toBeVisible();
+  await expect(detail.getByRole('button', { name: /^Archive contact$/ })).toBeVisible();
+});
+
+test('network list: arrow keys move the selection and Escape closes the record', async ({ page }) => {
+  await nav(page, 'Add Person');
+  await page.getByPlaceholder('Jordan Miles').fill('Keyboard Person');
+  await page.getByPlaceholder('jordan@example.com').fill('keyboard@example.com');
+  await page.getByRole('main').getByRole('button', { name: /^Save person$/i }).click();
+  await mainText(page, /Added to Google Sheets and refreshed/i);
+  await nav(page, 'West Peek Network');
+  const rows = page.getByRole('main').locator('.network-row');
+  await expect(rows).toHaveCount(2);
+  await rows.first().getByRole('button').focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(rows.nth(1)).toHaveAttribute('aria-current', 'true');
+  const detail = page.getByRole('complementary', { name: 'Contact detail' });
+  await expect(detail.getByRole('heading', { name: 'Existing Investor' })).toBeVisible();
+  await page.keyboard.press('ArrowUp');
+  await expect(rows.first()).toHaveAttribute('aria-current', 'true');
+  await expect(detail.getByRole('heading', { name: 'Keyboard Person' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(detail).toBeHidden();
+});
+
+test('mobile: network detail opens as a drawer and closes cleanly', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  await nav(page, 'West Peek Network');
+  await page.getByRole('main').getByRole('heading', { name: 'Existing Investor' }).getByRole('button').click();
+  const detail = page.getByRole('complementary', { name: 'Contact detail' });
+  await expect(detail.getByRole('heading', { name: 'Existing Investor' })).toBeVisible();
+  await expect(detail.getByRole('button', { name: /^Archive contact$/ })).toBeVisible();
+  await detail.getByRole('button', { name: /Close contact record/i }).click();
+  await expect(detail).toBeHidden();
 });

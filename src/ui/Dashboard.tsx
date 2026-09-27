@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, CalendarDays, CreditCard, Inbox, MailCheck, Mic, Plus, ShieldCheck } from 'lucide-react';
+import { AlertCircle, ArrowRight, CalendarDays, CreditCard, Inbox, MailCheck, Mic, Plus, ShieldCheck, Users } from 'lucide-react';
 import { clippedText, displayText } from './text';
 import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch } from '../domain/types';
 
@@ -63,7 +63,8 @@ export function Dashboard({ data, go, runtime, gmailSyncControl }: { data: Dashb
         <p className="subtitle hero-subtitle">Capture the person now. Add context later. Nothing becomes final until a human reviews it.</p>
         <div className="actions">
           <button className="btn primary" onClick={() => go('add')}><Plus size={17} /> Add person</button>
-          <button className="btn dark" onClick={() => go('capture')}><CreditCard size={17} /> Capture card or voice</button>
+          <button className="btn dark" onClick={() => go('contacts')}><Users size={17} /> Open the network</button>
+          <button className="btn" onClick={() => go('capture')}><CreditCard size={17} /> Capture card or voice</button>
           <button className="btn" onClick={() => go('events')}><CalendarDays size={17} /> Create event form</button>
         </div>
       </div>
@@ -86,7 +87,7 @@ export function Dashboard({ data, go, runtime, gmailSyncControl }: { data: Dashb
     </section>
 
     <section className="grid cols-4 compact-metrics">
-      <Metric label="People" value={data.contacts.length} helper="Final network records" />
+      <Metric label="People" value={data.contacts.length} helper="Open the network" onClick={() => go('contacts')} />
       <Metric label="Open intake" value={openIntake.length} helper="Needs review" />
       <Metric label="Touchpoints" value={openTouches.length} helper="Open follow-up" />
       <Metric label="Active events" value={activeEvents.length} helper="Form links live" />
@@ -124,8 +125,10 @@ export function Dashboard({ data, go, runtime, gmailSyncControl }: { data: Dashb
 function StatusLine({ label, value, good = false }: { label: string; value: string; good?: boolean }) {
   return <div className="status-line"><span>{label}</span><strong className={good ? 'good' : ''}>{value}</strong></div>;
 }
-function Metric({ label, value, helper }: { label: string; value: number; helper: string }) {
-  return <div className="card metric-card"><div className="metric">{value}</div><div><strong>{label}</strong><p className="muted">{helper}</p></div></div>;
+function Metric({ label, value, helper, onClick }: { label: string; value: number; helper: string; onClick?: () => void }) {
+  const body = <><div className="metric">{value}</div><div><strong>{label}</strong><p className="muted">{helper}</p></div></>;
+  if (onClick) return <button type="button" className="card metric-card metric-link" onClick={onClick} aria-label={`${label}: ${value}. ${helper}`}>{body}<ArrowRight size={16} className="metric-arrow" aria-hidden="true" /></button>;
+  return <div className="card metric-card">{body}</div>;
 }
 function Action({ icon, title, body, onClick }: { icon: React.ReactNode; title: string; body: string; onClick: () => void }) {
   return <button className="quick-action" onClick={onClick}><span className="quick-icon">{icon}</span><span><strong>{title}</strong><small>{body}</small></span></button>;
