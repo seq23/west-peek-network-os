@@ -567,3 +567,23 @@ select {
   .hero-panel { grid-template-columns:1fr; }
 }
 @media (max-width:760px) { .sidebar-theme-toggle { margin:0 0 10px; } }
+
+/* Operator-first Dashboard. */
+.hero-panel { grid-template-columns:minmax(0,1.65fr) minmax(310px,.85fr); }
+.hero-copy,.status-card { padding:20px 24px; border-radius:22px; }
+.hero-copy h1 { font-size:clamp(38px,4vw,58px); line-height:1; }
+.hero-subtitle { font-size:16px; margin-bottom:14px; }
+.status-card { gap:8px; }
+.compact-status h2 { font-size:22px; }
+.health-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.health-chips span { padding:6px 8px; background:var(--wp-badge-bg); border-radius:8px; font-size:11px; font-weight:750; }
+.health-details summary,.action-grid-card summary { cursor:pointer; font-weight:850; }
+.health-details[open] .status-line { padding:4px 0; }
+.recent-people .list { max-height:365px; overflow:auto; }
+.recent-people .row { padding:7px 10px; }
+.recent-people .row .muted { font-size:12px; }
+.secondary-panels .panel-button:not([open]) { min-height:0; }
+@media (max-width:1100px) { .hero-panel { grid-template-columns:1fr; } .action-grid-card:not([open]) { min-height:0; } }
+@media (max-width:760px) { .hero-copy,.status-card { padding:18px; } }
+.add-mode-tabs { margin-bottom:16px; }
+.add-mode-tabs button { min-width:150px; }

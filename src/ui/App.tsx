@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, CreditCard, Home, Inbox, MailCheck, Menu, Moon, Plus, Settings, Sparkles, Sun, Users, X } from 'lucide-react';
+import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, Home, Inbox, Menu, Moon, Plus, Settings, Sparkles, Sun, Users, X } from 'lucide-react';
 import { useTheme, type Theme } from './theme';
 import { Dashboard } from './Dashboard';
 import { GmailSyncControl } from './GmailSyncControl';
 import { Instructions } from './Instructions';
 import { AddPerson } from './AddPerson';
 import { CaptureStudio } from './CaptureStudio';
-import { ThankYouStudio } from './ThankYouStudio';
 import { EventsPage } from './Events';
 import { NetworkPage } from './Network';
 import { friendlyWhen, humanize, relativeWhen } from './format';
@@ -16,15 +15,13 @@ import { createSheetContact, createSheetIntake, decideSheetApproval, fetchSheetS
 import type { AiSuggestionRecord, ApprovalRecord, ContactRecord, DealFlowProspect, IntakeRecord, NotificationRecord, Owner, RelationshipTouch, TouchMethod } from '../domain/types';
 import { HANDWRITTEN_VENDORS, type HandwrittenVendor } from '../domain/handwrittenVendors';
 
-type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'capture' | 'thankyou' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
+type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
 
 const navItems: Array<{ page: Page; label: string; icon: React.ReactNode }> = [
   { page: 'dashboard', label: 'Dashboard', icon: <Home size={17} /> },
   { page: 'contacts', label: 'West Peek Network', icon: <Users size={17} /> },
   { page: 'events', label: 'Events', icon: <CalendarDays size={17} /> },
   { page: 'add', label: 'Add Person', icon: <Plus size={17} /> },
-  { page: 'capture', label: 'Capture Studio', icon: <CreditCard size={17} /> },
-  { page: 'thankyou', label: 'Thank-You', icon: <MailCheck size={17} /> },
   { page: 'intake', label: 'Intake Queue', icon: <Inbox size={17} /> },
   { page: 'touches', label: 'Touchpoints', icon: <ContactRound size={17} /> },
   { page: 'approvals', label: 'Approvals', icon: <CheckCircle2 size={17} /> },
@@ -55,6 +52,10 @@ type OAuthStatus = {
 export function App() {
   const [theme, setTheme] = useTheme();
   const [page, setPage] = useState<Page>('dashboard');
+  const [addMode, setAddMode] = useState<'manual' | 'capture'>('manual');
+  function openCapture() { setAddMode('capture'); setPage('add'); }
+  const [pendingContactId, setPendingContactId] = useState<string | null>(null);
+  function openContact(id: string) { setPendingContactId(id); setPage('contacts'); }
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
@@ -252,7 +253,7 @@ export function App() {
         <button className="sidebar-theme-toggle" type="button" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}<span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span></button>
         <nav id="primary-navigation" className="nav" aria-label="Primary">
           {navItems.map((item) => (
-            <button key={item.page} className={page === item.page ? 'active' : ''} onClick={() => { setPage(item.page); setMobileNavOpen(false); }}>
+            <button key={item.page} className={page === item.page ? 'active' : ''} onClick={() => { if (item.page === 'add') setAddMode('manual'); setPage(item.page); setMobileNavOpen(false); }}>
               {item.icon} {item.label}
             </button>
           ))}
@@ -261,7 +262,7 @@ export function App() {
       </aside>
       <main className="main">
         {message && <div className="notice" style={{ marginBottom: 16 }}>{message}</div>}
-        {page === 'dashboard' && <Dashboard data={data} go={setPage} runtime={{
+        {page === 'dashboard' && <Dashboard data={data} go={setPage} openCapture={openCapture} openContact={openContact} runtime={{
           sheetStatus,
           sessionAuthenticated: session.authenticated,
           sessionEmail: session.email,
@@ -272,11 +273,9 @@ export function App() {
         }} gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} compact onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} />}
         {page === 'instructions' && <Instructions />}
         {page === 'events' && <EventsPage events={data.events} attendees={data.eventAttendees} onAttendeeLifecycle={(id, action) => { void handleLifecycle('event_attendee', id, action); }} onSaved={(nextMessage) => void reloadSheetsSnapshot(nextMessage || 'Event data saved to Google Sheets.')} />}
-        {page === 'add' && <AddPerson onAdded={handleAdded} />}
-        {page === 'capture' && <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}
-        {page === 'thankyou' && <ThankYouStudio onSaved={() => void reloadSheetsSnapshot('Thank-you touch saved to Google Sheets.')} />}
+        {page === 'add' && <><div className="segmented add-mode-tabs" role="group" aria-label="Add person method"><button type="button" className={addMode === 'manual' ? 'active' : ''} aria-pressed={addMode === 'manual'} onClick={() => setAddMode('manual')}>Enter details</button><button type="button" className={addMode === 'capture' ? 'active' : ''} aria-pressed={addMode === 'capture'} onClick={() => setAddMode('capture')}>Card / voice capture</button></div>{addMode === 'manual' ? <AddPerson onAdded={handleAdded} /> : <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}</>}
         {page === 'intake' && <IntakePage gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id, conversion) => { void handleIntakeReview(id, 'convert', conversion); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
-        {page === 'contacts' && <NetworkPage rows={data.contacts} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
+        {page === 'contacts' && <NetworkPage rows={data.contacts} initialSelectedId={pendingContactId} onInitialSelectionApplied={() => setPendingContactId(null)} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
         {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('touch', id, action); }} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
         {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('approval', id, action); }} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
         {page === 'notifications' && <NotificationsPage rows={data.notifications} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('notification', id, action); }} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}

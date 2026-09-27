@@ -72,14 +72,7 @@ Met Sarah Lee at dinner. Horizon Capital. Strong LP conversation. Follow up next
     exampleTitle: 'Voice note content',
     example: `Met Jordan from Apex at the conference. Family office. Interested in late-stage OpenAI and Anthropic secondaries. Scooter should follow up next week.`
   },
-  {
-    title: '8. Send a thank-you card / relationship touch',
-    bestFor: 'Someone helped West Peek, made an intro, gave time, opened a door, or deserves a thoughtful touch.',
-    happens: 'The Thank-You Card Studio drafts a WP-branded virtual card and saves a pending relationship touch. Nothing sends automatically.',
-    steps: ['Open Thank-You Cards.', 'Enter recipient and reason.', 'Preview/copy the WP-branded card.', 'Open an email draft or save the touch for approval.'],
-    exampleTitle: 'Thank-you reason',
-    example: `Jordan Miles helped West Peek with a valuable intro. Send a thoughtful thank-you this week.`
-  }
+
 ];
 
 const examples = [
@@ -156,7 +149,7 @@ Due: This week`
 
 export function Instructions() {
   return <>
-    <Header eyebrow="App Instructions" title="Capture people the way they actually show up." subtitle="Event form links, conference email, reply thread, forwarded email, notes, cards, screenshots, voice notes, and thank-you touches all land in review first. Capture can be partial; enrichment comes later." />
+    <Header eyebrow="App Instructions" title="Capture people the way they actually show up." subtitle="Event form links, conference email, reply thread, forwarded email, notes, cards, screenshots, voice notes, and relationship touches all land in review first. Capture can be partial; enrichment comes later." />
     <RouteGuide purpose="Choose the lowest-friction capture route for the situation." primaryAction="Start with the quick decision guide, then copy the exact example you need." caution="Every route lands in review before becoming final or executable." />
 
     <div className="grid cols-2">
@@ -187,8 +180,7 @@ export function Instructions() {
         <div><strong>Have a business card?</strong><span>Upload the card/screenshot for OCR.</span></div>
         <div><strong>Have a Notes screenshot?</strong><span>Upload it as a notes_screenshot capture.</span></div>
         <div><strong>Too much to type?</strong><span>Upload a voice note and let transcription structure it.</span></div>
-        <div><strong>Need to thank someone?</strong><span>Use Thank-You Cards to draft a WP-branded card/touch.</span></div>
-        <div><strong>Need event context?</strong><span>Use the Events dashboard private context form or Capture Studio tied to the event.</span></div>
+        <div><strong>Need event context?</strong><span>Use the Events dashboard private context form or Add Person’s Card / voice capture tied to the event.</span></div>
       </div>
     </Section>
 
@@ -212,7 +204,6 @@ export function Instructions() {
 - tags
 - touch type
 - follow-up date
-- WP-branded thank-you card draft
 - duplicate warning`}</pre>
     </Section>
 

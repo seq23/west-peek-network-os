@@ -66,7 +66,6 @@ for (const fragment of [
   'Forward an email to yourself',
   'Upload a business card or screenshot',
   'Upload a voice note',
-  'Thank-You Card Studio',
   '<strong>Minimal</strong> is the on-the-spot default'
 ]) {
   assert.ok(instructionsSource.includes(fragment), `instructions missing ${fragment}`);

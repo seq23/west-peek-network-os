@@ -9,18 +9,32 @@ import { clampContactPage, contactPageCount, paginateContacts } from '../domain/
 
 type Props = {
   rows: ContactRecord[];
+  initialSelectedId?: string | null;
+  onInitialSelectionApplied?: () => void;
   mutationKey: string | null;
   onStatus: (id: string, status: 'active' | 'archived') => void;
 };
 
 const SORT_ORDER: ContactSort[] = ['newest', 'updated', 'name', 'company'];
 
-export function NetworkPage({ rows, mutationKey, onStatus }: Props) {
+export function NetworkPage({ rows, initialSelectedId, onInitialSelectionApplied, mutationKey, onStatus }: Props) {
   const [view, setView] = useState<ContactView>('active');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<ContactSort>('newest');
   const [requestedPage, setRequestedPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!initialSelectedId) return;
+    const target = rows.find((row) => row.contact_id === initialSelectedId);
+    if (target) {
+      setView(target.status === 'archived' ? 'archived' : 'active');
+      setSearch(''); setSort('newest');
+      const ordered = sortContacts(rows.filter((row) => row.status === target.status), 'newest');
+      setRequestedPage(Math.floor(ordered.findIndex((row) => row.contact_id === initialSelectedId) / NETWORK_LIST_PAGE_SIZE) + 1);
+      setSelectedId(initialSelectedId);
+    }
+    onInitialSelectionApplied?.();
+  }, [initialSelectedId]);
   const listRef = useRef<HTMLUListElement>(null);
 
   const visible = useMemo(() => sortContacts(filterContacts(rows, view, search), sort), [rows, view, search, sort]);

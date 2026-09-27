@@ -7,8 +7,6 @@ Machine-readable authority: `config/deployed-route-manifest.json`.
 | Dashboard | / | authenticated | operator | critical | desktop + mobile | none |
 | Events | / | authenticated | operator | critical | desktop | none |
 | Add Person | / | authenticated | operator | critical | desktop + mobile | none |
-| Capture Studio | / | authenticated | operator | critical | desktop + mobile | none |
-| Thank-You | / | authenticated | operator | critical | desktop | none |
 | Intake Queue | / | authenticated | operator | critical | desktop + mobile | none |
 | West Peek Network | / | authenticated | operator | critical | desktop + mobile | none |
 | Touchpoints | / | authenticated | operator | critical | desktop + mobile | none |
