@@ -1,5 +1,5 @@
 import { AlertCircle, ArrowRight, CalendarDays, CreditCard, Inbox, Mic, Plus, ShieldCheck, Users } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { clippedText, displayText } from './text';
 import { sortContacts } from '../domain/contactList';
 import { relativeWhen } from './format';
@@ -32,6 +32,7 @@ const openStatus = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs
 const openTouchStatus = new Set(['pending_approval', 'approved_ready_to_send', 'opened_vendor', 'will_do_myself', 'needed', 'planned', 'drafted']);
 
 export function Dashboard({ data, go, openCapture, openContact, runtime, gmailSyncControl }: { data: DashboardData; go: (page: Page) => void; openCapture: () => void; openContact: (id: string) => void; runtime: RuntimeStatus; gmailSyncControl: React.ReactNode }) {
+  useEffect(() => { if (runtime.usingLiveSheets && data.introductions?.some((row) => row.status === 'suggested')) void fetch('/api/introductions/weekly', {method:'POST',credentials:'same-origin'}).catch(() => undefined); }, [runtime.usingLiveSheets, data.introductions]);
   const [captureOpen, setCaptureOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth > 1100);
   const openIntake = data.intake.filter((item) => openStatus.has(item.review_status));
   const openTouches = data.touches.filter((item) => openTouchStatus.has(item.status));

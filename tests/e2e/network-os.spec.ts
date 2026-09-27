@@ -456,7 +456,8 @@ test('introductions: recommended match can be drafted and dismissed without send
   await page.getByRole('button',{name:'Draft intro'}).click();
   await expect(page.getByRole('region',{name:'Introduction draft'})).toContainText('Would you welcome an intro?');
   await page.getByRole('button',{name:'Close',exact:true}).click();
-  await page.getByRole('button',{name:'Not now'}).click();
+  await page.getByText('Not now',{exact:true}).click();
+  await page.getByRole('button',{name:'Wrong fit'}).click();
   await expect(page.getByRole('heading',{name:'Alex Founder ↔ Existing Investor'})).toHaveCount(0);
   expect(sendCalls).toBe(0);
 });

@@ -533,6 +533,8 @@ function SettingsPanel({
   onMaintenanceComplete: () => void;
   gmailSyncControl: React.ReactNode;
 }) {
+  const [introSendReadiness, setIntroSendReadiness] = useState<{ready:boolean;reason:string}|null>(null);
+  useEffect(() => { void fetch('/api/introductions/send-readiness', {credentials:'same-origin'}).then((response) => response.json()).then((value) => setIntroSendReadiness(value as {ready:boolean;reason:string})).catch(() => undefined); }, []);
   const [maintenanceStatus, setMaintenanceStatus] = useState<string | null>(null);
   const [maintenanceBusy, setMaintenanceBusy] = useState(false);
   const [refreshBusy, setRefreshBusy] = useState(false);
@@ -651,6 +653,7 @@ function SettingsPanel({
     <div className="grid cols-2">
       <div className="card">
         <h3>Google Gmail OAuth</h3>
+        {introSendReadiness && !introSendReadiness.ready && <p role="status" className="notice">Introduction sending: {introSendReadiness.reason}</p>}
         <p><strong>{oauthStatus.gmail_oauth_connected ? 'Connected' : 'Not connected / unknown'}</strong></p>
         <p className="muted">{oauthMessage}</p>
         <p className="muted">Browser session: {session.authenticated ? `signed in as ${session.email}` : session.message}</p>
