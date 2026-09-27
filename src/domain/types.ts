@@ -16,6 +16,20 @@ export type PersonType = 'investor' | 'founder' | 'operator' | 'lawyer' | 'servi
 export type DealFlowProspect = 'yes' | 'no' | 'unknown';
 export type TriggerIntent = 'network' | 'deal_flow' | 'relationship_routing' | 'event_participation' | 'network_membership';
 
+export interface IntroductionRecord {
+  intro_id: string; created_at: string; updated_at: string;
+  status: 'suggested' | 'drafted' | 'pending_approval' | 'approved' | 'permission_sent' | 'permission_confirmed' | 'sent' | 'send_uncertain' | 'declined' | 'dismissed' | 'archived';
+  mode: 'recommended' | 'targeted'; requester_email: string;
+  person_a_id: string; person_a_name: string; person_a_email: string; person_a_company: string; person_a_external: boolean;
+  person_b_id: string; person_b_name: string; person_b_email: string; person_b_company: string;
+  need_text: string; match_score: number; ai_confidence: 'low' | 'medium' | 'high';
+  rationale: string; rationale_a: string; rationale_b: string; etiquette: 'ask_first' | 'double';
+  draft_subject?: string; draft_body?: string; ask_first_subject?: string; ask_first_body?: string;
+  approval_id?: string; approved_by?: string; approved_at?: string; sent_at?: string; sent_from?: string;
+  gmail_message_id?: string; gmail_thread_id?: string; permission_sent_at?: string; permission_confirmed_at?: string; permission_confirmed_by?: string; send_error?: string; decline_reason?: string; dismissed_reason?: string;
+  touch_id_a?: string; touch_id_b?: string; internal_data_trace?: string; created_by?: string; updated_by?: string;
+}
+
 
 export interface EventRecord {
   event_id: string;

@@ -9,6 +9,7 @@ Machine-readable authority: `config/deployed-route-manifest.json`.
 | Add Person | / | authenticated | operator | critical | desktop + mobile | none |
 | Intake Queue | / | authenticated | operator | critical | desktop + mobile | none |
 | West Peek Network | / | authenticated | operator | critical | desktop + mobile | none |
+| Introductions | / | authenticated | operator | critical | desktop + mobile | none |
 | Touchpoints | / | authenticated | operator | critical | desktop + mobile | none |
 | Approvals | / | authenticated | operator | critical | desktop | none |
 | Notifications | / | authenticated | operator | critical | desktop | none |

@@ -16,3 +16,9 @@ compatibility_date = "2026-06-07"
 # allowlist and lock everyone out until the next build landed.
 [vars]
 ADMIN_EMAIL_ALLOWLIST = "info@westpeek.ventures,sequoia@westpeek.ventures,scooter@westpeek.ventures"
+
+# Deploy workers/intro-send-guard first. This binding is mandatory for Gmail sending.
+[[durable_objects.bindings]]
+name = "INTRO_SEND_GUARD"
+class_name = "IntroSendGuard"
+script_name = "west-peek-intro-send-guard"

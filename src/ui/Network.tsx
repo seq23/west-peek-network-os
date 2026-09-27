@@ -11,13 +11,14 @@ type Props = {
   rows: ContactRecord[];
   initialSelectedId?: string | null;
   onInitialSelectionApplied?: () => void;
+  onFindIntro?: (id: string) => void;
   mutationKey: string | null;
   onStatus: (id: string, status: 'active' | 'archived') => void;
 };
 
 const SORT_ORDER: ContactSort[] = ['newest', 'updated', 'name', 'company'];
 
-export function NetworkPage({ rows, initialSelectedId, onInitialSelectionApplied, mutationKey, onStatus }: Props) {
+export function NetworkPage({ rows, initialSelectedId, onInitialSelectionApplied, onFindIntro, mutationKey, onStatus }: Props) {
   const [view, setView] = useState<ContactView>('active');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<ContactSort>('newest');
@@ -129,7 +130,7 @@ export function NetworkPage({ rows, initialSelectedId, onInitialSelectionApplied
         {pagination}
       </section>
       <aside className="network-detail" aria-label="Contact detail" aria-live="polite">
-        {selected ? <ContactDetail contact={selected} mutationKey={mutationKey} onStatus={onStatus} onClose={() => setSelectedId(null)} /> : (
+        {selected ? <ContactDetail contact={selected} mutationKey={mutationKey} onStatus={onStatus} onFindIntro={onFindIntro} onClose={() => setSelectedId(null)} /> : (
           <div className="network-detail-empty">
             <div className="kicker">Contact record</div>
             <p>Select a person to see their full record here.</p>
@@ -144,7 +145,7 @@ export function NetworkPage({ rows, initialSelectedId, onInitialSelectionApplied
 type Field = { label: string; value?: string | null; kind?: 'text' | 'link' | 'long' };
 type Group = { title: string; fields: Field[] };
 
-function ContactDetail({ contact, mutationKey, onStatus, onClose }: { contact: ContactRecord; mutationKey: string | null; onStatus: (id: string, status: 'active' | 'archived') => void; onClose: () => void }) {
+function ContactDetail({ contact, mutationKey, onStatus, onFindIntro, onClose }: { contact: ContactRecord; mutationKey: string | null; onStatus: (id: string, status: 'active' | 'archived') => void; onFindIntro?: (id: string) => void; onClose: () => void }) {
   const busy = Boolean(mutationKey?.startsWith(`contact:${contact.contact_id}:`));
   const owners = [contact.relationship_owner, ...(contact.additional_owners || [])].filter(Boolean).join(', ');
   const rawGroups: Group[] = [
@@ -218,6 +219,7 @@ function ContactDetail({ contact, mutationKey, onStatus, onClose }: { contact: C
         <button type="button" className="btn small network-detail-close" onClick={onClose} aria-label="Close contact record"><X size={16} /></button>
       </header>
       <div className="network-detail-signals">
+        {contact.status === 'active' && onFindIntro && <button type="button" className="btn small" onClick={() => onFindIntro(contact.contact_id)}>Find an intro</button>}
         <span className={`badge ${contact.priority === 'High' ? 'warn' : ''}`}>{contact.priority} priority</span>
         {contact.deal_flow_prospect === 'yes' && <span className="badge warn">Deal-flow prospect</span>}
         {contact.touch_needed && <span className="badge warn">Needs touch</span>}

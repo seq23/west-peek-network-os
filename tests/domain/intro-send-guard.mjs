@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { IntroSendGuard } from '../../workers/intro-send-guard/index.ts';
+const memory = new Map();
+const state = { storage: { get: async (key) => memory.get(key), put: async (key, value) => { memory.set(key, value); } } };
+const guard = new IntroSendGuard(state);
+const fingerprint = 'a'.repeat(64);
+const call = (action, result) => guard.fetch(new Request('https://guard/', {method:'POST', body:JSON.stringify({action,fingerprint,result})}));
+assert.equal((await call('claim')).status, 200);
+assert.equal((await call('claim')).status, 409, 'double click cannot claim twice');
+assert.equal((await call('complete',{id:'gmail-123'})).status, 200);
+assert.equal((await call('claim')).status, 409, 'a recorded send cannot be retried');
+assert.equal((await call('complete',{id:'gmail-456'})).status, 409, 'receipt cannot be replaced');
+assert.equal(memory.get('claim').result.id, 'gmail-123');
+console.log('intro-send-guard: PASS');

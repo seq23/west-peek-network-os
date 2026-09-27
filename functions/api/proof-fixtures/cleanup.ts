@@ -23,7 +23,7 @@ const TIER4_RUN_PATTERN = /^wpno-tier4-[A-Za-z0-9._:-]+$/;
 const EXACT_PROOF_RUN_PATTERN = /^wpno-(?:tier4|runtime-gmail)-[A-Za-z0-9._:-]+$/;
 const TIER4_MARKER = /(^|[^a-z0-9])(?:wpno[\s_-]*)?tier[\s_-]*4([^a-z0-9]|$)/i;
 const MINIMUM_GRID_ROWS = 1000;
-const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
+const TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'introductions', 'events', 'event_attendees', 'provider_replay_guard'];
 const ID_KEYS: Partial<Record<SheetTab, string>> = {
   contacts: 'contact_id', intake_queue: 'intake_id', relationship_touches: 'touch_id', approvals: 'approval_id',
   notifications: 'notification_id', ai_suggestions: 'suggestion_id', events: 'event_id', event_attendees: 'event_attendee_id',

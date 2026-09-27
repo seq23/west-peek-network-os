@@ -22,7 +22,7 @@ assert.match(gmailSource, /TRIGGER_ALIASES\.join\(['\"]\s+['\"]\)/);
 assert.match(gmailSource, /nextPageToken/);
 assert.match(gmailSource, /gmail_ingestion_key/);
 assert.match(gmailSource, /skipped_duplicate_count/);
-assert.equal(Object.keys(schema.tabs).length, 10);
+assert.equal(Object.keys(schema.tabs).length, 11);
 for (const [tab, spec] of Object.entries(schema.tabs)) {
   assert.ok(spec.headers.length > 0, `${tab} headers`);
   assert.equal(new Set(spec.headers).size, spec.headers.length, `${tab} duplicate headers`);
