@@ -1,13 +1,371 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíÛMôñ:-jZ.¶›­–)Þ³V–×÷'B²W6TVffV7BÂW6TÖVÖòÂW6U7FFRÒg&öÒw&V7Bs°¦–×÷'B²&VÆÂÂ&öö´÷VâÂ6ÆVæF$F—2Â6†V6´6—&6ÆS"Â6öçF7E&÷VæBÂ†öÖRÂ–æ&÷‚ÂÖVçRÂÖööâÂÇW2Â6WGF–æw2Â7&¶ÆW2Â7VâÂW6W'2ÂW6W%&÷VæEÇW2Â‚Òg&öÒvÇV6–FR×&V7Bs°¦–×÷'B²W6UF†VÖRÂG—RF†VÖRÒg&öÒrâ÷F†VÖRs°¦–×÷'B²F6†&ö&BÒg&öÒrâôF6†&ö&Bs°¦–×÷'B²vÖ–Å7–æ46öçG&öÂÒg&öÒrâôvÖ–Å7–æ46öçG&öÂs°¦–×÷'B²–ç7G'V7F–öç2Òg&öÒrâô–ç7G'V7F–öç2s°¦–×÷'B²FEW'6öâÒg&öÒrâôFEW'6öâs°¦–×÷'B²6GW&U7GVF–òÒg&öÒrâô6GW&U7GVF–òs°¦–×÷'B²WfVçG5vRÒg&öÒrâôWfVçG2s°¦–×÷'B²æWGv÷&µvRÒg&öÒrâôæWGv÷&²s°¦–×÷'B²–çG&öGV7F–öç2Òg&öÒrâô–çG&öGV7F–öç2s°¦–×÷'B²g&–VæFÇ•v†VâÂ‡VÖæ—¦RÂ&VÆF—fUv†VâÒg&öÒrâöf÷&ÖBs°¦–×÷'B²6Æ—VEFW‡BÂF—7Æ•FW‡BÒg&öÒrâ÷FW‡Bs°¦–×÷'B²7F÷&RÒg&öÒrââöFF÷7F÷&Rs°¦–×÷'B²7&VFU6†VWD6öçF7BÂ7&VFU6†VWD–çF¶RÂFV6–FU6†VWD&÷fÂÂfWF6…6†VWE6æ6†÷BÂÖ&µ6†VWDæ÷F–f–6F–öå&VBÂ&Wf–Wu6†VWD–çF¶RÂWFFU6†VWEF÷V6„gVÆf–ÆÆÖVçBÂWFFU6†VWD6öçF7E7FGW2ÂWFFU6†VWE&V6÷&DÆ–fV7–6ÆRÂG—R6†VWE6æ6†÷BÒg&öÒrââ÷6W'f–6W2÷6†VWG46Æ–VçBs°¦–×÷'BG—R²•7VvvW7F–öå&V6÷&BÂ&÷fÅ&V6÷&BÂ6öçF7E&V6÷&BÂFVÄfÆ÷u&÷7V7BÂ–çF¶U&V6÷&BÂæ÷F–f–6F–öå&V6÷&BÂ÷væW"Â&VÆF–öç6†—F÷V6‚ÂF÷V6„ÖWF†öBÒg&öÒrââöFöÖ–â÷G—W2s°¦–×÷'B²„äEu$•EDTåõdTäDõ%2ÂG—R†æGw&—GFVåfVæF÷"Òg&öÒrââöFöÖ–âö†æGw&—GFVåfVæF÷'2s° §G—RvRÒvF6†&ö&BrÂv–ç7G'V7F–öç2rÂvWfVçG2rÂvFBrÂv–çG&öGV7F–öç2rÂv–çF¶RrÂv6öçF7G2rÂwF÷V6†W2rÂv&÷fÇ2rÂvæ÷F–f–6F–öç2rÂv’rÂw6WGF–æw2s° ¦6öç7Bæd—FV×3¢'&“Ç²vS¢vS²Æ&VÃ¢7G&–æs²–6öã¢&V7Bå&V7DæöFRÓâÒ°¢²vS¢vF6†&ö&BrÂÆ&VÃ¢tF6†&ö&BrÂ–6öã¢Ä†öÖR6—¦S×³wÒóâÒÀ¢²vS¢v6öçF7G2rÂÆ&VÃ¢uvW7BVV²æWGv÷&²rÂ–6öã¢ÅW6W'26—¦S×³wÒóâÒÀ¢²vS¢v–çG&öGV7F–öç2rÂÆ&VÃ¢t–çG&öGV7F–öç2rÂ–6öã¢ÅW6W%&÷VæEÇW26—¦S×³wÒóâÒÀ¢²vS¢vWfVçG2rÂÆ&VÃ¢tWfVçG2rÂ–6öã¢Ä6ÆVæF$F—26—¦S×³wÒóâÒÀ¢²vS¢vFBrÂÆ&VÃ¢tFBW'6öârÂ–6öã¢ÅÇW26—¦S×³wÒóâÒÀ¢²vS¢v–çF¶RrÂÆ&VÃ¢t–çF¶RVWVRrÂ–6öã¢Ä–æ&÷‚6—¦S×³wÒóâÒÀ¢²vS¢wF÷V6†W2rÂÆ&VÃ¢uF÷V6‡ö–çG2rÂ–6öã¢Ä6öçF7E&÷VæB6—¦S×³wÒóâÒÀ¢²vS¢v&÷fÇ2rÂÆ&VÃ¢t&÷fÇ2rÂ–6öã¢Ä6†V6´6—&6ÆS"6—¦S×³wÒóâÒÀ¢²vS¢væ÷F–f–6F–öç2rÂÆ&VÃ¢tæ÷F–f–6F–öç2rÂ–6öã¢Ä&VÆÂ6—¦S×³wÒóâÒÀ¢²vS¢v’rÂÆ&VÃ¢t’†VÇW"rÂ–6öã¢Å7&¶ÆW26—¦S×³wÒóâÒÀ¢²vS¢v–ç7G'V7F–öç2rÂÆ&VÃ¢t–ç7G'V7F–öç2rÂ–6öã¢Ä&öö´÷Vâ6—¦S×³wÒóâÒÀ¢²vS¢w6WGF–æw2rÂÆ&VÃ¢u6WGF–æw2rÂ–6öã¢Å6WGF–æw26—¦S×³wÒóâÐ¥Ó° §G—R6W76–öå7FFRÒ²WF†VçF–6FVC¢&ööÆVã²VÖ–Ãó¢7G&–æs²ÖW76vS¢7G&–ærÓ°§G—RôWF…7FGW2Ò°¢ö³ó¢&ööÆVã°¢'&÷w6W%÷6W76–öåö6öææV7FVCó¢&ööÆVã°¢'&÷w6W%÷6W76–öåöVÖ–Ãó¢7G&–æs°¢vÖ–ÅööWF…ö6öææV7FVCó¢&ööÆVã°¢6öææV7FVEöVÖ–Ãó¢7G&–æs°¢&÷f–FW#ó¢7G&–æs°¢7FGW3ó¢7G&–æs°¢Fö¶Våö6GW&VEöCó¢7G&–æs°¢Fö¶Vå÷WFFVEöCó¢7G&–æs°¢6÷W&6Só¢7G&–æs°¢66†U÷GFÅ÷6V6öæG3ó¢çVÖ&W#°¢v&æ–æsó¢7G&–æs°¢W'&÷#ó¢7G&–æs°§Ó°  ¦W‡÷'BgVæ7F–öâ‚’°¢6öç7B·F†VÖRÂ6WEF†VÖUÒÒW6UF†VÖR‚“°¢6öç7B·vRÂ6WEvUÒÒW6U7FFSÅvSâ‚vF6†&ö&Br“°¢6öç7B¶FDÖöFRÂ6WDFDÖöFUÒÒW6U7FFSÂvÖçVÂrÂv6GW&Rsâ‚vÖçVÂr“°¢gVæ7F–öâ÷Vä6GW&R‚’²6WDFDÖöFR‚v6GW&Rr“²6WEvR‚vFBr“²Ð¢6öç7B·VæF–æt6öçF7D–BÂ6WEVæF–æt6öçF7D–EÒÒW6U7FFSÇ7G&–ærÂçVÆÃâ†çVÆÂ“°¢6öç7B¶–çG&ô6öçF7D–BÂ6WD–çG&ô6öçF7D–EÒÒW6U7FFSÇ7G&–ærÂçVÆÃâ†çVÆÂ“°¢gVæ7F–öâ÷Vä–çG&ò†–C¢7G&–ær’²6WD–çG&ô6öçF7D–B†–B“²6WEvR‚v–çG&öGV7F–öç2r“²Ð¢gVæ7F–öâ÷Vä6öçF7B†–C¢7G&–ær’²6WEVæF–æt6öçF7D–B†–B“²6WEvR‚v6öçF7G2r“²Ð¢6öç7B¶Öö&–ÆTæd÷VâÂ6WDÖö&–ÆTæd÷VåÒÒW6U7FFR†fÇ6R“°¢6öç7B¶ÖW76vRÂ6WDÖW76vUÒÒW6U7FFSÇ7G&–ærÂçVÆÃâ†çVÆÂ“°¢6öç7B·&Vg&W6…Fö¶VâÂ6WE&Vg&W6…Fö¶VåÒÒW6U7FFRƒ“°¢6öç7B¶×WFF–öä¶W’Â6WD×WFF–öä¶W•ÒÒW6U7FFSÇ7G&–ærÂçVÆÃâ†çVÆÂ“°¢6öç7B·6†VWDFFÂ6WE6†VWDFFÒÒW6U7FFSÅ6†VWE6æ6†÷BÂçVÆÃâ†çVÆÂ“°¢6öç7B·6†VWE7FGW2Â6WE6†VWE7FGW5ÒÒW6U7FFR‚tÆöF–ærvöövÆR6†VWG26æ6†÷Bâââr“°¢6öç7B·6W76–öâÂ6WE6W76–öåÒÒW6U7FFSÅ6W76–öå7FFSâ‡²WF†VçF–6FVC¢fÇ6RÂÖW76vS¢t6†V6¶–ærvöövÆRôWF‚6W76–öâââârÒ“°¢6öç7B¶öWF…7FGW2Â6WDöWF…7FGW5ÒÒW6U7FFSÄôWF…7FGW3â‡²vÖ–ÅööWF…ö6öææV7FVC¢fÇ6RÂ7FGW3¢wVæ¶æ÷vârÒ“°¢6öç7B¶öWF„ÖW76vRÂ6WDöWF„ÖW76vUÒÒW6U7FFR‚t6†V6¶–ærvÖ–ÂôWF‚Fö¶Vâ7FGW2âââr“°¢6öç7BÆö6ÄFFÒW6TÖVÖò‚‚’Óâ‡°¢6öçF7G3¢7F÷&Ræ6öçF7G2‚’À¢–çF¶S¢7F÷&Ræ–çF¶R‚’À¢F÷V6†W3¢7F÷&RçF÷V6†W2‚’À¢&÷fÇ3¢7F÷&Ræ&÷fÇ2‚’À¢æ÷F–f–6F–öç3¢7F÷&Rææ÷F–f–6F–öç2‚’À¢•7VvvW7F–öç3¢µÒÀ¢–çG&öGV7F–öç3¢µÒÀ¢WfVçG3¢µÒÀ¢WfVçDGFVæFVW3¢µÐ¢Ò’Â·&Vg&W6…Fö¶VåÒ“°¢6öç7BFFÒ6†VWDFFÇÂÆö6ÄFF° ¢7–æ2gVæ7F–öâ&VÆöE6†VWG56æ6†÷B†æW‡DÖW76vSó¢7G&–ærÂg&W6‚ÒG'VR’°¢G'’°¢6öç7B6æ6†÷BÒv—BfWF6…6†VWE6æ6†÷B‡²g&W6‚Ò“°¢6WE6†VWDFF‡6æ6†÷B“°¢6öç7Bg&W6†æW72Ò6æ6†÷Bç6÷W&6RÓÓÒvvöövÆU÷6†VWG5ö&F6…ö66†Rrò66†VB6æ6†÷B‚G´ÖF‚ç&÷VæB‚‡6æ6†÷Bæ66†TvT×2ÇÂ’ò—×2öÆB’æ¢g&W6‚vöövÆR6†VWG26æ6†÷BG·6æ6†÷Bç&Vg&W6†VDBòBG¶æWrFFR‡6æ6†÷Bç&Vg&W6†VDB’çFôÆö6ÆUF–ÖU7G&–ær‚—Ö¢rwÒæ°¢6WE6†VWE7FGW2‡6æ6†÷Bçv&æ–æw3òæ–çG&öGV7F–öç2òG¶g&W6†æW77Ò–çG&öGV7F–öç2Væf–Æ&ÆS¢G·6æ6†÷Bçv&æ–æw2æ–çG&öGV7F–öç7Ö¢g&W6†æW72“°¢–b†æW‡DÖW76vR’6WDÖW76vR†æW‡DÖW76vR“°¢&WGW&â6æ6†÷C°¢Ò6F6‚†W'&÷"’°¢6WE6†VWE7FGW2†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢tvöövÆR6†VWG26æ6†÷BVæf–Æ&ÆRâr“°¢–b†æW‡DÖW76vR’6WDÖW76vR†æW‡DÖW76vR“°¢&WGW&âçVÆÃ°¢Ð¢Ð ¢7–æ2gVæ7F–öâÆöE6W76–öâ‚’°¢G'’°¢6öç7B&W7öç6RÒv—BfWF6‚‚rö’÷6W76–öârÂ²7&VFVçF–Ç3¢w6ÖRÖ÷&–v–ârÒ“°¢6öç7B–ÆöBÒv—B&W7öç6Ræ§6öâ‚’æ6F6‚‚‚’Óâ‡·Ò’’2²WF†VçF–6FVCó¢&ööÆVã²W6W#ó¢²VÖ–Ãó¢7G&–ærÓ²W'&÷#ó¢7G&–ærÓ°¢6WE6W76–öâ‡²WF†VçF–6FVC¢&ööÆVâ‡–ÆöBæWF†VçF–6FVB’ÂVÖ–Ã¢–ÆöBçW6W#òæVÖ–ÂÂÖW76vS¢–ÆöBæWF†VçF–6FVBò6–væVB–â2G·–ÆöBçW6W#òæVÖ–ÂÇÂv&÷fVBW6W"wÖ¢‡–ÆöBæW'&÷"ÇÂtæò6–væVB'&÷w6W"6W76–öâ–âF†—2'&÷w6W"âr’Ò“°¢Ò6F6‚†W'&÷"’°¢6WE6W76–öâ‡²WF†VçF–6FVC¢fÇ6RÂÖW76vS¢W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷B6†V6²'&÷w6W"6W76–öâârÒ“°¢Ð¢Ð ¢7–æ2gVæ7F–öâÆöDôWF…7FGW2‚’°¢G'’°¢6öç7B&W7öç6RÒv—BfWF6‚‚rö’ööWF‚÷7FGW2rÂ²7&VFVçF–Ç3¢w6ÖRÖ÷&–v–ârÒ“°¢6öç7B–ÆöBÒv—B&W7öç6Ræ§6öâ‚’æ6F6‚‚‚’Óâ‡·Ò’’2ôWF…7FGW3°¢6WDöWF…7FGW2‡–ÆöB“°¢–b‡–ÆöBævÖ–ÅööWF…ö6öææV7FVB’°¢6öç7B7Vff—‚Ò–ÆöBçv&æ–æròG·–ÆöBçv&æ–æwÖ¢rs°¢6WDöWF„ÖW76vR†vÖ–ÂôWF‚Fö¶Vâ6GW&VBf÷"G·–ÆöBæ6öææV7FVEöVÖ–ÂÇÂ–ÆöBæ'&÷w6W%÷6W76–öåöVÖ–ÂÇÂv&÷fVBW6W"wÒG·–ÆöBçFö¶Våö6GW&VEöBòBG·–ÆöBçFö¶Våö6GW&VEöGÖ¢rwÒâG·7Vff—‡Ö“°¢ÒVÇ6R–b‡–ÆöBç7FGW2ÓÓÒwFV×÷&&–Ç•÷&FUöÆ–Ö—FVBr’°¢6WDöWF„ÖW76vR‡–ÆöBæW'&÷"ÇÂtvöövÆR6†VWG2V÷F6ööÆF÷vââv—Bc6V6öæG2&Vf÷&R&Vg&W6†–ær6öææV7F–öâ7FGW2v–ââr“°¢ÒVÇ6R–b‡–ÆöBæW'&÷"’°¢6WDöWF„ÖW76vR‡–ÆöBæW'&÷"“°¢ÒVÇ6R°¢6WDöWF„ÖW76vR‚tæò7F—fRvÖ–ÂôWF‚Fö¶Vâf÷VæB–âöWF…÷Fö¶Vç2âr“°¢Ð¢Ò6F6‚†W'&÷"’°¢6WDöWF…7FGW2‡²vÖ–ÅööWF…ö6öææV7FVC¢fÇ6RÂ7FGW3¢wVæ¶æ÷vârÒ“°¢6WDöWF„ÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷B6†V6²vÖ–ÂôWF‚Fö¶Vâ7FGW2âr“°¢Ð¢Ð ¢7–æ2gVæ7F–öâ&Vg&W6„6öææV7F–öå7FGW2‚’°¢v—B&öÖ—6RæÆÂ…¶ÆöE6W76–öâ‚’ÂÆöDôWF…7FGW2‚•Ò“°¢Ð ¢W6TVffV7B‚‚’Óâ²fö–B&VÆöE6†VWG56æ6†÷B‡VæFVf–æVBÂfÇ6R“²fö–B&Vg&W6„6öææV7F–öå7FGW2‚“²ÒÂµÒ“° ¢gVæ7F–öâ&Vg&W6‚†æW‡DÖW76vSó¢7G&–ær’°¢6WE&Vg&W6…Fö¶Vâ‚‡fÇVR’ÓâfÇVR²“°¢–b†æW‡DÖW76vR’6WDÖW76vR†æW‡DÖW76vR“°¢Ð ¢7–æ2gVæ7F–öâ†æFÆTFFVB†6öçF7C¢6öçF7E&V6÷&BÂF÷V6„ÖWF†öC¢F÷V6„ÖWF†öB’°¢G'’°¢v—B7&VFU6†VWD6öçF7B†6öçF7BÂF÷V6„ÖWF†öB“°¢v—B&VÆöE6†VWG56æ6†÷B‚tFFVBFòvöövÆR6†VWG2æB&Vg&W6†VBF†RvW7BVV²æWGv÷&²âr“°¢6WEvR‚v6öçF7G2r“°¢Ò6F6‚†W'&÷"’°¢6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷BFBW'6öâFòvöövÆR6†VWG2âr“°¢Ð¢Ð ¢7–æ2gVæ7F–öâ†æFÆT–çF¶T6GW&R‡&uFW‡C¢7G&–ær’°¢G'’°¢v—B7&VFU6†VWD–çF¶R‡&uFW‡B“°¢v—B&VÆöE6†VWG56æ6†÷B‚t6GW&VB–çF¶R—FVÒFòvöövÆR6†VWG2âr“°¢Ò6F6‚†W'&÷"’°¢6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷B6GW&R–çF¶RFòvöövÆR6†VWG2âr“°¢Ð¢Ð ¢7–æ2gVæ7F–öâ†æFÆT–çF¶U&Wf–Wr†–C¢7G&–ærÂ7F–öã¢v6öçfW'BrÂvGF6‚rÂvF—6Ö—72rÂ6öçfW'6–öã¢²FVÅöfÆ÷u÷&÷7V7Có¢FVÄfÆ÷u&÷7V7C²&VÆF–öç6†—ö÷væW#ó¢÷væW"ÒÒ·Ò’°¢6öç7B¶W’Ò–çF¶S¢G¶–GÓ¢G¶7F–öçÖ°¢–b†×WFF–öä¶W’’&WGW&ã°¢6WD×WFF–öä¶W’†¶W’“°¢G'’°¢v—B&Wf–Wu6†VWD–çF¶R†–BÂ7F–öâÂ7F–öâÓÓÒvGF6‚rò²GF6†VEö6öçF7Eö–C¢v–æF÷rç&ö×B‚tW†—7F–ær6öçF7Eö–BFòGF6‚Fó¢r’ÇÂrrÒ¢6öçfW'6–öâ“°¢v—B&VÆöE6†VWG56æ6†÷B†–çF¶RG¶7F–öçÒ&V6÷&FVB–âvöövÆR6†VWG2æ“°¢Ò6F6‚†W'&÷"’°¢6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢6÷VÆBæ÷BG¶7F–öçÒ–çF¶R–âvöövÆR6†VWG2æ“°¢Òf–æÆÇ’°¢6WD×WFF–öä¶W’†çVÆÂ“°¢Ð¢Ð ¢7–æ2gVæ7F–öâ†æFÆT&÷fÄFV6—6–öâ†–C¢7G&–ærÂFV6—6–öã¢v&÷fRrÂw&V¦V7Br’°¢6öç7B¶W’Ò&÷fÃ¢G¶–GÓ¢G¶FV6—6–öçÖ°¢–b†×WFF–öä¶W’’&WGW&ã°¢6WD×WFF–öä¶W’†¶W’“°¢G'’°¢6öç7B&÷fÂÒFFæ&÷fÇ2æf–æB‚†—FVÒ’Óâ—FVÒæ&÷fÅö–BÓÓÒ–B“°¢v—BFV6–FU6†VWD&÷fÂ†–BÂFV6—6–öâ“°¢–b†FV6—6–öâÓÓÒv&÷fRrbb&÷fÃòç6÷W&6UöVçF—G•÷G—RÓÓÒw&VÆF–öç6†—÷F÷V6‚rbb&÷fÂç6÷W&6UöVçF—G•ö–B’°¢6öç7BF÷V6‚ÒFFçF÷V6†W2æf–æB‚†—FVÒ’Óâ—FVÒçF÷V6…ö–BÓÓÒ&÷fÂç6÷W&6UöVçF—G•ö–B“°¢–b‡F÷V6‚’°¢v—BWFFU6†VWEF÷V6„gVÆf–ÆÆÖVçB‡F÷V6‚Â°¢7FGW3¢v&÷fVE÷&VG•÷Fõ÷6VæBrÀ¢gVÆf–ÆÆÖVçE÷7FGW3¢v&÷fVE÷&VG•÷Fõ÷6VæBrÀ¢gVÆf–ÆÆÖVçEöæ÷FW3¢t&÷fÂ&V6÷&FVBâ÷W&F÷"×W7B6†ö÷6RfVæF÷"†æFöfb÷"Ö&²’v–ÆÂFò—B×—6VÆbâæWGv÷&²õ2†2æ÷B6VçB÷"–Bf÷"ç—F†–ærârÀ¢W†V7WF–öåöÆÆ÷vVC¢fÇ6P¢Ò“°¢Ð¢Ð¢v—B&VÆöE6†VWG56æ6†÷B†FV6—6–öâÓÓÒv&÷fRròt&÷fÂ&V6÷&FVBâ†æGw&—GFVâ÷fVæF÷"F÷V6†W2&Ræ÷r&VG’f÷"ÖçVÂgVÆf–ÆÆÖVçB6†ö–6Râr¢&÷fÂG¶FV6—6–öçÒ&V6÷&FVB–âvöövÆR6†VWG2æ“°¢Ò6F6‚†W'&÷"’°¢6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷B&V6÷&B&÷fÂFV6—6–öââr“°¢Òf–æÆÇ’°¢6WD×WFF–öä¶W’†çVÆÂ“°¢Ð¢Ð ¢7–æ2gVæ7F–öâ†æFÆUF÷V6„gVÆf–ÆÆÖVçB‡F÷V6ƒ¢&VÆF–öç6†—F÷V6‚ÂWFFS¢'F–ÃÅ&VÆF–öç6†—F÷V6ƒâ’°¢G'’°¢v—BWFFU6†VWEF÷V6„gVÆf–ÆÆÖVçB‡F÷V6‚ÂWFFR“°¢v—B&VÆöE6†VWG56æ6†÷B‚u&VÆF–öç6†—F÷V6‚gVÆf–ÆÆÖVçB7FGW2&V6÷&FVB–âvöövÆR6†VWG2âr“°¢Ò6F6‚†W'&÷"’°¢6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷BWFFR&VÆF–öç6†—F÷V6‚gVÆf–ÆÆÖVçBâr“°¢Ð¢Ð ¢7–æ2gVæ7F–öâ†æFÆT6öçF7E7FGW2†–C¢7G&–ærÂ7FGW3¢v7F—fRrÂv&6†—fVBr’°¢6öç7B¶W’Ò6öçF7C¢G¶–GÓ¢G·7FGW7Ö°¢–b†×WFF–öä¶W’’&WGW&ã°¢6WD×WFF–öä¶W’†¶W’“°¢G'’°¢v—BWFFU6†VWD6öçF7E7FGW2†–BÂ7FGW2Â7FGW2ÓÓÒv&6†—fVBròt&6†—fVB'’÷W&F÷"g&öÒvW7BVV²æWGv÷&²âr¢u&W7F÷&VB'’÷W&F÷"g&öÒ&6†—fRâr“°¢v—B&VÆöE6†VWG56æ6†÷B‡7FGW2ÓÓÒv&6†—fVBròt6öçF7B&6†—fVBæB&VÖ÷fVBg&öÒ7F—fRâr¢t6öçF7B&W7F÷&VBFò7F—fRâr“°¢Ò6F6‚†W'&÷"’°¢6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷BWFFR6öçF7B7FGW2âr“°¢Òf–æÆÇ’°¢6WD×WFF–öä¶W’†çVÆÂ“°¢Ð¢Ð ¢7–æ2gVæ7F–öâ†æFÆT–çG&õ&VfW&Væ6R†–C¢7G&–ærÂæô–çG&÷3¢&ööÆVâ’°¢6öç7B¶W’Ò6öçF7C¢G¶–GÓ¦–çG&ò×&VfW&Væ6V°¢–b†×WFF–öä¶W’’&WGW&ã°¢6WD×WFF–öä¶W’†¶W’“°¢G'’°¢6öç7B&W7öç6RÒv—BfWF6‚‚rö’ö6öçF7G2ö–çG&ò×&VfW&Væ6RrÂ¶ÖWF†öC¢uõ5BrÂ7&VFVçF–Ç3¢w6ÖRÖ÷&–v–ârÂ†VFW'3§²v6öçFVçB×G—Rs¢vÆ–6F–öâö§6öâwÒÂ&öG“¤¥4ôâç7G&–æv–g’‡¶6öçF7Eö–C¦–BÆæõö–çG&÷3¦æô–çG&÷7Ò—Ò“°¢6öç7B&W7VÇBÒv—B&W7öç6Ræ§6öâ‚’2¶W'&÷#ó§7G&–æwÓ°¢–b‚&W7öç6Ræö²’F‡&÷ræWrW'&÷"‡&W7VÇBæW'&÷"ÇÂt6÷VÆBæ÷BWFFR–çG&ò&VfW&Væ6Râr“°¢v—B&VÆöE6†VWG56æ6†÷B†æô–çG&÷2òtW†6ÇVFVBg&öÒ–çG&öGV7F–öâ7VvvW7F–öç2âr¢t–çG&öGV7F–öâ7VvvW7F–öç2Væ&ÆVBârÂG'VR“°¢Ò6F6‚†W'&÷"’²6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷BWFFR–çG&ò&VfW&Væ6Râr“²Ð¢f–æÆÇ’²6WD×WFF–öä¶W’†çVÆÂ“²Ð¢Ð ¢7–æ2gVæ7F–öâ†æFÆTÆ–fV7–6ÆR†VçF—G“¢v–çF¶RrÂwF÷V6‚rÂv&÷fÂrÂvæ÷F–f–6F–öârÂv•÷7VvvW7F–öârÂvWfVçEöGFVæFVRrÂ–C¢7G&–ærÂ7F–öã¢v&6†—fRrÂw&W7F÷&Rr’°¢6öç7B¶W’ÒG¶VçF—G—Ó¢G¶–GÓ¢G¶7F–öçÖ°¢–b†×WFF–öä¶W’’&WGW&ã°¢6WD×WFF–öä¶W’†¶W’“°¢G'’°¢v—BWFFU6†VWE&V6÷&DÆ–fV7–6ÆR†VçF—G’Â–BÂ7F–öâÂ7F–öâÓÓÒv&6†—fRròt&6†—fVB'’÷W&F÷"g&öÒWF†VçF–6FVBT’âr¢u&W7F÷&VB'’÷W&F÷"g&öÒWF†VçF–6FVBT’âr“°¢v—B&VÆöE6†VWG56æ6†÷B†7F–öâÓÓÒv&6†—fRròu&V6÷&B&6†—fVBæB&VÖ÷fVBg&öÒF†R7F—fRf–Wrâr¢u&V6÷&B&W7F÷&VBâr“°¢Ò6F6‚†W'&÷"’°¢6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢6÷VÆBæ÷BG¶7F–öçÒ&V6÷&Bæ“°¢Òf–æÆÇ’°¢6WD×WFF–öä¶W’†çVÆÂ“°¢Ð¢Ð ¢7–æ2gVæ7F–öâ†æFÆTæ÷F–f–6F–öå&VB†–C¢7G&–ærÂ&V6—–VçDVÖ–ÂÒrr’°¢G'’°¢v—BÖ&µ6†VWDæ÷F–f–6F–öå&VB†–BÂ&V6—–VçDVÖ–Â“°¢v—B&VÆöE6†VWG56æ6†÷B‚tæ÷F–f–6F–öâ&VB7FGW2&V6÷&FVB–âvöövÆR6†VWG2âr“°¢Ò6F6‚†W'&÷"’°¢6WDÖW76vR†W'&÷"–ç7Fæ6VöbW'&÷"òW'&÷"æÖW76vR¢t6÷VÆBæ÷BÖ&²æ÷F–f–6F–öâ&VBâr“°¢Ð¢Ð ¢&WGW&â€¢ÆF—b6Æ74æÖSÒ'6†VÆÂ#à¢Æ6–FR6Æ74æÖS×¶6–FV&"G¶Öö&–ÆTæd÷VâòvÖö&–ÆRÖ÷Vâr¢rwÖÓà¢Æ'WGFöâ6Æ74æÖSÒ&Öö&–ÆRÖæb×FövvÆR"G—SÒ&'WGFöâ"&–ÖW‡æFVC×¶Öö&–ÆTæd÷VçÒ&–Ö6öçG&öÇ3Ò'&–Ö'’Öæf–vF–öâ"öä6Æ–6³×²‚’Óâ6WDÖö&–ÆTæd÷Vâ‚‡fÇVR’ÓâfÇVR—Óç¶Öö&–ÆTæd÷VâòÅ‚6—¦S×³‡Òóâ¢ÄÖVçR6—¦S×³‡ÒóçÓÇ7ãç¶Öö&–ÆTæd÷Vâòt6Æ÷6RÖVçRr¢tÖVçRwÓÂ÷7ããÂö'WGFöãà¢ÆF—b6Æ74æÖSÒ&'&æB#à¢Æ–Ör6Æ74æÖSÒ&'&æBÖÆövò"7&3Ò"÷wÖÆövòæ§r"ÇCÒ%vW7BVV²Æövò"óà¢ÆF—cà¢ÆF—b6Æ74æÖSÒ&'&æB×F—FÆR#äæWGv÷&²õ3ÂöF—cà¢ÆF—b6Æ74æÖSÒ&'&æB×7V"#åvW7BVV²–çFW&æÃÂöF—cà¢ÂöF—cà¢ÂöF—cà¢Æ'WGFöâ6Æ74æÖSÒ'6–FV&"×F†VÖR×FövvÆR"G—SÒ&'WGFöâ"&–ÖÆ&VÃ×·F†VÖRÓÓÒvF&²ròu7v—F6‚FòÆ–v‡BÖöFRr¢u7v—F6‚FòF&²ÖöFRwÒF—FÆS×·F†VÖRÓÓÒvF&²ròu7v—F6‚FòÆ–v‡BÖöFRr¢u7v—F6‚FòF&²ÖöFRwÒöä6Æ–6³×²‚’Óâ6WEF†VÖR‡F†VÖRÓÓÒvF&²ròvÆ–v‡Br¢vF&²r—Óç·F†VÖRÓÓÒvF&²ròÅ7Vâ6—¦S×³wÒóâ¢ÄÖööâ6—¦S×³wÒóçÓÇ7ãç·F†VÖRÓÓÒvF&²ròtÆ–v‡BÖöFRr¢tF&²ÖöFRwÓÂ÷7ããÂö'WGFöãà¢Ææb–CÒ'&–Ö'’Öæf–vF–öâ"6Æ74æÖSÒ&æb"&–ÖÆ&VÃÒ%&–Ö'’#à¢¶æd—FV×2æÖ‚†—FVÒ’Óâ€¢Æ'WGFöâ¶W“×¶—FVÒçvWÒ6Æ74æÖS×·vRÓÓÒ—FVÒçvRòv7F—fRr¢rwÒöä6Æ–6³×²‚’Óâ²–b†—FVÒçvRÓÓÒvFBr’6WDFDÖöFR‚vÖçVÂr“²6WEvR†—FVÒçvR“²6WDÖö&–ÆTæd÷Vâ†fÇ6R“²×Óà¢¶—FVÒæ–6öçÒ¶—FVÒæÆ&VÇÐ¢Âö'WGFöãà¢’—Ð¢Âöæcà¢ÆF—b6Æ74æÖSÒ'6–FV&"Ö†VÇF‚"&–ÖÆ&VÃÒ%7—7FVÒ†VÇF‚"F—FÆS×·6W76–öâæWF†VçF–6FVBbb6†VWDFFòu7—7FV×2&VG’r¢u6WGWæVVG2GFVçF–öâwÓãÇ7â6Æ74æÖS×¶†VÇF‚ÖF÷BG·6W76–öâæWF†VçF–6FVBbb6†VWDFFòvvööBr¢rwÖÒóãÇ7ãç·6W76–öâæWF†VçF–6FVBbb6†VWDFFòu7—7FV×2&VG’r¢u6WGWæVVG2GFVçF–öâwÓÂ÷7ããÂöF—cà¢Âö6–FSà¢ÆÖ–â6Æ74æÖSÒ&Ö–â#à¢¶ÖW76vRbbÆF—b6Æ74æÖSÒ&æ÷F–6R"7G–ÆS×·²Ö&v–ä&÷GFöÓ¢b×Óç¶ÖW76vWÓÂöF—cçÐ¢·vRÓÓÒvF6†&ö&BrbbÄF6†&ö&BFF×¶FFÒvó×·6WEvWÒ÷Vä6GW&S×¶÷Vä6GW&WÒ÷Vä6öçF7C×¶÷Vä6öçF7GÒ'VçF–ÖS×·°¢6†VWE7FGW2À¢6W76–öäWF†VçF–6FVC¢6W76–öâæWF†VçF–6FVBÀ¢6W76–öäVÖ–Ã¢6W76–öâæVÖ–ÂÀ¢W6–ætÆ—fU6†VWG3¢&ööÆVâ‡6†VWDFF’À¢vÖ–ÄöWF„6öææV7FVC¢&ööÆVâ†öWF…7FGW2ævÖ–ÅööWF…ö6öææV7FVB’À¢vÖ–ÄöWF„VÖ–Ã¢öWF…7FGW2æ6öææV7FVEöVÖ–ÂÀ¢vÖ–ÄöWF„6GW&VDC¢öWF…7FGW2çFö¶Våö6GW&VEö@¢×ÒvÖ–Å7–æ46öçG&öÃ×³ÄvÖ–Å7–æ46öçG&öÂWF†VçF–6FVC×·6W76–öâæWF†VçF–6FVGÒ6ö×7Böå&Vg&W6ƒ×²‚’Óâ&VÆöE6†VWG56æ6†÷B‚tvÖ–Â7–æ26ö×ÆWFRâ–çF¶RVWVR&Vg&W6†VBârÂG'VR—ÒóçÒóçÐ¢·vRÓÓÒv–ç7G'V7F–öç2rbbÄ–ç7G'V7F–öç2óçÐ¢·vRÓÓÒvWfVçG2rbbÄWfVçG5vRWfVçG3×¶FFæWfVçG7ÒGFVæFVW3×¶FFæWfVçDGFVæFVW7ÒöäGFVæFVTÆ–fV7–6ÆS×²†–BÂ7F–öâ’Óâ²fö–B†æFÆTÆ–fV7–6ÆR‚vWfVçEöGFVæFVRrÂ–BÂ7F–öâ“²×Òöå6fVC×²†æW‡DÖW76vR’Óâfö–B&VÆöE6†VWG56æ6†÷B†æW‡DÖW76vRÇÂtWfVçBFF6fVBFòvöövÆR6†VWG2âr—ÒóçÐ¢·vRÓÓÒvFBrbbÃãÆF—b6Æ74æÖSÒ'6VvÖVçFVBFBÖÖöFR×F'2"&öÆSÒ&w&÷W"&–ÖÆ&VÃÒ$FBW'6öâÖWF†öB#ãÆ'WGFöâG—SÒ&'WGFöâ"6Æ74æÖS×¶FDÖöFRÓÓÒvÖçVÂròv7F—fRr¢rwÒ&–×&W76VC×¶FDÖöFRÓÓÒvÖçVÂwÒöä6Æ–6³×²‚’Óâ6WDFDÖöFR‚vÖçVÂr—ÓäVçFW"FWF–Ç3Âö'WGFöããÆ'WGFöâG—SÒ&'WGFöâ"6Æ74æÖS×¶FDÖöFRÓÓÒv6GW&Rròv7F—fRr¢rwÒ&–×&W76VC×¶FDÖöFRÓÓÒv6GW&RwÒöä6Æ–6³×²‚’Óâ6WDFDÖöFR‚v6GW&Rr—Óä6&Bòfö–6R6GW&SÂö'WGFöããÂöF—cç¶FDÖöFRÓÓÒvÖçVÂròÄFEW'6öâöäFFVC×¶†æFÆTFFVGÒóâ¢Ä6GW&U7GVF–òWfVçG3×¶FFæWfVçG7Òöå6fVC×²‚’Óâfö–B&VÆöE6†VWG56æ6†÷B‚t6GW&R6fVBFòvöövÆR6†VWG2âr—ÒóçÓÂóçÐ¢·vRÓÓÒv–çF¶RrbbÄ–çF¶UvRvÖ–Å7–æ46öçG&öÃ×³ÄvÖ–Å7–æ46öçG&öÂWF†VçF–6FVC×·6W76–öâæWF†VçF–6FVGÒöå&Vg&W6ƒ×²‚’Óâ&VÆöE6†VWG56æ6†÷B‚tvÖ–Â7–æ26ö×ÆWFRâ–çF¶RVWVR&Vg&W6†VBârÂG'VR—ÒóçÒ&÷w3×¶FFæ–çF¶WÒ×WFF–öä¶W“×¶×WFF–öä¶W—Òöä6GW&S×²‡&r’Óâ²fö–B†æFÆT–çF¶T6GW&R‡&r“²×Òöä6öçfW'C×²†–BÂ6öçfW'6–öâ’Óâ²fö–B†æFÆT–çF¶U&Wf–Wr†–BÂv6öçfW'BrÂ6öçfW'6–öâ“²×ÒöäGF6ƒ×²†–B’Óâ²fö–B†æFÆT–çF¶U&Wf–Wr†–BÂvGF6‚r“²×ÒöäF—6Ö—73×²†–B’Óâ²fö–B†æFÆT–çF¶U&Wf–Wr†–BÂvF—6Ö—72r“²×ÒóçÐ¢·vRÓÓÒv6öçF7G2rbbÄæWGv÷&µvR&÷w3×¶FFæ6öçF7G7Ò–æ—F–Å6VÆV7FVD–C×·VæF–æt6öçF7D–GÒöä–æ—F–Å6VÆV7F–öäÆ–VC×²‚’Óâ6WEVæF–æt6öçF7D–B†çVÆÂ—Òöäf–æD–çG&ó×¶÷Vä–çG&÷Òöä–çG&õ&VfW&Væ6S×²†–BÂæô–çG&÷2’Óâ²fö–B†æFÆT–çG&õ&VfW&Væ6R†–BÂæô–çG&÷2“²×Ò×WFF–öä¶W“×¶×WFF–öä¶W—Òöå7FGW3×²†–BÂ7FGW2’Óâ²fö–B†æFÆT6öçF7E7FGW2†–BÂ7FGW2“²×ÒóçÐ¢·vRÓÓÒv–çG&öGV7F–öç2rbbÄ–çG&öGV7F–öç26öçF7G3×¶FFæ6öçF7G7Ò–çG&öGV7F–öç3×¶FFæ–çG&öGV7F–öç7Ò–æ—F–Ä6öçF7D–C×¶–çG&ô6öçF7D–GÒöå&Vg&W6ƒ×²‚’Óâ&VÆöE6†VWG56æ6†÷B‡VæFVf–æVBÇG'VR—ÒóçÐ¢·vRÓÓÒwF÷V6†W2rbbÅF÷V6†W5vR&÷w3×¶FFçF÷V6†W7Ò6öçF7G3×¶FFæ6öçF7G7Ò×WFF–öä¶W“×¶×WFF–öä¶W—ÒöäÆ–fV7–6ÆS×²†–BÂ7F–öâ’Óâ²fö–B†æFÆTÆ–fV7–6ÆR‚wF÷V6‚rÂ–BÂ7F–öâ“²×ÒöägVÆf–ÆÆÖVçEWFFS×²‡F÷V6‚ÂWFFR’Óâ²fö–B†æFÆUF÷V6„gVÆf–ÆÆÖVçB‡F÷V6‚ÂWFFR“²×ÒóçÐ¢·vRÓÓÒv&÷fÇ2rbbÄ&÷fÇ5vR&÷w3×¶FFæ&÷fÇ7Ò×WFF–öä¶W“×¶×WFF–öä¶W—ÒöäÆ–fV7–6ÆS×²†–BÂ7F–öâ’Óâ²fö–B†æFÆTÆ–fV7–6ÆR‚v&÷fÂrÂ–BÂ7F–öâ“²×Òöä&÷fS×²†–B’Óâ²fö–B†æFÆT&÷fÄFV6—6–öâ†–BÂv&÷fRr“²×Òöå&V¦V7C×²†–B’Óâ²fö–B†æFÆT&÷fÄFV6—6–öâ†–BÂw&V¦V7Br“²×ÒóçÐ¢·vRÓÓÒvæ÷F–f–6F–öç2rbbÄæ÷F–f–6F–öç5vR&÷w3×¶FFææ÷F–f–6F–öç7Ò×WFF–öä¶W“×¶×WFF–öä¶W—ÒöäÆ–fV7–6ÆS×²†–BÂ7F–öâ’Óâ²fö–B†æFÆTÆ–fV7–6ÆR‚væ÷F–f–6F–öârÂ–BÂ7F–öâ“²×Òöå&VC×²†–BÂ&V6—–VçDVÖ–Â’Óâ²fö–B†æFÆTæ÷F–f–6F–öå&VB†–BÂ&V6—–VçDVÖ–Â“²×ÒóçÐ¢·vRÓÓÒv’rbbÄ•&Wf–Wr&÷w3×¶FFæ•7VvvW7F–öç7Ò×WFF–öä¶W“×¶×WFF–öä¶W—ÒöäÆ–fV7–6ÆS×²†–BÂ7F–öâ’Óâ²fö–B†æFÆTÆ–fV7–6ÆR‚v•÷7VvvW7F–öârÂ–BÂ7F–öâ“²×Òöä7&VFVC×¶7–æ2‚’Óâ²v—B&VÆöE6†VWG56æ6†÷B‚t’†VÇW"7&VFVBVæF–ær&÷fÂæBæ÷F–f–6F–öâârÂG'VR“²6WEvR‚v&÷fÇ2r“²×ÒóçÐ¢·vRÓÓÒw6WGF–æw2rbbÅ6WGF–æw5æVÀ¢F†VÖS×·F†VÖWÐ¢6WEF†VÖS×·6WEF†VÖWÐ¢6†VWE7FGW3×·6†VWE7FGW7Ð¢6W76–öã×·6W76–öçÐ¢öWF…7FGW3×¶öWF…7FGW7Ð¢öWF„ÖW76vS×¶öWF„ÖW76vWÐ¢öå&Vg&W6ƒ×²‚’Óâfö–B&VÆöE6†VWG56æ6†÷B‚u&Vg&W6†VBg&öÒvöövÆR6†VWG2âÆ—fRvöövÆR6†VWG26æ6†÷BÆöFVBârÂG'VR—Ð¢öå6W76–öå&Vg&W6ƒ×²‚’Óâfö–B&Vg&W6„6öææV7F–öå7FGW2‚—Ð¢öäÖ–çFVææ6T6ö×ÆWFS×²‚’Óâfö–B&VÆöE6†VWG56æ6†÷B‚u6†VWBÖ–çFVææ6Rf–æ—6†VBæBg&W6‚6æ6†÷Bv2ÆöFVBârÂG'VR—Ð¢vÖ–Å7–æ46öçG&öÃ×³ÄvÖ–Å7–æ46öçG&öÂWF†VçF–6FVC×·6W76–öâæWF†VçF–6FVGÒöå&Vg&W6ƒ×²‚’Óâ&VÆöE6†VWG56æ6†÷B‚tvÖ–Â7–æ26ö×ÆWFRâ–çF¶RVWVR&Vg&W6†VBârÂG'VR—ÒóçÐ¢óçÐ¢ÂöÖ–ãà¢ÂöF—cà¢“°§Ð ¦gVæ7F–öâ–çF¶UvR‡²vÖ–Å7–æ46öçG&öÂÂ&÷w2Â×WFF–öä¶W’Âöä6GW&RÂöä6öçfW'BÂöäGF6‚ÂöäF—6Ö—72Ó¢²vÖ–Å7–æ46öçG&öÃ¢&V7Bå&V7DæöFS²&÷w3¢–çF¶U&V6÷&EµÓ²×WFF–öä¶W“¢7G&–ærÂçVÆÃ²öä6GW&S¢‡&uFW‡C¢7G&–ær’Óâfö–C²öä6öçfW'C¢†–C¢7G&–ærÂ6öçfW'6–öã¢²FVÅöfÆ÷u÷&÷7V7C¢FVÄfÆ÷u&÷7V7C²&VÆF–öç6†—ö÷væW#¢÷væW"Ò’Óâfö–C²öäGF6ƒ¢†–C¢7G&–ær’Óâfö–C²öäF—6Ö—73¢†–C¢7G&–ær’Óâfö–BÒ’°¢6öç7B·f–WrÂ6WEf–WuÒÒW6U7FFSÂwVæF–ærrÂv†—7F÷'’rÂvÆÂsâ‚wVæF–ærr“°¢6öç7B·6V&6‚Â6WE6V&6…ÒÒW6U7FFR‚rr“°¢6öç7BVæF–æu7FGW6W2ÒæWr6WB…²væWrrÂv•÷&Wf–WvVBrÂwVæF–æuö‡VÖå÷&Wf–WrrÂvæVVG5ö‡VÖå÷&Wf–WrrÂvæVVG5öÖ÷&Uö–æfòrÂwVæF–æuöæWGv÷&µ÷&Wf–WrrÂvWfVçEö–çF¶U÷&V6V—fVBuÒ“°¢6öç7Bf—6–&ÆU&÷w2Ò&÷w2æf–ÇFW"‚‡&÷r’Óâf–WrÓÓÒvÆÂrÇÂ‡f–WrÓÓÒwVæF–ærròVæF–æu7FGW6W2æ†2‡&÷rç&Wf–Wu÷7FGW2’¢VæF–æu7FGW6W2æ†2‡&÷rç&Wf–Wu÷7FGW2’’’æf–ÇFW"‚‡&÷r’Óâ6V&6‚ÇÂ·&÷rç'6VEöæÖRÂ&÷rç'6VEö6ö×ç’Â&÷rç'6VEöVÖ–ÂÂ&÷ræVÖ–Å÷7V&¦V7BÂ&÷ræ•÷7VÖÖ'’Â&÷rç&u÷FW‡EÒæ¦ö–â‚rr’çFôÆ÷vW$66R‚’æ–æ6ÇVFW2‡6V&6‚çFôÆ÷vW$66R‚’’“°¢gVæ7F–öâ7V&Ö—D6GW&R†WfVçC¢&V7Bäf÷&ÔWfVçCÄ…DÔÄf÷&ÔVÆVÖVçCâ’°¢WfVçBç&WfVçDFVfVÇB‚“°¢6öç7Bf÷&ÒÒæWrf÷&ÔFF†WfVçBæ7W'&VçEF&vWB“°¢öä6GW&R…7G&–ær†f÷&ÒævWB‚w&u÷FW‡Br’ÇÂrr’“°¢WfVçBæ7W'&VçEF&vWBç&W6WB‚“°¢Ð¢&WGW&âÃà¢Ä†VFW"W–V'&÷sÒ$–çF¶RVWVR"F—FÆSÒ%&Wf–Wr6GW&VB&VÆF–öç6†—6öçFW‡B"7V'F—FÆSÒ$7F–öæ&ÆR6GW&W2V"f—'7BâW6R7wFVÆfÆ÷rò6FVÆfÆ÷rf÷"f÷VæFW"÷"&÷7V7F—fRFVÂfÆ÷râWfW'’6GW&R&VÖ–ç2–â‡VÖâ&Wf–WrVçF–Ââ÷W&F÷"FV6–FW2â"óà¢Å&÷WFTwV–FRW'÷6SÒ%GW&â&r6GW&W2–çFòG'W7FVB&VÆF–öç6†—&V6÷&G2â"&–Ö'”7F–öãÒ%&W6öÇfRVæF–ær–çF¶RöæR—FVÒBF–ÖRâ"6V6öæF'“Ò$6GW&RÖçVÂæ÷FRv†Vâæò6÷W&6R–çFVw&F–öâ—2f–Æ&ÆRâ"6WF–öãÒ$æ÷F†–ær6öçfW'G2ÂGF6†W2Â÷"F—6Ö—76W2v—F†÷WB÷W&F÷"7F–öââ"óà¢ÆF—b6Æ74æÖSÒ&6&B6WGF–æw2Ö÷W&F–öç2#ãÆƒ3ä–×÷'BæWrvÖ–Â–çF¶SÂöƒ3ãÇ6Æ74æÖSÒ&×WFVB#ä6†V6·2ÆÂVÆ–v–&ÆR6öææV7FVBvW7BVV²Ö–Æ&÷†W2Â–×÷'G2æWrVÆ–g––ærÖW76vW2ÂæB&Vg&W6†W2F†—2VWVRãÂ÷ç¶vÖ–Å7–æ46öçG&öÇÓÂöF—cà¢ÆF—b6Æ74æÖSÒ&f–ÇFW"Ö&"#ãÆ–çWB&–ÖÆ&VÃÒ%6V&6‚–çF¶R"Æ6V†öÆFW#Ò%6V&6‚W'6öâÂ6ö×ç’ÂVÖ–ÂÂ7V&¦V7BÂ÷"7VÖÖ'’"fÇVS×·6V&6‡Òöä6†ævS×²†WfVçB’Óâ6WE6V&6‚†WfVçBçF&vWBçfÇVR—ÒóãÆF—b6Æ74æÖSÒ'6VvÖVçFVB"&öÆSÒ&w&÷W"&–ÖÆ&VÃÒ$–çF¶Rf–Wr#ãÆ'WGFöâ6Æ74æÖS×·f–WrÓÓÒwVæF–ærròv7F—fRr¢rwÒöä6Æ–6³×²‚’Óâ6WEf–Wr‚wVæF–ærr—ÓåVæF–æsÂö'WGFöããÆ'WGFöâ6Æ74æÖS×·f–WrÓÓÒv†—7F÷'’ròv7F—fRr¢rwÒöä6Æ–6³×²‚’Óâ6WEf–Wr‚v†—7F÷'’r—Óä†—7F÷'“Âö'WGFöããÆ'WGFöâ6Æ74æÖS×·f–WrÓÓÒvÆÂròv7F—fRr¢rwÒöä6Æ–6³×²‚’Óâ6WEf–Wr‚vÆÂr—ÓäÆÃÂö'WGFöããÂöF—cãÇ7â6Æ74æÖSÒ'&W7VÇBÖ6÷VçB#ç·f—6–&ÆU&÷w2æÆVæwF‡Ò&V6÷&G3Â÷7ããÂöF—cà¢ÆFWF–Ç26Æ74æÖSÒ&6&B"÷VããÇ7VÖÖ'“äÖçVÂ6GW&SÂ÷7VÖÖ'“ãÆf÷&Ò6Æ74æÖSÒ&f÷&Ò6ö×7BÖf÷&Ò"öå7V&Ö—C×·7V&Ö—D6GW&WÓãÇ6Æ74æÖSÒ&×WFVB#å7FR&VÂ&VÆF–öç6†—÷"FVÂÖfÆ÷ræ÷FRâ&öGV7F–öâf÷&×27F'BV×G’ãÂ÷ãÇFW‡F&VæÖSÒ'&u÷FW‡B"&–ÖÆ&VÃÒ$vÖ–ÂG&–vvW"FW‡B"&WV—&VBÆ6V†öÆFW#Ò"7wæWGv÷&²÷"7wFVÆfÆ÷rÂF†VâF†R&VÆF–öç6†—6öçFW‡B"óãÆ'WGFöâ6Æ74æÖSÒ&'Fâ&–Ö'’"G—SÒ'7V&Ö—B#ä6GW&RFò–çF¶RVWVSÂö'WGFöããÂöf÷&ÓãÂöFWF–Ç3à¢ÆF—b6Æ74æÖSÒ&Æ—7B#ç·f—6–&ÆU&÷w2æÆVæwF‚ÓÓÒòÆF—b6Æ74æÖSÒ&V×G’×7FFR#ãÆƒ3ç·&÷w2æÆVæwF‚òtæò&V6÷&G2ÖF6‚F†—2f–Wrr¢tæò–çF¶R&V6÷&G2–WBwÓÂöƒ3ãÇç·&÷w2æÆVæwF‚òt6†ævRF†R6V&6‚÷"f–Wrf–ÇFW'2âr¢tæWr&Wf–Wr—FV×2v–ÆÂV"†W&RâwÓÂ÷ãÂöF—câ¢f—6–&ÆU&÷w2æÖ‚†’’Óâ²6öç7B'W7’Ò×WFF–öä¶W“òç7F'G5v—F‚†–çF¶S¢G¶’æ–çF¶Uö–GÓ¦“²&WGW&âÆ'F–6ÆR6Æ74æÖSÒ&6&B&V6÷&BÖ6&B"¶W“×¶’æ–çF¶Uö–GÒFF×FW7F–C×¶–çF¶RÒG¶’æ–çF¶Uö–GÖÓãÆ†VFW"6Æ74æÖSÒ'&V6÷&BÖ†VFW"#ãÆF—cãÆF—b6Æ74æÖSÒ&¶–6¶W"#ç¶‡VÖæ—¦R†’ç6÷W&6R—Ò(
-"¶‡VÖæ—¦R†’ç&Wf–Wu÷7FGW2—×¶’æ7&VFVEöBò(
-"G·&VÆF—fUv†Vâ†’æ7&VFVEöB—Ö¢rwÓÂöF—cãÆƒ3ç¶’ç'6VEöæÖRÇÂ’æVÖ–Åög&öÒÇÂuVç'6VBW'6öâwÓÂöƒ3ãÇ6Æ74æÖSÒ&×WFVB#ç¶’ç'6VEö6ö×ç’ÇÂ’æVÖ–Å÷7V&¦V7BÇÂt6ö×ç’æ÷B'6VBw×¶’ç6÷W&6UöÖ–Æ&÷‚ò(
-"f–G¶’ç6÷W&6UöÖ–Æ&÷‡Ö¢rwÓÂ÷ãÇ6Æ74æÖSÒ&6öçF7BÖVÖ–Â#ç¶’ç'6VEöVÖ–ÂÇÂtVÖ–Âæ÷B'6VBwÓÂ÷ãÂöF—cãÆF—b6Æ74æÖSÒ&&FvR×7F6²#ç¶’æÖ—76–æuöf–VÆG2bbÇ7â6Æ74æÖSÒ&&FvRv&â#äÖ—76–ær¶‡VÖæ—¦TÆ—7B†’æÖ—76–æuöf–VÆG2—ÓÂ÷7ãç×¶’æFVÅöfÆ÷u÷&÷7V7BÓÓÒw–W2rbbÇ7â6Æ74æÖSÒ&&FvRv&â#äFVÂfÆ÷sÂ÷7ãçÓÂöF—cãÂö†VFW#ãÇ6Æ74æÖSÒ'&V6÷&B×7VÖÖ'’#ç¶&÷VæFVB†’æ•÷7VÖÖ'’ÇÂ’ç'6VEöæ÷FW2ÇÂ’ç&u÷FW‡BÂC#—ÓÂ÷ãÆFWF–Ç3ãÇ7VÖÖ'“åf–Wr6÷W&6RFWF–Ç3Â÷7VÖÖ'“ãÆFÂ6Æ74æÖSÒ&ÖWFFF#ãÆGCäg&öÓÂöGCãÆFCç¶’æVÖ–Åög&öÒÇÂ~(	BwÓÂöFCãÆGCåFóÂöGCãÆFCç¶’æVÖ–Å÷FòÇÂ~(	BwÓÂöFCãÆGCäÖW76vR”CÂöGCãÆFCç¶’ævÖ–ÅöÖW76vUö–BÇÂ~(	BwÓÂöFCãÂöFÃãÇ&R6Æ74æÖSÒ'&r×6÷W&6R#ç¶&÷VæFVB†’ç&u÷FW‡BÂC—ÓÂ÷&SãÂöFWF–Ç3ç·f–WrÓÓÒwVæF–ærrbbÄ–çF¶TFV6—6–öäfö÷FW"–çF¶S×¶—Ò'W7“×´&ööÆVâ†'W7’—Ò×WFF–öä¶W“×¶×WFF–öä¶W—Òöä6öçfW'C×¶öä6öçfW'GÒöäGF6ƒ×¶öäGF6‡ÒöäF—6Ö—73×¶öäF—6Ö—77ÒóçÓÂö'F–6ÆSçÒ—ÓÂöF—cà¢Âóã°§Ð ¦gVæ7F–öâ–çF¶TFV6—6–öäfö÷FW"‡²–çF¶RÂ'W7’Â×WFF–öä¶W’Âöä6öçfW'BÂöäGF6‚ÂöäF—6Ö—72Ó¢²–çF¶S¢–çF¶U&V6÷&C²'W7“¢&ööÆVã²×WFF–öä¶W“¢7G&–ærÂçVÆÃ²öä6öçfW'C¢†–C¢7G&–ærÂ6öçfW'6–öã¢²FVÅöfÆ÷u÷&÷7V7C¢FVÄfÆ÷u&÷7V7C²&VÆF–öç6†—ö÷væW#¢÷væW"Ò’Óâfö–C²öäGF6ƒ¢†–C¢7G&–ær’Óâfö–C²öäF—6Ö—73¢†–C¢7G&–ær’Óâfö–BÒ’°¢6öç7B¶FVÄfÆ÷u&÷7V7BÂ6WDFVÄfÆ÷u&÷7V7EÒÒW6U7FFSÄFVÄfÆ÷u&÷7V7Câ†–çF¶RæFVÅöfÆ÷u÷&÷7V7BÇÂ†–çF¶RçW'6öå÷G—RÓÓÒvf÷VæFW"ròw–W2r¢wVæ¶æ÷vâr’“°¢6öç7B¶÷væW"Â6WD÷væW%ÒÒW6U7FFSÄ÷væW#â†–çF¶Rç'6VEö÷væW"ÇÂuVæ76–væVBr“°¢&WGW&âÃà¢ÆF—b6Æ74æÖSÒ&–çF¶RÖFV6—6–öâÖ&Æö6²#ãÇ6Æ74æÖSÒ&–çF¶RÖFV6—6–öâÖæ÷FR#äæWræWGv÷&²6öçF7B6WGF–æw2(	BW6VBöæÇ’v†Vâ–÷R6†ö÷6RFBFòvW7BVV²æWGv÷&²ãÂ÷ãÆF—b6Æ74æÖSÒ&–çF¶RÖFV6—6–öâÖw&–B"&–ÖÆ&VÃÒ$æWræWGv÷&²6öçF7B6öçfW'6–öâ6WGF–æw2#à¢ÆÆ&VÃäFVÂÖfÆ÷r&÷7V7CÇ6VÆV7B&–ÖÆ&VÃ×¶FVÂÖfÆ÷r&÷7V7Bf÷"G¶–çF¶Rç'6VEöæÖRÇÂ–çF¶Ræ–çF¶Uö–GÖÒfÇVS×¶FVÄfÆ÷u&÷7V7GÒF—6&ÆVC×¶'W7—Òöä6†ævS×²†WfVçB’Óâ6WDFVÄfÆ÷u&÷7V7B†WfVçBçF&vWBçfÇVR2FVÄfÆ÷u&÷7V7B—ÓãÆ÷F–öâfÇVSÒ'–W2#å–W3Âö÷F–öããÆ÷F–öâfÇVSÒ&æò#äæóÂö÷F–öããÆ÷F–öâfÇVSÒ'Væ¶æ÷vâ#åVæ¶æ÷vãÂö÷F–öããÂ÷6VÆV7CãÂöÆ&VÃà¢ÆÆ&VÃä76–vâFóÇ6VÆV7B&–ÖÆ&VÃ×¶&VÆF–öç6†—÷væW"f÷"G¶–çF¶Rç'6VEöæÖRÇÂ–çF¶Ræ–çF¶Uö–GÖÒfÇVS×¶÷væW'ÒF—6&ÆVC×¶'W7—Òöä6†ævS×²†WfVçB’Óâ6WD÷væW"†WfVçBçF&vWBçfÇVR2÷væW"—ÓãÆ÷F–öâfÇVSÒ%Væ76–væVB#åVæ76–væVCÂö÷F–öããÆ÷F–öâfÇVSÒ%6WVö–#å6WVö–Âö÷F–öããÆ÷F–öâfÇVSÒ%66ö÷FW"#å66ö÷FW#Âö÷F–öããÂ÷6VÆV7CãÂöÆ&VÃà¢ÂöF—cãÂöF—cà¢Æfö÷FW"6Æ74æÖSÒ&7F–öâÖfö÷FW"#ãÆ'WGFöâ6Æ74æÖSÒ&'Fâ&–Ö'’"F—6&ÆVC×¶'W7—Òöä6Æ–6³×²‚’Óâöä6öçfW'B†–çF¶Ræ–çF¶Uö–BÂ²FVÅöfÆ÷u÷&÷7V7C¢FVÄfÆ÷u&÷7V7BÂ&VÆF–öç6†—ö÷væW#¢÷væW"Ò—Óç¶×WFF–öä¶W’ÓÓÒ–çF¶S¢G¶–çF¶Ræ–çF¶Uö–GÓ¦6öçfW'FòtFF–æ~(
-br¢tFBFòvW7BVV²æWGv÷&²wÓÂö'WGFöããÆ'WGFöâ6Æ74æÖSÒ&'Fâ"F—6&ÆVC×¶'W7—Òöä6Æ–6³×²‚’ÓâöäGF6‚†–çF¶Ræ–çF¶Uö–B—Óç¶×WFF–öä¶W’ÓÓÒ–çF¶S¢G¶–çF¶Ræ–çF¶Uö–GÓ¦GF6†òtGF6†–æ~(
-br¢tGF6‚FòW†—7F–ærW'6öâwÓÂö'WGFöããÆ'WGFöâ6Æ74æÖSÒ&'FâFævW""F—6&ÆVC×¶'W7—Òöä6Æ–6³×²‚’ÓâöäF—6Ö—72†–çF¶Ræ–çF¶Uö–B—Óç¶×WFF–öä¶W’ÓÓÒ–çF¶S¢G¶–çF¶Ræ–çF¶Uö–GÓ¦F—6Ö—76òtF—6Ö—76–æ~(
-br¢tF—6Ö—72wÓÂö'WGFöããÂöfö÷FW#à¢Âóã°§Ð ¦gVæ7F–öâF÷V6†W5vR‡²&÷w2Â6öçF7G2Â×WFF–öä¶W’ÂöäÆ–fV7–6ÆRÂöägVÆf–ÆÆÖVçEWFFRÓ¢²&÷w3¢&VÆF–öç6†—F÷V6…µÓ²6öçF7G3¢6öçF7E&V6÷&EµÓ²×WFF–öä¶W“¢7G&–ærÂçVÆÃ²öäÆ–fV7–6ÆS¢†–C¢7G&–ærÂ7F–öã¢v&6†—fRrÂw&W7F÷&Rr’Óâfö–C²öägVÆf–ÆÆÖVçEWFFS¢‡F÷V6ƒ¢&VÆF–öç6†—F÷V6‚ÂWFFS¢'F–ÃÅ&VÆF–öç6†—F÷V6ƒâ’Óâfö–BÒ’°¢6öç7B·f–WrÂ6WEf–WuÒÒW6U7FFSÂv7F—fRrÂv&6†—fVBsâ‚v7F—fRr“°¢6öç7Bf—6–&ÆU&÷w2Ò&÷w2æf–ÇFW"‚‡&÷r’Óâf–WrÓÓÒv&6†—fVBrò&÷rç7FGW2ÓÓÒv6æ6VÆÆVBr¢&÷rç7FGW2ÓÒv6æ6VÆÆVBr“°¢&WGW&âÃà¢Ä†VFW"W–V'&÷sÒ%&VÆF–öç6†—F÷V6†W2"F—FÆSÒ$–çFVçF–öæÂföÆÆ÷r×F‡&÷Vv‚"7V'F—FÆSÒ$7F–öç2F†B6“¢’&VÖVÖ&W&VBÂ’&V6–FVB—BÂ’föÆÆ÷vVBF‡&÷Vv‚â†æGw&—GFVâæ÷FW27F’ÖçVÂVçF–Â‡VÖâ6†ö÷6W2fVæF÷"÷"6VÆbÖgVÆf–ÆÆÖVçBâ"óà¢Å&÷WFTwV–FRW'÷6SÒ%&Wf–Wr&VÆF–öç6†—föÆÆ÷r×F‡&÷Vv‚v—F†÷WB6öægW6–ærG&gG2v—F‚6ö×ÆWFVB÷WG&V6‚â"&–Ö'”7F–öãÒ%v÷&²F†RæW‡BGVRF÷V6‚ÂF†Vâ&V6÷&BF†RgVÆf–ÆÆÖVçB7FFRâ"6V6öæF'“Ò%W6RF†R&V6—–VçBÂÖWF†öBÂGVRFFRÂæB&V6öâFòF—7F–æwV—6‚6–Ö–Æ"&V6÷&G2â"6WF–öãÒ$æWGv÷&²õ2æWfW"6VæG2Â÷&FW'2Â—2Â÷"Ö–Ç2öâ—G2÷vââ"óà¢ÆF—b6Æ74æÖSÒ&f–ÇFW"Ö&"#ãÆF—b6Æ74æÖSÒ'6VvÖVçFVB#ãÆ'WGFöâ6Æ74æÖS×·f–WrÓÓÒv7F—fRròv7F—fRr¢rwÒöä6Æ–6³×²‚’Óâ6WEf–Wr‚v7F—fRr—Óä7F—fSÂö'WGFöããÆ'WGFöâ6Æ74æÖS×·f–WrÓÓÒv&6†—fVBròv7F—fRr¢rwÒöä6Æ–6³×²‚’Óâ6WEf–Wr‚v&6†—fVBr—Óä&6†—fVCÂö'WGFöããÂöF—cãÇ7â6Æ74æÖSÒ'&W7VÇBÖ6÷VçB#ç·f—6–&ÆU&÷w2æÆVæwF‡Ò&V6÷&G3Â÷7ããÂöF—cãÆF—b6Æ74æÖSÒ&w&–B6öÇ2Ó"#ç·f—6–&ÆU&÷w2æÆVæwF‚ÓÓÒòÆF—b6Æ74æÖSÒ&V×G’×7FFR#ãÆƒ3äæò&VÆF–öç6†—F÷V6†W2–WCÂöƒ3ãÇä&÷fVBföÆÆ÷r×WG&gG2æBF†æ²×–÷R7F–öç2v–ÆÂV"†W&RãÂ÷ãÂöF—câ¢f—6–&ÆU&÷w2æÖ‚‡B’Óâ°¢6öç7B6öçF7BÒ6öçF7G2æf–æB‚†2’Óâ2æ6öçF7Eö–BÓÓÒBæ6öçF7Eö–B“°¢6öç7BÖWF†öDÆ&VÂÒBæÖWF†öBç&WÆ6TÆÂ‚uòrÂrr’ç&WÆ6R‚õÆ%ÇrörÂ†6†"’Óâ6†"çFõWW$66R‚’“°¢6öç7B6VÆV7FVEfVæF÷"Ò„äEu$•EDTåõdTäDõ%2æf–æB‚‡fVæF÷"’ÓâfVæF÷"ææÖRÓÓÒBçfVæF÷%öæÖR’ÇÂ„äEu$•EDTåõdTäDõ%5³Ó°¢6öç7B—4†æGw&—GFVâÒBæÖWF†öBÓÓÒv†æGw&—GFVåöæ÷FRrÇÂBæ6&E÷G—Sòæ–æ6ÇVFW2‚v†æGw&—GFVâr“°¢&WGW&âÆ'F–6ÆR6Æ74æÖSÒ&6&B&V6÷&BÖ6&B"¶W“×·BçF÷V6…ö–GÓà¢ÆF—b6Æ74æÖSÒ'&V6÷&BÖ†VFW"#ãÆF—cãÆF—b6Æ74æÖSÒ&¶–6¶W"#ç¶‡VÖæ—¦R‡BæÖWF†öB—Ò(
-"¶‡VÖæ—¦R‡Bç7FGW2—×·Bæ7&VFVEöBò(
-"G·&VÆF—fUv†Vâ‡Bæ7&VFVEöB—Ö¢rwÓÂöF—cãÆƒ3ç¶6öçF7CòægVÆÅöæÖRÇÂBç&V6—–VçEöæÖRÇÂBç&V6öçÓÂöƒ3ãÇ6Æ74æÖSÒ&×WFVB#ç·Bæ6ö×ç’ÇÂ6öçF7Còæ6ö×ç’ÇÂtæò6ö×ç’wÒ(
-"÷væW#¢·Bæ÷væW'ÓÂ÷ãÍôòÚ$z{-®éÜj×onKey)} onClick={() => { if (window.confirm('Archive this touchpoint?')) onLifecycle(t.touch_id, 'archive'); }}>{mutationKey === `touch:${t.touch_id}:archive` ? 'Archivingâ€¦' : 'Archive touchpoint'}</button>}</footer>
+import { useEffect, useMemo, useState } from 'react';
+import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, Home, Inbox, Menu, Moon, Plus, Settings, Sparkles, Sun, Users, UserRoundPlus, X } from 'lucide-react';
+import { useTheme, type Theme } from './theme';
+import { Dashboard } from './Dashboard';
+import { GmailSyncControl } from './GmailSyncControl';
+import { Instructions } from './Instructions';
+import { AddPerson } from './AddPerson';
+import { CaptureStudio } from './CaptureStudio';
+import { EventsPage } from './Events';
+import { NetworkPage } from './Network';
+import { Introductions } from './Introductions';
+import { friendlyWhen, humanize, relativeWhen } from './format';
+import { clippedText, displayText } from './text';
+import { store } from '../data/store';
+import { createSheetContact, createSheetIntake, decideSheetApproval, fetchSheetSnapshot, markSheetNotificationRead, reviewSheetIntake, updateSheetTouchFulfillment, updateSheetContactStatus, updateSheetRecordLifecycle, type SheetSnapshot } from '../services/sheetsClient';
+import type { AiSuggestionRecord, ApprovalRecord, ContactRecord, DealFlowProspect, IntakeRecord, NotificationRecord, Owner, RelationshipTouch, TouchMethod } from '../domain/types';
+import { HANDWRITTEN_VENDORS, type HandwrittenVendor } from '../domain/handwrittenVendors';
+
+type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'introductions' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
+
+const navItems: Array<{ page: Page; label: string; icon: React.ReactNode }> = [
+  { page: 'dashboard', label: 'Dashboard', icon: <Home size={17} /> },
+  { page: 'contacts', label: 'West Peek Network', icon: <Users size={17} /> },
+  { page: 'introductions', label: 'Introductions', icon: <UserRoundPlus size={17} /> },
+  { page: 'events', label: 'Events', icon: <CalendarDays size={17} /> },
+  { page: 'add', label: 'Add Person', icon: <Plus size={17} /> },
+  { page: 'intake', label: 'Intake Queue', icon: <Inbox size={17} /> },
+  { page: 'touches', label: 'Touchpoints', icon: <ContactRound size={17} /> },
+  { page: 'approvals', label: 'Approvals', icon: <CheckCircle2 size={17} /> },
+  { page: 'notifications', label: 'Notifications', icon: <Bell size={17} /> },
+  { page: 'ai', label: 'AI Helper', icon: <Sparkles size={17} /> },
+  { page: 'instructions', label: 'App Instructions', icon: <BookOpen size={17} /> },
+  { page: 'settings', label: 'Settings', icon: <Settings size={17} /> }
+];
+
+type SessionState = { authenticated: boolean; email?: string; message: string };
+type OAuthStatus = {
+  ok?: boolean;
+  browser_session_connected?: boolean;
+  browser_session_email?: string;
+  gmail_oauth_connected?: boolean;
+  connected_email?: string;
+  provider?: string;
+  status?: string;
+  token_captured_at?: string;
+  token_updated_at?: string;
+  source?: string;
+  cache_ttl_seconds?: number;
+  warning?: string;
+  error?: string;
+};
+
+
+export function App() {
+  const [theme, setTheme] = useTheme();
+  const [page, setPage] = useState<Page>('dashboard');
+  const [addMode, setAddMode] = useState<'manual' | 'capture'>('manual');
+  function openCapture() { setAddMode('capture'); setPage('add'); }
+  const [pendingContactId, setPendingContactId] = useState<string | null>(null);
+  const [introContactId, setIntroContactId] = useState<string | null>(null);
+  function openIntro(id: string) { setIntroContactId(id); setPage('introductions'); }
+  function openContact(id: string) { setPendingContactId(id); setPage('contacts'); }
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
+  const [mutationKey, setMutationKey] = useState<string | null>(null);
+  const [sheetData, setSheetData] = useState<SheetSnapshot | null>(null);
+  const [sheetStatus, setSheetStatus] = useState('Loading Google Sheets snapshot...');
+  const [session, setSession] = useState<SessionState>({ authenticated: false, message: 'Checking Google OAuth session...' });
+  const [oauthStatus, setOauthStatus] = useState<OAuthStatus>({ gmail_oauth_connected: false, status: 'unknown' });
+  const [oauthMessage, setOauthMessage] = useState('Checking Gmail OAuth token status...');
+  const localData = useMemo(() => ({
+    contacts: store.contacts(),
+    intake: store.intake(),
+    touches: store.touches(),
+    approvals: store.approvals(),
+    notifications: store.notifications(),
+    aiSuggestions: [],
+    introductions: [],
+    events: [],
+    eventAttendees: []
+  }), [refreshToken]);
+  const data = sheetData || localData;
+
+  async function reloadSheetsSnapshot(nextMessage?: string, fresh = true) {
+    try {
+      const snapshot = await fetchSheetSnapshot({ fresh });
+      setSheetData(snapshot);
+      const freshness = snapshot.source === 'google_sheets_batch_cache' ? `Cached snapshot (${Math.round((snapshot.cacheAgeMs || 0) / 1000)}s old).` : `Fresh Google Sheets snapshot${snapshot.refreshedAt ? ` at ${new Date(snapshot.refreshedAt).toLocaleTimeString()}` : ''}.`;
+      setSheetStatus(snapshot.warnings?.introductions ? `${freshness} Introductions unavailable: ${snapshot.warnings.introductions}` : freshness);
+      if (nextMessage) setMessage(nextMessage);
+      return snapshot;
+    } catch (error) {
+      setSheetStatus(error instanceof Error ? error.message : 'Google Sheets snapshot unavailable.');
+      if (nextMessage) setMessage(nextMessage);
+      return null;
+    }
+  }
+
+  async function loadSession() {
+    try {
+      const response = await fetch('/api/session', { credentials: 'same-origin' });
+      const payload = await response.json().catch(() => ({})) as { authenticated?: boolean; user?: { email?: string }; error?: string };
+      setSession({ authenticated: Boolean(payload.authenticated), email: payload.user?.email, message: payload.authenticated ? `Signed in as ${payload.user?.email || 'approved user'}` : (payload.error || 'No signed browser session in this browser.') });
+    } catch (error) {
+      setSession({ authenticated: false, message: error instanceof Error ? error.message : 'Could not check browser session.' });
+    }
+  }
+
+  async function loadOAuthStatus() {
+    try {
+      const response = await fetch('/api/oauth/status', { credentials: 'same-origin' });
+      const payload = await response.json().catch(() => ({})) as OAuthStatus;
+      setOauthStatus(payload);
+      if (payload.gmail_oauth_connected) {
+        const suffix = payload.warning ? ` ${payload.warning}` : '';
+        setOauthMessage(`Gmail OAuth token captured for ${payload.connected_email || payload.browser_session_email || 'approved user'}${payload.token_captured_at ? ` at ${payload.token_captured_at}` : ''}.${suffix}`);
+      } else if (payload.status === 'temporarily_rate_limited') {
+        setOauthMessage(payload.error || 'Google Sheets quota cooldown. Wait 60 seconds before refreshing connection status again.');
+      } else if (payload.error) {
+        setOauthMessage(payload.error);
+      } else {
+        setOauthMessage('No active Gmail OAuth token found in oauth_tokens.');
+      }
+    } catch (error) {
+      setOauthStatus({ gmail_oauth_connected: false, status: 'unknown' });
+      setOauthMessage(error instanceof Error ? error.message : 'Could not check Gmail OAuth token status.');
+    }
+  }
+
+  async function refreshConnectionStatus() {
+    await Promise.all([loadSession(), loadOAuthStatus()]);
+  }
+
+  useEffect(() => { void reloadSheetsSnapshot(undefined, false); void refreshConnectionStatus(); }, []);
+
+  function refresh(nextMessage?: string) {
+    setRefreshToken((value) => value + 1);
+    if (nextMessage) setMessage(nextMessage);
+  }
+
+  async function handleAdded(contact: ContactRecord, touchMethod: TouchMethod) {
+    try {
+      await createSheetContact(contact, touchMethod);
+      await reloadSheetsSnapshot('Added to Google Sheets and refreshed the West Peek Network.');
+      setPage('contacts');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not add person to Google Sheets.');
+    }
+  }
+
+  async function handleIntakeCapture(rawText: string) {
+    try {
+      await createSheetIntake(rawText);
+      await reloadSheetsSnapshot('Captured intake item to Google Sheets.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not capture intake to Google Sheets.');
+    }
+  }
+
+  async function handleIntakeReview(id: string, action: 'convert' | 'attach' | 'dismiss', conversion: { deal_flow_prospect?: DealFlowProspect; relationship_owner?: Owner } = {}) {
+    const key = `intake:${id}:${action}`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      await reviewSheetIntake(id, action, action === 'attach' ? { attached_contact_id: window.prompt('Existing contact_id to attach to:') || '' } : conversion);
+      await reloadSheetsSnapshot(`Intake ${action} recorded in Google Sheets.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : `Could not ${action} intake in Google Sheets.`);
+    } finally {
+      setMutationKey(null);
+    }
+  }
+
+  async function handleApprovalDecision(id: string, decision: 'approve' | 'reject') {
+    const key = `approval:${id}:${decision}`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      const approval = data.approvals.find((item) => item.approval_id === id);
+      await decideSheetApproval(id, decision);
+      if (decision === 'approve' && approval?.source_entity_type === 'relationship_touch' && approval.source_entity_id) {
+        const touch = data.touches.find((item) => item.touch_id === approval.source_entity_id);
+        if (touch) {
+          await updateSheetTouchFulfillment(touch, {
+            status: 'approved_ready_to_send',
+            fulfillment_status: 'approved_ready_to_send',
+            fulfillment_notes: 'Approval recorded. Operator must choose a vendor handoff or mark I will do it myself. Network OS has not sent or paid for anything.',
+            execution_allowed: false
+          });
+        }
+      }
+      await reloadSheetsSnapshot(decision === 'approve' ? 'Approval recorded. Handwritten/vendor touches are now ready for manual fulfillment choice.' : `Approval ${decision} recorded in Google Sheets.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not record approval decision.');
+    } finally {
+      setMutationKey(null);
+    }
+  }
+
+  async function handleTouchFulfillment(touch: RelationshipTouch, update: Partial<RelationshipTouch>) {
+    try {
+      await updateSheetTouchFulfillment(touch, update);
+      await reloadSheetsSnapshot('Relationship touch fulfillment status recorded in Google Sheets.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not update relationship touch fulfillment.');
+    }
+  }
+
+  async function handleContactStatus(id: string, status: 'active' | 'archived') {
+    const key = `contact:${id}:${status}`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      await updateSheetContactStatus(id, status, status === 'archived' ? 'Archived by operator from West Peek Network.' : 'Restored by operator from archive.');
+      await reloadSheetsSnapshot(status === 'archived' ? 'Contact archived and removed from Active.' : 'Contact restored to Active.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not update contact status.');
+    } finally {
+      setMutationKey(null);
+    }
+  }
+
+  async function handleIntroPreference(id: string, noIntros: boolean) {
+    const key = `contact:${id}:intro-preference`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      const response = await fetch('/api/contacts/intro-preference', {method:'POST', credentials:'same-origin', headers:{'content-type':'application/json'}, body:JSON.stringify({contact_id:id,no_intros:noIntros})});
+      const result = await response.json() as {error?:string};
+      if (!response.ok) throw new Error(result.error || 'Could not update intro preference.');
+      await reloadSheetsSnapshot(noIntros ? 'Excluded from introduction suggestions.' : 'Introduction suggestions enabled.', true);
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Could not update intro preference.'); }
+    finally { setMutationKey(null); }
+  }
+
+  async function handleLifecycle(entity: 'intake' | 'touch' | 'approval' | 'notification' | 'ai_suggestion' | 'event_attendee', id: string, action: 'archive' | 'restore') {
+    const key = `${entity}:${id}:${action}`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      await updateSheetRecordLifecycle(entity, id, action, action === 'archive' ? 'Archived by operator from authenticated UI.' : 'Restored by operator from authenticated UI.');
+      await reloadSheetsSnapshot(action === 'archive' ? 'Record archived and removed from the active view.' : 'Record restored.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : `Could not ${action} record.`);
+    } finally {
+      setMutationKey(null);
+    }
+  }
+
+  async function handleNotificationRead(id: string, recipientEmail = '') {
+    try {
+      await markSheetNotificationRead(id, recipientEmail);
+      await reloadSheetsSnapshot('Notification read status recorded in Google Sheets.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not mark notification read.');
+    }
+  }
+
+  return (
+    <div className="shell">
+      <aside className={`sidebar ${mobileNavOpen ? 'mobile-open' : ''}`}>
+        <button className="mobile-nav-toggle" type="button" aria-expanded={mobileNavOpen} aria-controls="primary-navigation" onClick={() => setMobileNavOpen((value) => !value)}>{mobileNavOpen ? <X size={18} /> : <Menu size={18} />}<span>{mobileNavOpen ? 'Close menu' : 'Menu'}</span></button>
+        <div className="brand">
+          <img className="brand-logo" src="/wp-logo.jpg" alt="West Peek logo" />
+          <div>
+            <div className="brand-title">Network OS</div>
+            <div className="brand-sub">West Peek internal</div>
+          </div>
+        </div>
+        <button className="sidebar-theme-toggle" type="button" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}<span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span></button>
+        <nav id="primary-navigation" className="nav" aria-label="Primary">
+          {navItems.map((item) => (
+            <button key={item.page} className={page === item.page ? 'active' : ''} onClick={() => { if (item.page === 'add') setAddMode('manual'); setPage(item.page); setMobileNavOpen(false); }}>
+              {item.icon} {item.label}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-health" aria-label="System health" title={session.authenticated && sheetData ? 'Systems ready' : 'Setup needs attention'}><span className={`health-dot ${session.authenticated && sheetData ? 'good' : ''}`} /><span>{session.authenticated && sheetData ? 'Systems ready' : 'Setup needs attention'}</span></div>
+      </aside>
+      <main className="main">
+        {message && <div className="notice" style={{ marginBottom: 16 }}>{message}</div>}
+        {page === 'dashboard' && <Dashboard data={data} go={setPage} openCapture={openCapture} openContact={openContact} runtime={{
+          sheetStatus,
+          sessionAuthenticated: session.authenticated,
+          sessionEmail: session.email,
+          usingLiveSheets: Boolean(sheetData),
+          gmailOauthConnected: Boolean(oauthStatus.gmail_oauth_connected),
+          gmailOauthEmail: oauthStatus.connected_email,
+          gmailOauthCapturedAt: oauthStatus.token_captured_at
+        }} gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} compact onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} />}
+        {page === 'instructions' && <Instructions />}
+        {page === 'events' && <EventsPage events={data.events} attendees={data.eventAttendees} onAttendeeLifecycle={(id, action) => { void handleLifecycle('event_attendee', id, action); }} onSaved={(nextMessage) => void reloadSheetsSnapshot(nextMessage || 'Event data saved to Google Sheets.')} />}
+        {page === 'add' && <><div className="segmented add-mode-tabs" role="group" aria-label="Add person method"><button type="button" className={addMode === 'manual' ? 'active' : ''} aria-pressed={addMode === 'manual'} onClick={() => setAddMode('manual')}>Enter details</button><button type="button" className={addMode === 'capture' ? 'active' : ''} aria-pressed={addMode === 'capture'} onClick={() => setAddMode('capture')}>Card / voice capture</button></div>{addMode === 'manual' ? <AddPerson onAdded={handleAdded} /> : <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}</>}
+        {page === 'intake' && <IntakePage gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id, conversion) => { void handleIntakeReview(id, 'convert', conversion); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
+        {page === 'contacts' && <NetworkPage rows={data.contacts} initialSelectedId={pendingContactId} onInitialSelectionApplied={() => setPendingContactId(null)} onFindIntro={openIntro} onIntroPreference={(id, noIntros) => { void handleIntroPreference(id, noIntros); }} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
+        {page === 'introductions' && <Introductions contacts={data.contacts} introductions={data.introductions} initialContactId={introContactId} onRefresh={() => reloadSheetsSnapshot(undefined,true)} />}
+        {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('touch', id, action); }} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
+        {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('approval', id, action); }} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
+        {page === 'notifications' && <NotificationsPage rows={data.notifications} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('notification', id, action); }} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
+        {page === 'ai' && <AiReview rows={data.aiSuggestions} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('ai_suggestion', id, action); }} onCreated={async () => { await reloadSheetsSnapshot('AI Helper created a pending approval and notification.', true); setPage('approvals'); }} />}
+        {page === 'settings' && <SettingsPanel
+          theme={theme}
+          setTheme={setTheme}
+          sheetStatus={sheetStatus}
+          session={session}
+          oauthStatus={oauthStatus}
+          oauthMessage={oauthMessage}
+          onRefresh={() => void reloadSheetsSnapshot('Refreshed from Google Sheets. Live Google Sheets snapshot loaded.', true)}
+          onSessionRefresh={() => void refreshConnectionStatus()}
+          onMaintenanceComplete={() => void reloadSheetsSnapshot('Sheet maintenance finished and a fresh snapshot was loaded.', true)}
+          gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />}
+        />}
+      </main>
+    </div>
+  );
+}
+
+function IntakePage({ gmailSyncControl, rows, mutationKey, onCapture, onConvert, onAttach, onDismiss }: { gmailSyncControl: React.ReactNode; rows: IntakeRecord[]; mutationKey: string | null; onCapture: (rawText: string) => void; onConvert: (id: string, conversion: { deal_flow_prospect: DealFlowProspect; relationship_owner: Owner }) => void; onAttach: (id: string) => void; onDismiss: (id: string) => void }) {
+  const [view, setView] = useState<'pending' | 'history' | 'all'>('pending');
+  const [search, setSearch] = useState('');
+  const pendingStatuses = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'needs_more_info', 'pending_network_review', 'event_intake_received']);
+  const visibleRows = rows.filter((row) => view === 'all' || (view === 'pending' ? pendingStatuses.has(row.review_status) : !pendingStatuses.has(row.review_status))).filter((row) => !search || [row.parsed_name, row.parsed_company, row.parsed_email, row.email_subject, row.ai_summary, row.raw_text].join(' ').toLowerCase().includes(search.toLowerCase()));
+  function submitCapture(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    onCapture(String(form.get('raw_text') || ''));
+    event.currentTarget.reset();
+  }
+  return <>
+    <Header eyebrow="Intake Queue" title="Review captured relationship context" subtitle="Actionable captures appear first. Use #wpdealflow / #dealflow for founder or prospective deal flow. Every capture remains in human review until an operator decides." />
+    <RouteGuide purpose="Turn raw captures into trusted relationship records." primaryAction="Resolve pending intake one item at a time." secondary="Capture a manual note when no source integration is available." caution="Nothing converts, attaches, or dismisses without operator action." />
+    <div className="card settings-operations"><h3>Import new Gmail intake</h3><p className="muted">Checks all eligible connected West Peek mailboxes, imports new qualifying messages, and refreshes this queue.</p>{gmailSyncControl}</div>
+    <div className="filter-bar"><input aria-label="Search intake" placeholder="Search person, company, email, subject, or summary" value={search} onChange={(event) => setSearch(event.target.value)} /><div className="segmented" role="group" aria-label="Intake view"><button className={view === 'pending' ? 'active' : ''} onClick={() => setView('pending')}>Pending</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>History</button><button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>All</button></div><span className="result-count">{visibleRows.length} records</span></div>
+    <details className="card" open><summary>Manual capture</summary><form className="form compact-form" onSubmit={submitCapture}><p className="muted">Paste a real relationship or deal-flow note. Production forms start empty.</p><textarea name="raw_text" aria-label="Gmail trigger text" required placeholder="#wpnetwork or #wpdealflow, then the relationship context" /><button className="btn primary" type="submit">Capture to Intake Queue</button></form></details>
+    <div className="list">{visibleRows.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No records match this view' : 'No intake records yet'}</h3><p>{rows.length ? 'Change the search or view filters.' : 'New review items will appear here.'}</p></div> : visibleRows.map((i) => { const busy = mutationKey?.startsWith(`intake:${i.intake_id}:`); return <article className="card record-card" key={i.intake_id} data-testid={`intake-${i.intake_id}`}><header className="record-header"><div><div className="kicker">{humanize(i.source)} â€¢ {humanize(i.review_status)}{i.created_at ? ` â€¢ ${relativeWhen(i.created_at)}` : ''}</div><h3>{i.parsed_name || i.email_from || 'Unparsed person'}</h3><p className="muted">{i.parsed_company || i.email_subject || 'Company not parsed'}{i.source_mailbox ? ` â€¢ via ${i.source_mailbox}` : ''}</p><p className="contact-email">{i.parsed_email || 'Email not parsed'}</p></div><div className="badge-stack">{i.missing_fields && <span className="badge warn">Missing {humanizeList(i.missing_fields)}</span>}{i.deal_flow_prospect === 'yes' && <span className="badge warn">Deal flow</span>}</div></header><p className="record-summary">{bounded(i.ai_summary || i.parsed_notes || i.raw_text, 420)}</p><details><summary>View source details</summary><dl className="metadata"><dt>From</dt><dd>{i.email_from || 'â€”'}</dd><dt>To</dt><dd>{i.email_to || 'â€”'}</dd><dt>Message ID</dt><dd>{i.gmail_message_id || 'â€”'}</dd></dl><pre className="raw-source">{bounded(i.raw_text, 4000)}</pre></details>{view === 'pending' && <IntakeDecisionFooter intake={i} busy={Boolean(busy)} mutationKey={mutationKey} onConvert={onConvert} onAttach={onAttach} onDismiss={onDismiss} />}</article>})}</div>
+  </>;
+}
+
+function IntakeDecisionFooter({ intake, busy, mutationKey, onConvert, onAttach, onDismiss }: { intake: IntakeRecord; busy: boolean; mutationKey: string | null; onConvert: (id: string, conversion: { deal_flow_prospect: DealFlowProspect; relationship_owner: Owner }) => void; onAttach: (id: string) => void; onDismiss: (id: string) => void }) {
+  const [dealFlowProspect, setDealFlowProspect] = useState<DealFlowProspect>(intake.deal_flow_prospect || (intake.person_type === 'founder' ? 'yes' : 'unknown'));
+  const [owner, setOwner] = useState<Owner>(intake.parsed_owner || 'Unassigned');
+  return <>
+    <div className="intake-decision-block"><p className="intake-decision-note">New Network contact settings â€” used only when you choose Add to West Peek Network.</p><div className="intake-decision-grid" aria-label="New Network contact conversion settings">
+      <label>Deal-flow prospect<select aria-label={`Deal-flow prospect for ${intake.parsed_name || intake.intake_id}`} value={dealFlowProspect} disabled={busy} onChange={(event) => setDealFlowProspect(event.target.value as DealFlowProspect)}><option value="yes">Yes</option><option value="no">No</option><option value="unknown">Unknown</option></select></label>
+      <label>Assign to<select aria-label={`Relationship owner for ${intake.parsed_name || intake.intake_id}`} value={owner} disabled={busy} onChange={(event) => setOwner(event.target.value as Owner)}><option value="Unassigned">Unassigned</option><option value="Sequoia">Sequoia</option><option value="Scooter">Scooter</option></select></label>
+    </div></div>
+    <footer className="action-footer"><button className="btn primary" disabled={busy} onClick={() => onConvert(intake.intake_id, { deal_flow_prospect: dealFlowProspect, relationship_owner: owner })}>{mutationKey === `intake:${intake.intake_id}:convert` ? 'Addingâ€¦' : 'Add to West Peek Network'}</button><button className="btn" disabled={busy} onClick={() => onAttach(intake.intake_id)}>{mutationKey === `intake:${intake.intake_id}:attach` ? 'Attachingâ€¦' : 'Attach to Existing Person'}</button><button className="btn danger" disabled={busy} onClick={() => onDismiss(intake.intake_id)}>{mutationKey === `intake:${intake.intake_id}:dismiss` ? 'Dismissingâ€¦' : 'Dismiss'}</button></footer>
+  </>;
+}
+
+function TouchesPage({ rows, contacts, mutationKey, onLifecycle, onFulfillmentUpdate }: { rows: RelationshipTouch[]; contacts: ContactRecord[]; mutationKey: string | null; onLifecycle: (id: string, action: 'archive' | 'restore') => void; onFulfillmentUpdate: (touch: RelationshipTouch, update: Partial<RelationshipTouch>) => void }) {
+  const [view, setView] = useState<'active' | 'archived'>('active');
+  const visibleRows = rows.filter((row) => view === 'archived' ? row.status === 'cancelled' : row.status !== 'cancelled');
+  return <>
+    <Header eyebrow="Relationship Touches" title="Intentional follow-through" subtitle="Actions that say: I remembered, I appreciated it, I followed through. Handwritten notes stay manual until a human chooses vendor or self-fulfillment." />
+    <RouteGuide purpose="Review relationship follow-through without confusing drafts with completed outreach." primaryAction="Work the next due touch, then record the fulfillment state." secondary="Use the recipient, method, due date, and reason to distinguish similar records." caution="Network OS never sends, orders, pays, or mails on its own." />
+    <div className="filter-bar"><div className="segmented"><button className={view === 'active' ? 'active' : ''} onClick={() => setView('active')}>Active</button><button className={view === 'archived' ? 'active' : ''} onClick={() => setView('archived')}>Archived</button></div><span className="result-count">{visibleRows.length} records</span></div><div className="grid cols-2">{visibleRows.length === 0 ? <div className="empty-state"><h3>No relationship touches yet</h3><p>Approved follow-up drafts and thank-you actions will appear here.</p></div> : visibleRows.map((t) => {
+      const contact = contacts.find((c) => c.contact_id === t.contact_id);
+      const methodLabel = t.method.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+      const selectedVendor = HANDWRITTEN_VENDORS.find((vendor) => vendor.name === t.vendor_name) || HANDWRITTEN_VENDORS[0];
+      const isHandwritten = t.method === 'handwritten_note' || t.card_type?.includes('handwritten');
+      return <article className="card record-card" key={t.touch_id}>
+        <div className="record-header"><div><div className="kicker">{humanize(t.method)} â€¢ {humanize(t.status)}{t.created_at ? ` â€¢ ${relativeWhen(t.created_at)}` : ''}</div><h3>{contact?.full_name || t.recipient_name || t.reason}</h3><p className="muted">{t.company || contact?.company || 'No company'} â€¢ Owner: {t.owner}</p></div><span className="badge warn">{humanize(t.fulfillment_status || t.status)}</span></div>
+        <p className="record-summary">{clippedText(t.reason, 420)}</p>
+        <dl className="metadata compact-metadata"><dt>Method</dt><dd>{methodLabel}</dd><dt>Due</dt><dd>{friendlyWhen(t.due_date)}</dd>{t.recipient_email && <><dt>Recipient</dt><dd>{t.recipient_email}</dd></>}</dl>
+        {t.draft_message && <details><summary>Preview draft</summary><p className="record-summary">{clippedText(t.draft_message, 1200)}</p></details>}
+        {isHandwritten && <HandwrittenFulfillmentPanel touch={t} selectedVendor={selectedVendor} onFulfillmentUpdate={onFulfillmentUpdate} />}<footer className="action-footer">{t.status === 'cancelled' ? <button className="btn" disabled={Boolean(mutationKey)} onClick={() => onLifecycle(t.touch_id, 'restore')}>Restore touchpoint</button> : <button className="btn danger" disabled={Boolean(mutationKey)} onClick={() => { if (window.confirm('Archive this touchpoint?')) onLifecycle(t.touch_id, 'archive'); }}>{mutationKey === `touch:${t.touch_id}:archive` ? 'Archivingâ€¦' : 'Archive touchpoint'}</button>}</footer>
       </article>;
     })}</div>
   </>;
