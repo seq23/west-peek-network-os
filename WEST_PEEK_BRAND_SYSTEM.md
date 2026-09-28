@@ -56,3 +56,7 @@ A Hallmark review must verify:
 ## Change control
 
 Any change to the canonical orange, parent-logo treatment, or black/white-first rule requires owner approval and an update to this file in every West Peek repo.
+
+## Network OS dark default (owner-approved 2026-09-27)
+
+Network OS opens on near-black page and card surfaces with high-contrast light text. Its optional light theme remains available through the sidebar and Settings controls; the choice persists in this browser. The navigation shell remains near-black in both themes. The canonical orange remains `#F05A1A`, used for selected states and primary actions, not broad surfaces. The light theme uses `--wp-page`, `--wp-card`, and `--wp-ink` for warm page, white card, and dark text; the dark theme overrides those same tokens with `#0d0c0b`, `#161412`, and `#f4ede6`. Semantic good, warning, and danger colors retain their distinct meanings.
