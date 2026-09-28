@@ -3,7 +3,7 @@ const p='config/deployed-route-manifest.json';
 const m=JSON.parse(fs.readFileSync(p,'utf8'));
 if(!Array.isArray(m.routes)||!m.routes.length) throw new Error('route manifest empty');
 const ids=new Set();
-const mobileRequired=new Set(['dashboard','add-person','capture-studio','intake-queue','network','touchpoints','settings']);
+const mobileRequired=new Set(['dashboard','add-person','intake-queue','network','introductions','touchpoints','settings']);
 for(const r of m.routes){
   for(const k of ['id','path','authMode','persona','criticality','viewports','expectedIdentity','safeActions','fixtureRequirements','persistenceRequired','cleanupPolicy']) if(!(k in r)) throw new Error(`route ${r.id||'?'} missing ${k}`);
   if(ids.has(r.id)) throw new Error(`duplicate route id ${r.id}`);

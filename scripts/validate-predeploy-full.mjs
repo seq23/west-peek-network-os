@@ -15,6 +15,7 @@ await runRequired('npm run validate:tier4-lane-registry');
 await runRequired('npm run validate:tier4-report-schema');
 await runRequired('npm run validate:docs-match-package-scripts');
 await runRequired('npm run validate:repo-matrix-consistency');
+await runRequired('npm run validate:deployed-route-manifest');
 await runRequired('npm run validate:no-localhost-defaults');
 await runRequired('npm run validate:tier-docs-current');
 await runRequired('npm run validate:tier4-docs-complete');
