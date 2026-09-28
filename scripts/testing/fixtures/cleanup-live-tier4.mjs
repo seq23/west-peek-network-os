@@ -6,7 +6,7 @@ const runId = process.env.WEST_PEEK_E2E_RUN_ID || process.argv[2] || '';
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || process.env.POSTDEPLOY_BASE_URL || 'https://network.joinwestpeek.com';
 const storageState = process.env.TIER4_AUTHENTICATED_STORAGE_STATE || process.env.PLAYWRIGHT_STORAGE_STATE || '.auth/playwright-storage-state.json';
 const dryRun = process.env.TIER4_CLEANUP_DRY_RUN === '1';
-const tabs = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees', 'provider_replay_guard'];
+const tabs = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'introductions', 'events', 'event_attendees', 'provider_replay_guard'];
 const executeConfirm = 'DELETE_EXACT_REGISTERED_PROOF_FIXTURES';
 if (!/^wpno-tier4-[A-Za-z0-9._:-]+$/.test(runId)) throw new Error('Set WEST_PEEK_E2E_RUN_ID to the exact wpno-tier4 run being cleaned.');
 if (!baseURL.startsWith('https://')) throw new Error('Cleanup requires an explicit deployed HTTPS URL.');

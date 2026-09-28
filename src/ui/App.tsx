@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, Home, Inbox, Menu, Moon, Plus, Settings, Sparkles, Sun, Users, X } from 'lucide-react';
+import { Bell, BookOpen, CalendarDays, CheckCircle2, ContactRound, Home, Inbox, Menu, Moon, Plus, Settings, Sparkles, Sun, Users, UserRoundPlus, X } from 'lucide-react';
 import { useTheme, type Theme } from './theme';
 import { Dashboard } from './Dashboard';
 import { GmailSyncControl } from './GmailSyncControl';
@@ -8,6 +8,7 @@ import { AddPerson } from './AddPerson';
 import { CaptureStudio } from './CaptureStudio';
 import { EventsPage } from './Events';
 import { NetworkPage } from './Network';
+import { Introductions } from './Introductions';
 import { friendlyWhen, humanize, relativeWhen } from './format';
 import { clippedText, displayText } from './text';
 import { store } from '../data/store';
@@ -15,11 +16,12 @@ import { createSheetContact, createSheetIntake, decideSheetApproval, fetchSheetS
 import type { AiSuggestionRecord, ApprovalRecord, ContactRecord, DealFlowProspect, IntakeRecord, NotificationRecord, Owner, RelationshipTouch, TouchMethod } from '../domain/types';
 import { HANDWRITTEN_VENDORS, type HandwrittenVendor } from '../domain/handwrittenVendors';
 
-type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
+type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'introductions' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
 
 const navItems: Array<{ page: Page; label: string; icon: React.ReactNode }> = [
   { page: 'dashboard', label: 'Dashboard', icon: <Home size={17} /> },
   { page: 'contacts', label: 'West Peek Network', icon: <Users size={17} /> },
+  { page: 'introductions', label: 'Introductions', icon: <UserRoundPlus size={17} /> },
   { page: 'events', label: 'Events', icon: <CalendarDays size={17} /> },
   { page: 'add', label: 'Add Person', icon: <Plus size={17} /> },
   { page: 'intake', label: 'Intake Queue', icon: <Inbox size={17} /> },
@@ -55,6 +57,8 @@ export function App() {
   const [addMode, setAddMode] = useState<'manual' | 'capture'>('manual');
   function openCapture() { setAddMode('capture'); setPage('add'); }
   const [pendingContactId, setPendingContactId] = useState<string | null>(null);
+  const [introContactId, setIntroContactId] = useState<string | null>(null);
+  function openIntro(id: string) { setIntroContactId(id); setPage('introductions'); }
   function openContact(id: string) { setPendingContactId(id); setPage('contacts'); }
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -72,6 +76,7 @@ export function App() {
     approvals: store.approvals(),
     notifications: store.notifications(),
     aiSuggestions: [],
+    introductions: [],
     events: [],
     eventAttendees: []
   }), [refreshToken]);
@@ -216,6 +221,19 @@ export function App() {
     }
   }
 
+  async function handleIntroPreference(id: string, noIntros: boolean) {
+    const key = `contact:${id}:intro-preference`;
+    if (mutationKey) return;
+    setMutationKey(key);
+    try {
+      const response = await fetch('/api/contacts/intro-preference', {method:'POST', credentials:'same-origin', headers:{'content-type':'application/json'}, body:JSON.stringify({contact_id:id,no_intros:noIntros})});
+      const result = await response.json() as {error?:string};
+      if (!response.ok) throw new Error(result.error || 'Could not update intro preference.');
+      await reloadSheetsSnapshot(noIntros ? 'Excluded from introduction suggestions.' : 'Introduction suggestions enabled.', true);
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Could not update intro preference.'); }
+    finally { setMutationKey(null); }
+  }
+
   async function handleLifecycle(entity: 'intake' | 'touch' | 'approval' | 'notification' | 'ai_suggestion' | 'event_attendee', id: string, action: 'archive' | 'restore') {
     const key = `${entity}:${id}:${action}`;
     if (mutationKey) return;
@@ -275,7 +293,8 @@ export function App() {
         {page === 'events' && <EventsPage events={data.events} attendees={data.eventAttendees} onAttendeeLifecycle={(id, action) => { void handleLifecycle('event_attendee', id, action); }} onSaved={(nextMessage) => void reloadSheetsSnapshot(nextMessage || 'Event data saved to Google Sheets.')} />}
         {page === 'add' && <><div className="segmented add-mode-tabs" role="group" aria-label="Add person method"><button type="button" className={addMode === 'manual' ? 'active' : ''} aria-pressed={addMode === 'manual'} onClick={() => setAddMode('manual')}>Enter details</button><button type="button" className={addMode === 'capture' ? 'active' : ''} aria-pressed={addMode === 'capture'} onClick={() => setAddMode('capture')}>Card / voice capture</button></div>{addMode === 'manual' ? <AddPerson onAdded={handleAdded} /> : <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}</>}
         {page === 'intake' && <IntakePage gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id, conversion) => { void handleIntakeReview(id, 'convert', conversion); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
-        {page === 'contacts' && <NetworkPage rows={data.contacts} initialSelectedId={pendingContactId} onInitialSelectionApplied={() => setPendingContactId(null)} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
+        {page === 'contacts' && <NetworkPage rows={data.contacts} initialSelectedId={pendingContactId} onInitialSelectionApplied={() => setPendingContactId(null)} onFindIntro={openIntro} onIntroPreference={(id, noIntros) => { void handleIntroPreference(id, noIntros); }} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
+        {page === 'introductions' && <Introductions contacts={data.contacts} introductions={data.introductions} initialContactId={introContactId} onRefresh={() => reloadSheetsSnapshot(undefined,true)} />}
         {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('touch', id, action); }} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
         {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('approval', id, action); }} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
         {page === 'notifications' && <NotificationsPage rows={data.notifications} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('notification', id, action); }} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
@@ -514,6 +533,8 @@ function SettingsPanel({
   onMaintenanceComplete: () => void;
   gmailSyncControl: React.ReactNode;
 }) {
+  const [introSendReadiness, setIntroSendReadiness] = useState<{ready:boolean;reason:string}|null>(null);
+  useEffect(() => { void fetch('/api/introductions/send-readiness', {credentials:'same-origin'}).then((response) => response.json()).then((value) => setIntroSendReadiness(value as {ready:boolean;reason:string})).catch(() => undefined); }, []);
   const [maintenanceStatus, setMaintenanceStatus] = useState<string | null>(null);
   const [maintenanceBusy, setMaintenanceBusy] = useState(false);
   const [refreshBusy, setRefreshBusy] = useState(false);
@@ -632,6 +653,7 @@ function SettingsPanel({
     <div className="grid cols-2">
       <div className="card">
         <h3>Google Gmail OAuth</h3>
+        {introSendReadiness && !introSendReadiness.ready && <p role="status" className="notice">Introduction sending: {introSendReadiness.reason}</p>}
         <p><strong>{oauthStatus.gmail_oauth_connected ? 'Connected' : 'Not connected / unknown'}</strong></p>
         <p className="muted">{oauthMessage}</p>
         <p className="muted">Browser session: {session.authenticated ? `signed in as ${session.email}` : session.message}</p>

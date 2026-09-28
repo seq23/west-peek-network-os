@@ -61,3 +61,9 @@ Header spoofing is not accepted for production authentication.
 ## Guardrail literal
 
 Provider-created rows must preserve execution_allowed=false unless explicitly reviewed by a human.
+
+### In-app introduction email
+
+A suggested pair has no send authority. The receiving person's assigned relationship owner must approve the exact edited email. For an investor or LP, the operator first sends a permission request only to that person; the operator explicitly records the person's agreement before the introduction to both recipients is enabled. The browser confirms the final send and the server rechecks recipient addresses, active contacts, approval, Gmail scope, and the operator's own token. The operator is limited to ten completed introductions per UTC day. The separate `west-peek-intro-send-guard` Durable Object owns a permanent one-use claim per introduction and stage. A missing binding disables sending. A Gmail timeout or lost response is treated as uncertain and cannot trigger an automatic retry; reconcile the deterministic RFC Message-ID in Gmail Sent manually. The send route does not accept client-supplied recipients or message text.
+
+Deployment order: deploy `workers/intro-send-guard` with its migration, bind it to Pages as `INTRO_SEND_GUARD`, add the `introductions` sheet tab with the exact schema, then deploy Pages. Operators must reconnect Google to grant `gmail.send`. Verify using a controlled inbox and an approved introduction before enabling real use. Rollback: remove or disable the binding to stop new sends immediately, revoke the Gmail send grant in Google, and reconcile any `send_uncertain` records using Gmail Sent. Never reset a guard claim to retry an ambiguous send.

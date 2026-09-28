@@ -40,6 +40,7 @@ const sidebar = [
   'Add Person',
   'Intake Queue',
   'West Peek Network',
+  'Introductions',
   'Touchpoints',
   'Approvals',
   'Notifications',
@@ -54,6 +55,7 @@ const contentBySidebar: Record<(typeof sidebar)[number], RegExp> = {
   'Add Person': /Add to West Peek Network/i,
   'Intake Queue': /Review captured relationship context|manual Gmail capture|Gmail trigger text/i,
   'West Peek Network': /People in the West Peek Network|Existing Investor/i,
+  Introductions: /Good people should meet good people|Find intros/i,
   Touchpoints: /Intentional follow-through|Handwritten note fulfillment|pending_approval/i,
   Approvals: /Approvals Needed|Needs decision|Approve/i,
   Notifications: /Calm reminders|Approval needed|Notifications/i,
@@ -439,6 +441,26 @@ for (const label of sidebar) {
     await mainText(page, contentBySidebar[label]);
   });
 }
+
+test('introductions: recommended match can be drafted and dismissed without sending', async ({ page }) => {
+  const intro = { intro_id: 'intro_fixture', created_at: now(), updated_at: now(), status: 'suggested', mode: 'recommended', requester_email: 'sequoia@westpeek.ventures', person_a_id: 'contact_a', person_a_name: 'Alex Founder', person_a_email: 'alex@example.com', person_a_company: 'Alex Co', person_b_id: 'contact_existing', person_b_name: 'Existing Investor', person_b_email: 'existing@example.com', person_b_company: 'Apex Family Office', match_score: 80, ai_confidence: 'medium', rationale: 'Shared venture interest', rationale_a: 'Seeking advice', rationale_b: 'Relevant investor', etiquette: 'ask_first' };
+  let sendCalls = 0;
+  await page.route('**/api/introductions/send', (route) => { sendCalls++; return send(route, {ok:false,error:'Should not send'}, 409); });
+  await page.route('**/api/introductions/send-readiness', (route) => send(route, {ok:true,ready:false,reason:'Connect Gmail.'}));
+  await page.route('**/api/introductions/recommend', (route) => send(route, {ok:true,introductions:[intro]}));
+  await page.route('**/api/introductions/draft', (route) => send(route, {ok:true,introduction:{...intro,status:'drafted',draft_subject:'Introduction',draft_body:'Hello both',ask_first_subject:'May I connect you?',ask_first_body:'Would you welcome an intro?'}}));
+  await page.route('**/api/introductions/dismiss', (route) => send(route, {ok:true}));
+  await nav(page, 'Introductions');
+  await page.getByRole('button', {name:'Find intros', exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Alex Founder ↔ Existing Investor'})).toBeVisible();
+  await page.getByRole('button',{name:'Draft intro'}).click();
+  await expect(page.getByRole('region',{name:'Introduction draft'})).toContainText('Would you welcome an intro?');
+  await page.getByRole('button',{name:'Close',exact:true}).click();
+  await page.getByText('Not now',{exact:true}).click();
+  await page.getByRole('button',{name:'Wrong fit'}).click();
+  await expect(page.getByRole('heading',{name:'Alex Founder ↔ Existing Investor'})).toHaveCount(0);
+  expect(sendCalls).toBe(0);
+});
 
 test('surface: dashboard exposes primary West Peek Network actions', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /Network OS|Relationship command center|Open work queue/i); });
 test('surface: all major views are reachable', async ({ page }) => { for (const label of sidebar) { await nav(page, label); await mainText(page, contentBySidebar[label]); } });

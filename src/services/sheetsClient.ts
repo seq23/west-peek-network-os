@@ -1,4 +1,4 @@
-import type { AiSuggestionRecord, ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch, TouchMethod } from '../domain/types';
+import type { AiSuggestionRecord, ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, IntroductionRecord, NotificationRecord, RelationshipTouch, TouchMethod } from '../domain/types';
 
 export type SheetSnapshot = {
   source?: string;
@@ -11,6 +11,7 @@ export type SheetSnapshot = {
   approvals: ApprovalRecord[];
   notifications: NotificationRecord[];
   aiSuggestions: AiSuggestionRecord[];
+  introductions: IntroductionRecord[];
   events: EventRecord[];
   eventAttendees: EventAttendeeRecord[];
 };
@@ -35,6 +36,7 @@ export async function fetchSheetSnapshot(options: { fresh?: boolean } = {}): Pro
     approvals: rows(data.approvals).map(normalizeApproval),
     notifications: rows(data.notifications).map(normalizeNotification),
     aiSuggestions: rows(data.ai_suggestions).map(normalizeAiSuggestion),
+    introductions: rows(data.introductions).map(normalizeIntroduction),
     events: rows(data.events).map(normalizeEvent),
     eventAttendees: rows(data.event_attendees).map(normalizeEventAttendee)
   };
@@ -186,6 +188,21 @@ function normalizeAiSuggestion(row: Record<string, unknown>): AiSuggestionRecord
 
 function normalizeNotification(row: Record<string, unknown>): NotificationRecord {
   return { notification_id: str(row.notification_id), created_at: str(row.created_at), updated_at: emptyToUndefined(row.updated_at), recipient_email: str(row.recipient_email), notification_type: str(row.notification_type), channel: emptyToUndefined(row.channel), subject: str(row.subject, 'Notification'), body_preview: emptyToUndefined(row.body_preview), entity_type: emptyToUndefined(row.entity_type), entity_id: emptyToUndefined(row.entity_id), priority: priority(row.priority), status: str(row.status, 'unread') as NotificationRecord['status'], sent_at: emptyToUndefined(row.sent_at), read_at: emptyToUndefined(row.read_at), resolved_at: emptyToUndefined(row.resolved_at), failure_reason: emptyToUndefined(row.failure_reason) };
+}
+
+function normalizeIntroduction(row: Record<string, unknown>): IntroductionRecord {
+  return {
+    intro_id:str(row.intro_id), created_at:str(row.created_at), updated_at:str(row.updated_at),
+    status:str(row.status,'suggested') as IntroductionRecord['status'], mode:str(row.mode,'targeted') as IntroductionRecord['mode'], requester_email:str(row.requester_email),
+    person_a_id:str(row.person_a_id), person_a_name:str(row.person_a_name), person_a_email:str(row.person_a_email), person_a_company:str(row.person_a_company), person_a_external:bool(row.person_a_external),
+    person_b_id:str(row.person_b_id), person_b_name:str(row.person_b_name), person_b_email:str(row.person_b_email), person_b_company:str(row.person_b_company),
+    need_text:str(row.need_text), match_score:Number(row.match_score)||0, ai_confidence:confidence(row.ai_confidence)||'low',
+    rationale:str(row.rationale), rationale_a:str(row.rationale_a), rationale_b:str(row.rationale_b), etiquette:str(row.etiquette,'double') as IntroductionRecord['etiquette'],
+    draft_subject:emptyToUndefined(row.draft_subject), draft_body:emptyToUndefined(row.draft_body), ask_first_subject:emptyToUndefined(row.ask_first_subject), ask_first_body:emptyToUndefined(row.ask_first_body),
+    approval_id:emptyToUndefined(row.approval_id), approved_by:emptyToUndefined(row.approved_by), approved_at:emptyToUndefined(row.approved_at), sent_at:emptyToUndefined(row.sent_at), sent_from:emptyToUndefined(row.sent_from),
+    gmail_message_id:emptyToUndefined(row.gmail_message_id), gmail_thread_id:emptyToUndefined(row.gmail_thread_id), permission_sent_at:emptyToUndefined(row.permission_sent_at), permission_confirmed_at:emptyToUndefined(row.permission_confirmed_at), permission_confirmed_by:emptyToUndefined(row.permission_confirmed_by), send_error:emptyToUndefined(row.send_error), decline_reason:emptyToUndefined(row.decline_reason), dismissed_reason:emptyToUndefined(row.dismissed_reason),
+    touch_id_a:emptyToUndefined(row.touch_id_a), touch_id_b:emptyToUndefined(row.touch_id_b), internal_data_trace:emptyToUndefined(row.internal_data_trace), created_by:emptyToUndefined(row.created_by), updated_by:emptyToUndefined(row.updated_by)
+  };
 }
 
 function normalizeEvent(row: Record<string, unknown>): EventRecord {

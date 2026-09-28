@@ -5,7 +5,7 @@ import { batchReadTabs, sheetsUnavailable, type RuntimeEnv, type SheetTab } from
 type Env = RuntimeEnv & AuthEnv;
 type Context = { request: Request; env: Env };
 
-const BASE_TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'events', 'event_attendees'];
+const BASE_TABS: SheetTab[] = ['contacts', 'intake_queue', 'relationship_touches', 'approvals', 'notifications', 'ai_suggestions', 'introductions', 'events', 'event_attendees'];
 const PROOF_TABS: SheetTab[] = ['provider_replay_guard'];
 const IDS: Record<string, string> = {
   contacts: 'contact_id',
@@ -14,6 +14,7 @@ const IDS: Record<string, string> = {
   approvals: 'approval_id',
   notifications: 'notification_id',
   ai_suggestions: 'suggestion_id',
+  introductions: 'intro_id',
   events: 'event_id',
   event_attendees: 'event_attendee_id',
   provider_replay_guard: 'replay_id'

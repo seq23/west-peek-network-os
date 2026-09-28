@@ -23,3 +23,5 @@ Gmail trigger ingestion promise is implemented through `/api/gmail/sync` and rem
 Pitch Lab promise is implemented through signed endpoints using `x-pitch-lab-submitted-at` and `x-pitch-lab-signature` with base64url HMAC over `${submittedAt}.${rawBody}`. Tests must use this exact contract.
 
 No provider-backed lane may be called complete from static validation, mocked E2E, or pre-existing evidence lookup.
+
+| In-app introductions | Matching and drafting do not send email. A receiving-side owner approves the edited draft; the operator explicitly clicks Send. Investor and LP introductions first require a permission email and recorded agreement. Gmail sends from the operator's connected account behind a one-use Durable Object claim. | Domain scoring and guard tests, authenticated browser flow, controlled live Gmail send with exact-SHA release proof. | Production send remains unproven until the guard Worker and Sheets schema are deployed, Google scopes are renewed, and live controlled-inbox proof passes. |

@@ -113,6 +113,28 @@
       "cleanupPolicy": "none"
     },
     {
+      "id": "introductions",
+      "path": "/",
+      "navigationLabel": "Introductions",
+      "authMode": "authenticated",
+      "persona": "operator",
+      "criticality": "critical",
+      "viewports": [
+        "desktop",
+        "mobile"
+      ],
+      "expectedIdentity": {
+        "type": "heading",
+        "value": "Introductions"
+      },
+      "safeActions": [
+        "navigate"
+      ],
+      "fixtureRequirements": [],
+      "persistenceRequired": false,
+      "cleanupPolicy": "none"
+    },
+    {
       "id": "touchpoints",
       "path": "/",
       "navigationLabel": "Touchpoints",

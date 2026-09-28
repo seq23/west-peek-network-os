@@ -15,6 +15,7 @@ const routeContracts = [
   { label: 'Add Person', heading: /^Add to West Peek Network$/ },
   { label: 'Intake Queue', heading: /^Review captured relationship context$/ },
   { label: 'West Peek Network', heading: /^People in the West Peek Network$/ },
+  { label: 'Introductions', heading: /^Introductions$/ },
   { label: 'Touchpoints', heading: /^Intentional follow-through$/ },
   { label: 'Approvals', heading: /^Approvals Needed$/ },
   { label: 'Notifications', heading: /^Calm reminders, not approvals$/ },

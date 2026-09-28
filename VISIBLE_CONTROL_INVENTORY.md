@@ -47,3 +47,5 @@ Status: ACTIVE
 | Settings → Google Sheets data | Refresh from Google Sheets | Reloads workbook rows already persisted | Does not query Gmail or create intake rows |
 
 | Add Person | Enter details / Card / voice capture | Authenticated operator | Client-side mode selection | Manual contact creation or media intake upload remains on the same route | API readback required for each save | Mode selection is local; save uses existing guarded endpoints | Media failure leaves input visible | network-os.spec (manual and media capture) |
+
+| Introductions | Find intros / targeted matching / dismiss | Authenticated operator | Client-side controls → authenticated APIs | Reviewable suggested pairs in introductions tab; no email | Readback required for save | Human review required; opted-out people excluded | Rules-only ranking if Claude fails | introduction-scoring and network-os.spec |

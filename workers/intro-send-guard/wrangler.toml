@@ -1,0 +1,10 @@
+name = "west-peek-intro-send-guard"
+account_id = "8d147e242033699dd37c6f5a451f48d2"
+main = "index.ts"
+compatibility_date = "2026-06-07"
+[[durable_objects.bindings]]
+name = "INTRO_SEND_GUARD"
+class_name = "IntroSendGuard"
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["IntroSendGuard"]

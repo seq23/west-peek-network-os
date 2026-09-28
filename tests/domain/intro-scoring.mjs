@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { performance } from 'node:perf_hooks';
+import { scoreCandidates,introPairKey } from '../../functions/_shared/introScoring.ts';
+const a={contact_id:'a',full_name:'Founder A',email:'a@example.com',company:'A',person_type:'founder',need_text:'raising capital investor seed round'};
+const rows=Array.from({length:4000},(_,i)=>({contact_id:`b${i}`,full_name:`Person ${i}`,email:`person${i}@example.com`,company:`Company ${i}`,status:'active',person_type:i%2?'investor':'operator',priority:i%2?'High':'Normal',context_summary:i%2?'Seed capital investment introductions':'Technology operations'}));
+rows.push({contact_id:'blocked',full_name:'Blocked',email:'blocked@example.com',company:'Blocked',status:'active',person_type:'investor',priority:'High',tags:'no-intros',context_summary:'capital investment'});
+rows.push({contact_id:'archived',full_name:'Archived',email:'archived@example.com',company:'Archived',status:'archived',person_type:'investor',priority:'High',context_summary:'capital investment'});
+rows.push({contact_id:'sameemail',full_name:'Same',email:a.email,company:'Other',status:'active',person_type:'investor',priority:'High',context_summary:'capital'});
+rows.push({contact_id:'samecompany',full_name:'Colleague',email:'other@example.com',company:'A',status:'active',person_type:'investor',priority:'High',context_summary:'capital'});
+const t=performance.now();
+const found=scoreCandidates(a,rows,[{person_a_id:'a',person_b_id:'b1',status:'suggested'}],{targeted:true});
+const elapsed=performance.now()-t;
+assert.ok(elapsed<300,`4000 contacts took ${elapsed.toFixed(1)}ms`);
+assert.equal(found.length,40);
+assert.ok(found.every((x)=>x.contact.contact_id!=='blocked'&&x.contact.contact_id!=='archived'&&x.contact.contact_id!=='sameemail'&&x.contact.contact_id!=='samecompany'&&x.contact.contact_id!=='b1'));
+assert.equal(introPairKey('a','b'),introPairKey('b','a'));
+assert.ok(found[0].breakdown.lexical>=0);
+console.log(`intro-scoring: PASS — 4000 contacts in ${elapsed.toFixed(1)}ms`);

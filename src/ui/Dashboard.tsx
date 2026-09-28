@@ -1,14 +1,15 @@
 import { AlertCircle, ArrowRight, CalendarDays, CreditCard, Inbox, Mic, Plus, ShieldCheck, Users } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { clippedText, displayText } from './text';
 import { sortContacts } from '../domain/contactList';
 import { relativeWhen } from './format';
-import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch } from '../domain/types';
+import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, IntroductionRecord, NotificationRecord, RelationshipTouch } from '../domain/types';
 
-type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
+type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'intake' | 'contacts' | 'introductions' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
 
 type DashboardData = {
   contacts: ContactRecord[];
+  introductions?: IntroductionRecord[];
   intake: IntakeRecord[];
   touches: RelationshipTouch[];
   approvals: ApprovalRecord[];
@@ -31,6 +32,7 @@ const openStatus = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs
 const openTouchStatus = new Set(['pending_approval', 'approved_ready_to_send', 'opened_vendor', 'will_do_myself', 'needed', 'planned', 'drafted']);
 
 export function Dashboard({ data, go, openCapture, openContact, runtime, gmailSyncControl }: { data: DashboardData; go: (page: Page) => void; openCapture: () => void; openContact: (id: string) => void; runtime: RuntimeStatus; gmailSyncControl: React.ReactNode }) {
+  useEffect(() => { if (runtime.usingLiveSheets && data.introductions?.some((row) => row.status === 'suggested')) void fetch('/api/introductions/weekly', {method:'POST',credentials:'same-origin'}).catch(() => undefined); }, [runtime.usingLiveSheets, data.introductions]);
   const [captureOpen, setCaptureOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth > 1100);
   const openIntake = data.intake.filter((item) => openStatus.has(item.review_status));
   const openTouches = data.touches.filter((item) => openTouchStatus.has(item.status));
@@ -98,6 +100,8 @@ export function Dashboard({ data, go, openCapture, openContact, runtime, gmailSy
       <Metric label="Touchpoints" value={openTouches.length} helper="Open follow-up" onClick={() => go('touches')} />
       <Metric label="Active events" value={activeEvents.length} helper="Form links live" onClick={() => go('events')} />
     </section>
+
+    <section className="card" style={{ marginTop: 16 }}><div className="section-head"><div><div className="kicker">Network connections</div><h2>Suggested introductions</h2></div><button className="btn small" onClick={() => go('introductions')}>Review intros</button></div><p>{(data.introductions || []).filter((row) => row.status === 'suggested').length} suggestions ready for review. Nothing sends without owner approval and an explicit send.</p></section>
 
     <section className="grid cols-2" style={{ marginTop: 16 }}>
       <div className="card recent-people"><div className="section-head"><div><div className="kicker">Network activity</div><h2>Recently added people</h2></div><button className="btn small" onClick={() => go('contacts')}>See all</button></div>{recentPeople.length ? <div className="list">{recentPeople.map((person) => <button className="row clean-row" key={person.contact_id} type="button" onClick={() => openContact(person.contact_id)}><span><strong>{displayText(person.full_name, 'Unnamed contact')}</strong><br /><span className="muted">{[person.company, person.relationship_owner, relativeWhen(person.created_at)].filter(Boolean).join(' · ')}</span></span><ArrowRight size={18} /></button>)}</div> : <EmptyState title="No recently added people" />}</div>
