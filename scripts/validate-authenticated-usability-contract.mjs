@@ -35,7 +35,7 @@ for (const token of [
   if (!clickAudit.includes(token)) failures.push(`click audit missing proof contract token: ${token}`);
 }
 const manifest = fs.readFileSync('AUTHENTICATED_ROUTE_MANIFEST.md', 'utf8');
-const expectedRoutes = ['Dashboard','Events','Add Person','Capture Studio','Thank-You','Intake Queue','West Peek Network','Touchpoints','Approvals','Notifications','AI Helper','App Instructions','Settings'];
+const expectedRoutes = ['Dashboard','Events','Add Person','Intake Queue','West Peek Network','Touchpoints','Approvals','Notifications','AI Helper','App Instructions','Settings'];
 for (const route of expectedRoutes) if (!manifest.includes(`| ${route} |`)) failures.push(`route manifest missing ${route}`);
 const gmailControl = fs.readFileSync('src/ui/GmailSyncControl.tsx', 'utf8');
 for (const token of ['Sync new emails from Gmail','info@westpeek.ventures','sequoia@westpeek.ventures','scooter@westpeek.ventures','runningRef.current','Intake refresh failed']) if (!gmailControl.includes(token)) failures.push(`Gmail sync control missing ${token}`);

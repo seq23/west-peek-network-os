@@ -1,8 +1,11 @@
-import { AlertCircle, ArrowRight, CalendarDays, CreditCard, Inbox, MailCheck, Mic, Plus, ShieldCheck, Users } from 'lucide-react';
+import { AlertCircle, ArrowRight, CalendarDays, CreditCard, Inbox, Mic, Plus, ShieldCheck, Users } from 'lucide-react';
+import { useState } from 'react';
 import { clippedText, displayText } from './text';
+import { sortContacts } from '../domain/contactList';
+import { relativeWhen } from './format';
 import type { ApprovalRecord, ContactRecord, EventAttendeeRecord, EventRecord, IntakeRecord, NotificationRecord, RelationshipTouch } from '../domain/types';
 
-type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'capture' | 'thankyou' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
+type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
 
 type DashboardData = {
   contacts: ContactRecord[];
@@ -27,7 +30,8 @@ type RuntimeStatus = {
 const openStatus = new Set(['new', 'ai_reviewed', 'pending_human_review', 'needs_human_review', 'needs_more_info']);
 const openTouchStatus = new Set(['pending_approval', 'approved_ready_to_send', 'opened_vendor', 'will_do_myself', 'needed', 'planned', 'drafted']);
 
-export function Dashboard({ data, go, runtime, gmailSyncControl }: { data: DashboardData; go: (page: Page) => void; runtime: RuntimeStatus; gmailSyncControl: React.ReactNode }) {
+export function Dashboard({ data, go, openCapture, openContact, runtime, gmailSyncControl }: { data: DashboardData; go: (page: Page) => void; openCapture: () => void; openContact: (id: string) => void; runtime: RuntimeStatus; gmailSyncControl: React.ReactNode }) {
+  const [captureOpen, setCaptureOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth > 1100);
   const openIntake = data.intake.filter((item) => openStatus.has(item.review_status));
   const openTouches = data.touches.filter((item) => openTouchStatus.has(item.status));
   const pendingApprovals = data.approvals.filter((item) => item.status === 'pending');
@@ -54,23 +58,25 @@ export function Dashboard({ data, go, runtime, gmailSyncControl }: { data: Dashb
     }))
   ].filter((item) => !isProofRecord(item.label));
   const nextWork = [...new Map(queueCandidates.map((item) => [`${item.page}:${item.label}:${item.detail}`, item])).values()].slice(0, 6);
+  const recentPeople = sortContacts(data.contacts.filter((person) => person.status === 'active' && !isProofRecord(person.full_name, person.email, person.contact_id)), 'newest').slice(0, 8);
 
   return <>
     <section className="hero-panel">
       <div className="hero-copy">
         <div className="eyebrow">West Peek internal</div>
         <h1>Network OS</h1>
-        <p className="subtitle hero-subtitle">Capture the person now. Add context later. Nothing becomes final until a human reviews it.</p>
+        <p className="subtitle hero-subtitle">Capture people, review intake, and keep relationships moving.</p>
         <div className="actions">
           <button className="btn primary" onClick={() => go('add')}><Plus size={17} /> Add person</button>
           <button className="btn dark" onClick={() => go('contacts')}><Users size={17} /> Open the network</button>
-          <button className="btn" onClick={() => go('capture')}><CreditCard size={17} /> Capture card or voice</button>
+          <button className="btn" onClick={openCapture}><CreditCard size={17} /> Capture card or voice</button>
           <button className="btn" onClick={() => go('events')}><CalendarDays size={17} /> Create event form</button>
         </div>
       </div>
       <div className="status-card compact-status">
         <div className="section-head"><div><div className="kicker">System health</div><h2>{runtime.gmailOauthConnected && runtime.sessionAuthenticated && runtime.usingLiveSheets ? 'Ready' : 'Needs attention'}</h2></div><button className="btn small" onClick={() => go('settings')}>Details</button></div>
-        <StatusLine
+        <div className="health-chips" aria-label="Connection status"><span>Gmail OAuth: {runtime.gmailOauthConnected ? 'Connected' : 'Needs attention'}</span><span>Browser session: {runtime.sessionAuthenticated ? 'Connected' : 'Needs attention'}</span><span>Google Sheets: {runtime.usingLiveSheets ? 'Connected' : 'Needs attention'}</span></div>
+        <details className="health-details"><summary>Connection details</summary><StatusLine
           label="Gmail OAuth"
           value={runtime.gmailOauthConnected ? `Connected: ${runtime.gmailOauthEmail || runtime.sessionEmail || 'approved user'}` : 'Not connected / token not found'}
           good={runtime.gmailOauthConnected}
@@ -80,7 +86,7 @@ export function Dashboard({ data, go, runtime, gmailSyncControl }: { data: Dashb
           value={runtime.sessionAuthenticated ? `Signed in: ${runtime.sessionEmail}` : 'Not signed in on this browser'}
           good={runtime.sessionAuthenticated}
         />
-        <StatusLine label="Google Sheets" value={runtime.usingLiveSheets ? 'Live snapshot loaded' : runtime.sheetStatus} good={runtime.usingLiveSheets} />
+        <StatusLine label="Google Sheets" value={runtime.usingLiveSheets ? 'Live snapshot loaded' : runtime.sheetStatus} good={runtime.usingLiveSheets} /></details>
         {(!runtime.gmailOauthConnected || !runtime.sessionAuthenticated || !runtime.usingLiveSheets) && <p className="muted">Resolve degraded connections in Settings before relying on sync, OCR, or transcription.</p>}
         <div className="dashboard-gmail-sync"><p className="muted">Check all eligible connected West Peek Gmail mailboxes and refresh Intake Queue.</p>{gmailSyncControl}</div>
       </div>
@@ -88,28 +94,27 @@ export function Dashboard({ data, go, runtime, gmailSyncControl }: { data: Dashb
 
     <section className="grid cols-4 compact-metrics">
       <Metric label="People" value={data.contacts.length} helper="Open the network" onClick={() => go('contacts')} />
-      <Metric label="Open intake" value={openIntake.length} helper="Needs review" />
-      <Metric label="Touchpoints" value={openTouches.length} helper="Open follow-up" />
-      <Metric label="Active events" value={activeEvents.length} helper="Form links live" />
+      <Metric label="Open intake" value={openIntake.length} helper="Needs review" onClick={() => go('intake')} />
+      <Metric label="Touchpoints" value={openTouches.length} helper="Open follow-up" onClick={() => go('touches')} />
+      <Metric label="Active events" value={activeEvents.length} helper="Form links live" onClick={() => go('events')} />
     </section>
 
     <section className="grid cols-2" style={{ marginTop: 16 }}>
+      <div className="card recent-people"><div className="section-head"><div><div className="kicker">Network activity</div><h2>Recently added people</h2></div><button className="btn small" onClick={() => go('contacts')}>See all</button></div>{recentPeople.length ? <div className="list">{recentPeople.map((person) => <button className="row clean-row" key={person.contact_id} type="button" onClick={() => openContact(person.contact_id)}><span><strong>{displayText(person.full_name, 'Unnamed contact')}</strong><br /><span className="muted">{[person.company, person.relationship_owner, relativeWhen(person.created_at)].filter(Boolean).join(' · ')}</span></span><ArrowRight size={18} /></button>)}</div> : <EmptyState title="No recently added people" />}</div>
       <div className="card work-card">
         <div className="section-head"><div><div className="kicker">Operator queue</div><h2>Next work</h2></div><button className="btn small" onClick={() => go('intake')}>Review all</button></div>
         {nextWork.length ? <div className="list">{nextWork.map((item, index) => <button className="row clean-row" key={item.key || `${item.label}-${index}`} onClick={() => go(item.page)}><span><strong>{item.label}</strong><br /><span className="muted">{item.detail}</span></span><ArrowRight size={18} /></button>)}</div> : <EmptyState title="Nothing waiting" body="No pending intake, touches, or approvals in the current snapshot." />}
       </div>
 
-      <div className="card action-grid-card">
-        <div className="kicker">Capture routes</div>
+      <details className="card action-grid-card" open={captureOpen} onToggle={(event) => setCaptureOpen(event.currentTarget.open)}><summary>Capture routes</summary>
         <h2>Choose the fastest path</h2>
         <div className="action-grid">
           <Action icon={<CalendarDays size={18} />} title="Event link" body="Let people fill out their own details." onClick={() => go('events')} />
           <Action icon={<Inbox size={18} />} title="#wpnetwork" body="Capture relationship context." onClick={() => go('instructions')} />
           <Action icon={<Inbox size={18} />} title="#wpdealflow / #dealflow" body="Capture founder / prospective deal flow into human review." onClick={() => go('instructions')} />
-          <Action icon={<Mic size={18} />} title="Voice note" body="Upload audio and turn it into intake." onClick={() => go('capture')} />
-          <Action icon={<MailCheck size={18} />} title="Thank-you" body="Draft a card or touchpoint." onClick={() => go('thankyou')} />
+          <Action icon={<Mic size={18} />} title="Voice note" body="Upload audio and turn it into intake." onClick={openCapture} />
         </div>
-      </div>
+      </details>
     </section>
 
     <section className="grid cols-3 secondary-panels" style={{ marginTop: 16 }}>
@@ -134,7 +139,8 @@ function Action({ icon, title, body, onClick }: { icon: React.ReactNode; title: 
   return <button className="quick-action" onClick={onClick}><span className="quick-icon">{icon}</span><span><strong>{title}</strong><small>{body}</small></span></button>;
 }
 function Panel({ title, count, rows, empty, actionLabel, onClick }: { title: string; count: number; rows: Array<{ title: string; meta?: string }>; empty: string; actionLabel: string; onClick: () => void }) {
-  return <details className="card panel-button" open>
+  const [open, setOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1280);
+  return <details className="card panel-button" open={open} onToggle={(event) => setOpen(event.currentTarget.open)}>
     <summary><span><span className="panel-count">{count}</span><strong>{title}</strong></span><ArrowRight size={17} /></summary>
     <div className="panel-content">{rows.length ? <div className="list compact-list">{rows.map((row, index) => <div className="mini-card" key={`${row.title}-${index}`}><strong>{displayText(row.title, 'Untitled')}</strong>{row.meta && <small>{displayText(row.meta)}</small>}</div>)}</div> : <EmptyState title={empty} />}
     <button className="panel-action" type="button" onClick={onClick}>{actionLabel}<ArrowRight size={15} /></button></div>

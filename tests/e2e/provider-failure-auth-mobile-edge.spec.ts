@@ -65,7 +65,8 @@ test.describe('provider failure, auth/session, mobile, and edge-case E2E', () =>
     await expect(page.getByRole('main')).toContainText(/provider unavailable|Nothing executed|Claude/i);
     await expect(page.getByRole('main')).not.toContainText(/suggestion approved|execution_allowed[^\n]+true/i);
 
-    await nav(page, 'Capture Studio');
+    await nav(page, 'Add Person');
+    await page.getByRole('group', { name: 'Add person method' }).getByRole('button', { name: 'Card / voice capture' }).click();
     await page.locator('input[type="file"]').first().setInputFiles('tests/e2e/fixtures/card.png');
     await page.getByRole('main').getByRole('button', { name: /OCR card\/screenshot to Intake Queue/i }).click();
     await expect(page.getByRole('main')).toContainText(/provider unavailable|not executed|human review|error/i);
@@ -74,7 +75,7 @@ test.describe('provider failure, auth/session, mobile, and edge-case E2E', () =>
   test('mobile critical workflows remain reachable beyond the sidebar smoke', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
-    for (const label of ['Dashboard', 'Add Person', 'Capture Studio', 'Intake Queue', 'App Instructions', 'Settings']) {
+    for (const label of ['Dashboard', 'Add Person', 'Intake Queue', 'App Instructions', 'Settings']) {
       await nav(page, label);
       await expect(page.getByRole('main')).toBeVisible();
     }

@@ -139,7 +139,7 @@ export function EventsPage({ events, attendees, onSaved, onAttendeeLifecycle }: 
           <span>{person.review_status} • missing: {person.missing_fields || 'none'}</span>
           {(person.public_interest || person.private_context || person.ai_summary) && <p>{clippedText(person.private_context || person.public_interest || person.ai_summary, 500)}</p>}<div className="actions">{person.review_status !== 'archived' ? <button className="btn danger" type="button" onClick={() => { if (window.confirm('Archive this attendee from the event view?')) onAttendeeLifecycle(person.event_attendee_id, 'archive'); }}>Archive attendee</button> : <button className="btn" type="button" onClick={() => onAttendeeLifecycle(person.event_attendee_id, 'restore')}>Restore attendee</button>}</div>
         </div>)}</div>
-        <p className="muted" style={{ marginTop: 12 }}>For card/photo or voice enrichment, use Capture Studio and choose this event. Those uploads stay internal and pending review.</p>
+        <p className="muted" style={{ marginTop: 12 }}>For card/photo or voice enrichment, open Add Person, select Card / voice capture, and choose this event. Those uploads stay internal and pending review.</p>
       </div>
     </div>}
   </>;

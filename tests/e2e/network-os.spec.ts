@@ -38,8 +38,6 @@ const sidebar = [
   'Dashboard',
   'Events',
   'Add Person',
-  'Capture Studio',
-  'Thank-You',
   'Intake Queue',
   'West Peek Network',
   'Touchpoints',
@@ -54,8 +52,6 @@ const contentBySidebar: Record<(typeof sidebar)[number], RegExp> = {
   Dashboard: /Network OS|Relationship command center|Open work queue/i,
   Events: /Create event|event forms|review attendees|Public form/i,
   'Add Person': /Add to West Peek Network/i,
-  'Capture Studio': /cards, screenshots, and voice notes|Internal data trace|OCR/i,
-  'Thank-You': /thank-you|WP branded|card preview/i,
   'Intake Queue': /Review captured relationship context|manual Gmail capture|Gmail trigger text/i,
   'West Peek Network': /People in the West Peek Network|Existing Investor/i,
   Touchpoints: /Intentional follow-through|Handwritten note fulfillment|pending_approval/i,
@@ -447,7 +443,7 @@ for (const label of sidebar) {
 test('surface: dashboard exposes primary West Peek Network actions', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /Network OS|Relationship command center|Open work queue/i); });
 test('surface: all major views are reachable', async ({ page }) => { for (const label of sidebar) { await nav(page, label); await mainText(page, contentBySidebar[label]); } });
 test('dashboard action: Add Person card opens Add Person', async ({ page }) => { await nav(page, 'Dashboard'); await page.getByRole('main').getByRole('button', { name: /Add Person/i }).first().click(); await mainText(page, /Add to West Peek Network/i); });
-test('dashboard journey: voice note path reaches Capture Studio', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /voice notes|Capture/i); await nav(page, 'Capture Studio'); await mainText(page, /Voice note transcription|cards, screenshots, and voice notes/i); });
+test('dashboard journey: voice note path reaches Add Person capture mode', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /voice notes|Capture/i); await nav(page, 'Add Person'); await page.getByRole('group', { name: 'Add person method' }).getByRole('button', { name: 'Card / voice capture' }).click(); await mainText(page, /Voice note transcription|cards, screenshots, and voice notes/i); });
 test('dashboard journey: #wpnetwork path reaches App Instructions', async ({ page }) => { await nav(page, 'Dashboard'); await mainText(page, /#wpnetwork|#wpdealflow|#dealflow|canonical trigger|Intake/i); await nav(page, 'App Instructions'); await mainText(page, /Canonical trigger|#wpnetwork|#wpdealflow|#dealflow/i); });
 
 test('transaction+persistence: manual add persists after reload and duplicate email is blocked', async ({ page }) => {
@@ -582,9 +578,8 @@ test('transaction: intake can be dismissed', async ({ page }) => { await nav(pag
 test('events: create event public form link', async ({ page }) => { await nav(page, 'Events'); await page.getByRole('textbox', { name: /^GP Wine Night$/i }).fill('E2E LP Dinner'); await page.getByPlaceholder('Tonight / 2026-06-07').fill('2026-06-07'); await page.getByPlaceholder('Memphis / NYC / Tech Week').fill('Memphis'); await page.getByPlaceholder('scooter@westpeek.ventures').fill('sequoia@westpeek.ventures'); await page.getByPlaceholder('Who is in the room? What is the goal?').fill('Relationship room for LPs.'); await page.getByRole('main').getByRole('button', { name: /^Create event \+ form link$/i }).click(); await mainText(page, /Created E2E LP Dinner|\/e\/e2e-lp-dinner/i); });
 test('events: private context saves attendee review item', async ({ page }) => { await nav(page, 'Events'); await page.getByPlaceholder('Jordan Miles').fill('Private Event Prospect'); await page.getByPlaceholder('jordan@example.com').fill('private-event@example.com'); await page.getByPlaceholder('Apex Family Office').fill('Event Capital'); await page.getByPlaceholder('Partner').fill('Partner'); await page.getByPlaceholder(/Met at GP Wine Night/i).fill('Needs follow-up after dinner.'); await page.getByRole('main').getByRole('button', { name: /^Save private context to event$/i }).click(); await mainText(page, /Private context added/i); });
 
-test('capture studio: image OCR route preserves provider trace and human review', async ({ page }) => { await nav(page, 'Capture Studio'); await page.locator('input[type="file"]').first().setInputFiles('tests/e2e/fixtures/card.png'); await page.getByPlaceholder(/Met at conference/i).fill('Met at E2E conference.'); await page.getByRole('main').getByRole('button', { name: /OCR card\/screenshot to Intake Queue/i }).click(); await mainText(page, /provider_trace|human_review_required|execution_allowed/i); });
-test('capture studio: voice note route preserves provider trace and human review', async ({ page }) => { await nav(page, 'Capture Studio'); await page.locator('input[type="file"]').nth(1).setInputFiles('tests/e2e/fixtures/voice.webm'); await page.getByPlaceholder(/This was after/i).fill('Voice note context.'); await page.getByRole('main').getByRole('button', { name: /Transcribe voice note to Intake Queue/i }).click(); await mainText(page, /human_review_required|execution_allowed|provider_trace/i); });
-test('thank-you studio: drafts touch without automatic execution', async ({ page }) => { await nav(page, 'Thank-You'); await page.locator('input[name="recipient_name"]').fill('Thank You E2E'); await page.getByPlaceholder('jordan@example.com').fill('thanks-e2e@example.com'); await page.getByPlaceholder('Apex Family Office').fill('Thanks Capital'); await page.getByRole('main').getByRole('button', { name: /^Draft \+ save thank-you touch$/i }).click(); await mainText(page, /Thank you|execution_allowed|human_review_required/i); });
+test('capture studio: image OCR route preserves provider trace and human review', async ({ page }) => { await nav(page, 'Add Person'); await page.getByRole('group', { name: 'Add person method' }).getByRole('button', { name: 'Card / voice capture' }).click(); await page.locator('input[type="file"]').first().setInputFiles('tests/e2e/fixtures/card.png'); await page.getByPlaceholder(/Met at conference/i).fill('Met at E2E conference.'); await page.getByRole('main').getByRole('button', { name: /OCR card\/screenshot to Intake Queue/i }).click(); await mainText(page, /provider_trace|human_review_required|execution_allowed/i); });
+test('capture studio: voice note route preserves provider trace and human review', async ({ page }) => { await nav(page, 'Add Person'); await page.getByRole('group', { name: 'Add person method' }).getByRole('button', { name: 'Card / voice capture' }).click(); await page.locator('input[type="file"]').nth(1).setInputFiles('tests/e2e/fixtures/voice.webm'); await page.getByPlaceholder(/This was after/i).fill('Voice note context.'); await page.getByRole('main').getByRole('button', { name: /Transcribe voice note to Intake Queue/i }).click(); await mainText(page, /human_review_required|execution_allowed|provider_trace/i); });
 
 test('surface: AI Review and Settings communicate authenticated provider-gated layers', async ({ page }) => { await nav(page, 'AI Helper'); await mainText(page, /Claude|reviewable|human approval/i); await mainText(page, /Claude|Anthropic|AI Suggestions/i); });
 test('AI Helper: creates pending human-review suggestion without auto execution', async ({ page }) => {
@@ -788,6 +783,16 @@ test('dashboard action: People metric opens the West Peek Network', async ({ pag
   await expect(page.getByRole('main').getByRole('heading', { name: 'Existing Investor' })).toBeVisible();
 });
 
+test('Add Person combines manual entry and media capture', async ({ page }) => {
+  await nav(page, 'Add Person');
+  await expect(page.getByRole('heading', { name: 'Add to West Peek Network' })).toBeVisible();
+  const methods = page.getByRole('group', { name: 'Add person method' });
+  await methods.getByRole('button', { name: 'Card / voice capture' }).click();
+  await expect(page.getByRole('heading', { name: 'Add people from cards, screenshots, and voice notes' })).toBeVisible();
+  await methods.getByRole('button', { name: 'Enter details' }).click();
+  await expect(page.getByRole('heading', { name: 'Add to West Peek Network' })).toBeVisible();
+});
+
 test('theme: dark is the default and the toggle persists across reload', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.getByRole('button', { name: 'Switch to light mode' }).click();
@@ -812,6 +817,28 @@ test('dashboard action: Open the network button opens the West Peek Network', as
   await nav(page, 'Dashboard');
   await page.getByRole('main').getByRole('button', { name: /^Open the network$/i }).click();
   await mainText(page, /People in the West Peek Network/i);
+});
+
+test('dashboard: recently added people opens the exact network record', async ({ page }) => {
+  await nav(page, 'Add Person');
+  await page.getByPlaceholder('Jordan Miles').fill('Recent Person');
+  await page.getByPlaceholder('jordan@example.com').fill('recent-person@example.com');
+  await page.getByPlaceholder('Apex Family Office').fill('Recent Capital');
+  await page.getByPlaceholder(/helped West Peek/i).fill('Recent network contact.');
+  await page.getByRole('main').getByRole('button', { name: /^Save person$/i }).click();
+  await nav(page, 'Dashboard');
+  await expect(page.locator('.recent-people .row').first()).toContainText('Recent Person');
+  await page.locator('.recent-people .row').first().click();
+  await mainText(page, /People in the West Peek Network/);
+  await expect(page.getByRole('complementary', { name: 'Contact detail' }).getByRole('heading', { name: 'Recent Person' })).toBeVisible();
+});
+
+test('dashboard: metric tiles route into operator pages', async ({ page }) => {
+  for (const [label, expected] of [['Open intake', /Review captured relationship context|Intake Queue/], ['Touchpoints', /Intentional follow-through/], ['Active events', /Create event/]] as const) {
+    await nav(page, 'Dashboard');
+    await page.getByRole('main').getByRole('button', { name: new RegExp(`^${label}:`) }).click();
+    await mainText(page, expected);
+  }
 });
 
 test('network list: newest addition is the first row and opens in the detail panel', async ({ page }) => {

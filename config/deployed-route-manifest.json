@@ -69,49 +69,6 @@
       "cleanupPolicy": "none"
     },
     {
-      "id": "capture-studio",
-      "path": "/",
-      "navigationLabel": "Capture Studio",
-      "authMode": "authenticated",
-      "persona": "operator",
-      "criticality": "critical",
-      "viewports": [
-        "desktop",
-        "mobile"
-      ],
-      "expectedIdentity": {
-        "type": "heading",
-        "value": "Add people from cards, screenshots, and voice notes"
-      },
-      "safeActions": [
-        "navigate"
-      ],
-      "fixtureRequirements": [],
-      "persistenceRequired": false,
-      "cleanupPolicy": "none"
-    },
-    {
-      "id": "thank-you",
-      "path": "/",
-      "navigationLabel": "Thank-You",
-      "authMode": "authenticated",
-      "persona": "operator",
-      "criticality": "critical",
-      "viewports": [
-        "desktop"
-      ],
-      "expectedIdentity": {
-        "type": "heading",
-        "value": "Create a West Peek branded thank-you"
-      },
-      "safeActions": [
-        "navigate"
-      ],
-      "fixtureRequirements": [],
-      "persistenceRequired": false,
-      "cleanupPolicy": "none"
-    },
-    {
       "id": "intake-queue",
       "path": "/",
       "navigationLabel": "Intake Queue",

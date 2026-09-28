@@ -13,8 +13,6 @@ const routeContracts = [
   { label: 'Dashboard', heading: /^Network OS$/ },
   { label: 'Events', heading: /^Create event forms and review attendees$/ },
   { label: 'Add Person', heading: /^Add to West Peek Network$/ },
-  { label: 'Capture Studio', heading: /^Add people from cards, screenshots, and voice notes$/ },
-  { label: 'Thank-You', heading: /^Create a West Peek branded thank-you$/ },
   { label: 'Intake Queue', heading: /^Review captured relationship context$/ },
   { label: 'West Peek Network', heading: /^People in the West Peek Network$/ },
   { label: 'Touchpoints', heading: /^Intentional follow-through$/ },
