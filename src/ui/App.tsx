@@ -7,23 +7,24 @@ import { AddPerson } from './AddPerson';
 import { CaptureStudio } from './CaptureStudio';
 import { ThankYouStudio } from './ThankYouStudio';
 import { EventsPage } from './Events';
+import { NetworkPage } from './Network';
+import { friendlyWhen, humanize, relativeWhen } from './format';
 import { clippedText, displayText } from './text';
 import { store } from '../data/store';
 import { createSheetContact, createSheetIntake, decideSheetApproval, fetchSheetSnapshot, markSheetNotificationRead, reviewSheetIntake, updateSheetTouchFulfillment, updateSheetContactStatus, updateSheetRecordLifecycle, type SheetSnapshot } from '../services/sheetsClient';
 import type { AiSuggestionRecord, ApprovalRecord, ContactRecord, DealFlowProspect, IntakeRecord, NotificationRecord, Owner, RelationshipTouch, TouchMethod } from '../domain/types';
 import { HANDWRITTEN_VENDORS, type HandwrittenVendor } from '../domain/handwrittenVendors';
-import { CONTACTS_PAGE_SIZE, clampContactPage, contactPageCount, paginateContacts } from '../domain/contactPagination';
 
 type Page = 'dashboard' | 'instructions' | 'events' | 'add' | 'capture' | 'thankyou' | 'intake' | 'contacts' | 'touches' | 'approvals' | 'notifications' | 'ai' | 'settings';
 
 const navItems: Array<{ page: Page; label: string; icon: React.ReactNode }> = [
   { page: 'dashboard', label: 'Dashboard', icon: <Home size={17} /> },
+  { page: 'contacts', label: 'West Peek Network', icon: <Users size={17} /> },
   { page: 'events', label: 'Events', icon: <CalendarDays size={17} /> },
   { page: 'add', label: 'Add Person', icon: <Plus size={17} /> },
   { page: 'capture', label: 'Capture Studio', icon: <CreditCard size={17} /> },
   { page: 'thankyou', label: 'Thank-You', icon: <MailCheck size={17} /> },
   { page: 'intake', label: 'Intake Queue', icon: <Inbox size={17} /> },
-  { page: 'contacts', label: 'West Peek Network', icon: <Users size={17} /> },
   { page: 'touches', label: 'Touchpoints', icon: <ContactRound size={17} /> },
   { page: 'approvals', label: 'Approvals', icon: <CheckCircle2 size={17} /> },
   { page: 'notifications', label: 'Notifications', icon: <Bell size={17} /> },
@@ -272,7 +273,7 @@ export function App() {
         {page === 'capture' && <CaptureStudio events={data.events} onSaved={() => void reloadSheetsSnapshot('Capture saved to Google Sheets.')} />}
         {page === 'thankyou' && <ThankYouStudio onSaved={() => void reloadSheetsSnapshot('Thank-you touch saved to Google Sheets.')} />}
         {page === 'intake' && <IntakePage gmailSyncControl={<GmailSyncControl authenticated={session.authenticated} onRefresh={() => reloadSheetsSnapshot('Gmail sync complete. Intake Queue refreshed.', true)} />} rows={data.intake} mutationKey={mutationKey} onCapture={(raw) => { void handleIntakeCapture(raw); }} onConvert={(id, conversion) => { void handleIntakeReview(id, 'convert', conversion); }} onAttach={(id) => { void handleIntakeReview(id, 'attach'); }} onDismiss={(id) => { void handleIntakeReview(id, 'dismiss'); }} />}
-        {page === 'contacts' && <ContactsPage rows={data.contacts} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
+        {page === 'contacts' && <NetworkPage rows={data.contacts} mutationKey={mutationKey} onStatus={(id, status) => { void handleContactStatus(id, status); }} />}
         {page === 'touches' && <TouchesPage rows={data.touches} contacts={data.contacts} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('touch', id, action); }} onFulfillmentUpdate={(touch, update) => { void handleTouchFulfillment(touch, update); }} />}
         {page === 'approvals' && <ApprovalsPage rows={data.approvals} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('approval', id, action); }} onApprove={(id) => { void handleApprovalDecision(id, 'approve'); }} onReject={(id) => { void handleApprovalDecision(id, 'reject'); }} />}
         {page === 'notifications' && <NotificationsPage rows={data.notifications} mutationKey={mutationKey} onLifecycle={(id, action) => { void handleLifecycle('notification', id, action); }} onRead={(id, recipientEmail) => { void handleNotificationRead(id, recipientEmail); }} />}
@@ -290,23 +291,6 @@ export function App() {
       </main>
     </div>
   );
-}
-
-function ContactsPage({ rows, mutationKey, onStatus }: { rows: ContactRecord[]; mutationKey: string | null; onStatus: (id: string, status: 'active' | 'archived') => void }) {
-  const [view, setView] = useState<'active' | 'archived' | 'all'>('active');
-  const [search, setSearch] = useState('');
-  const [requestedPage, setRequestedPage] = useState(1);
-  const visible = rows.filter((row) => view === 'all' || row.status === view).filter((row) => !search || [row.full_name, row.email, row.company, row.context_summary, row.tags.join(' ')].join(' ').toLowerCase().includes(search.toLowerCase()));
-  const pageCount = contactPageCount(visible.length);
-  const currentPage = clampContactPage(requestedPage, visible.length);
-  const pageRows = paginateContacts(visible, currentPage);
-  return <>
-    <Header eyebrow="West Peek Network" title="People in the West Peek Network" subtitle="Active relationships appear first. Archived contacts stay recoverable and out of normal work surfaces." />
-    <RouteGuide purpose="Find and manage finalized relationship records." primaryAction="Search or review active contacts." secondary="Archive stale records without deleting history." caution="Intake belongs in the Intake Queue until reviewed." />
-    <div className="filter-bar"><input aria-label="Search contacts" placeholder="Search name, email, company, context, or tags" value={search} onChange={(event) => { setSearch(event.target.value); setRequestedPage(1); }} /><div className="segmented"><button className={view === 'active' ? 'active' : ''} onClick={() => { setView('active'); setRequestedPage(1); }}>Active</button><button className={view === 'archived' ? 'active' : ''} onClick={() => { setView('archived'); setRequestedPage(1); }}>Archived</button><button className={view === 'all' ? 'active' : ''} onClick={() => { setView('all'); setRequestedPage(1); }}>All</button></div><span className="result-count">{visible.length} records</span></div>
-    {visible.length > CONTACTS_PAGE_SIZE && <nav className="pagination-controls" aria-label="Contact pages"><button className="btn small" type="button" disabled={currentPage === 1} onClick={() => setRequestedPage(currentPage - 1)}>Previous</button><span>Page {currentPage} of {pageCount} · showing {pageRows.length} contacts</span><button className="btn small" type="button" disabled={currentPage === pageCount} onClick={() => setRequestedPage(currentPage + 1)}>Next</button></nav>}
-    <div className="grid cols-2">{visible.length === 0 ? <div className="empty-state"><h3>{rows.length ? 'No contacts match this view' : 'No contacts yet'}</h3></div> : pageRows.map((c) => { const busy = mutationKey?.startsWith(`contact:${c.contact_id}:`); return <article className="card record-card" key={c.contact_id}><div className="record-header"><div><h3>{clippedText(c.full_name, 100, 'Unnamed contact')}</h3><p className="muted">{c.company || 'No company'} • Owner: {c.relationship_owner}</p><p className="contact-email">{c.email || 'No email on file'}</p></div><span className="badge">{humanize(c.status)}</span></div><p>{clippedText(c.context_summary, 420, 'No context yet.')}</p><p><span className="badge">{c.priority}</span>{c.person_type && c.person_type !== 'unknown' && <span className="badge badge-gap">{humanize(c.person_type)}</span>}{c.deal_flow_prospect === 'yes' && <span className="badge warn badge-gap">Deal-flow prospect</span>}{c.touch_needed && <span className="badge warn badge-gap">Needs touch</span>}</p><footer className="action-footer">{c.status === 'active' ? <button className="btn danger" disabled={Boolean(busy)} onClick={() => { if (window.confirm(`Archive ${c.full_name}? The record will leave Active but remain restorable.`)) onStatus(c.contact_id, 'archived'); }}>{busy ? 'Archiving…' : 'Archive contact'}</button> : <button className="btn primary" disabled={Boolean(busy)} onClick={() => onStatus(c.contact_id, 'active')}>{busy ? 'Restoring…' : 'Restore contact'}</button>}</footer></article>})}</div>
-  </>;
 }
 
 function IntakePage({ gmailSyncControl, rows, mutationKey, onCapture, onConvert, onAttach, onDismiss }: { gmailSyncControl: React.ReactNode; rows: IntakeRecord[]; mutationKey: string | null; onCapture: (rawText: string) => void; onConvert: (id: string, conversion: { deal_flow_prospect: DealFlowProspect; relationship_owner: Owner }) => void; onAttach: (id: string) => void; onDismiss: (id: string) => void }) {
@@ -664,9 +648,6 @@ export function RouteGuide({ purpose, primaryAction, secondary, caution }: { pur
   return <section className="route-guide" aria-label="Route guidance"><div><span>Purpose</span><strong>{purpose}</strong></div><div><span>Primary action</span><strong>{primaryAction}</strong></div>{secondary && <div><span>Secondary</span><strong>{secondary}</strong></div>}{caution && <div className="route-caution"><span>Guardrail</span><strong>{caution}</strong></div>}</section>;
 }
 
-function humanize(value: unknown) { if (String(value || '') === 'general_tech_adjacent') return 'General – Tech Adjacent'; return String(value || '').replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase()); }
-function friendlyWhen(value: unknown) { const date = new Date(String(value || '')); return Number.isNaN(date.getTime()) ? String(value || 'Not scheduled') : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined }); }
-function relativeWhen(value: unknown) { const date = new Date(String(value || '')); if (Number.isNaN(date.getTime())) return ''; const days = Math.floor((Date.now() - date.getTime()) / 86400000); if (days <= 0) return 'Today'; if (days === 1) return 'Yesterday'; if (days < 7) return `${days} days ago`; return friendlyWhen(value); }
 function humanizeList(value: unknown) { return String(value || '').split(',').map((item) => humanize(item.trim())).filter(Boolean).join(', '); }
 function bounded(value: unknown, max: number) { const text = displayText(value); return text.length > max ? `${text.slice(0, max).trim()}…` : text; }
 

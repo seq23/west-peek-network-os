@@ -1,12 +1,12 @@
 import fs from 'node:fs';
-const app=fs.readFileSync('src/ui/App.tsx','utf8');
+const app=['src/ui/App.tsx','src/ui/Network.tsx','src/ui/format.ts'].map((file)=>fs.readFileSync(file,'utf8')).join('\n');
 const css=fs.readFileSync('src/styles.css','utf8');
 const audit=fs.readFileSync('scripts/postdeploy-click-audit-unified.mjs','utf8');
 const gmailControl=fs.readFileSync('src/ui/GmailSyncControl.tsx','utf8');
 const gmailApi=fs.readFileSync('functions/api/gmail/sync.ts','utf8');
 const postcleanup=fs.readFileSync('scripts/postcleanup-integrity.mjs','utf8');
 const manifest=JSON.parse(fs.readFileSync('config/deployed-route-manifest.json','utf8'));
-const requiredApp=['bounded(i.ai_summary || i.parsed_notes || i.raw_text, 420)','View source details','raw-source','clippedText(parseSuggestedPayload(a.suggested_payload).summary','AI Helper','App Instructions','setPage(\'approvals\')','c.email || \'No email on file\'','i.parsed_email || \'Email not parsed\'','Deal-flow prospect for','Relationship owner for','deal_flow_prospect: dealFlowProspect','relationship_owner: owner','paginateContacts(visible, currentPage)','Page {currentPage} of {pageCount}','General – Tech Adjacent'];
+const requiredApp=['bounded(i.ai_summary || i.parsed_notes || i.raw_text, 420)','View source details','raw-source','clippedText(parseSuggestedPayload(a.suggested_payload).summary','AI Helper','App Instructions','setPage(\'approvals\')','contact.email || \'No email on file\'','i.parsed_email || \'Email not parsed\'','Deal-flow prospect for','Relationship owner for','deal_flow_prospect: dealFlowProspect','relationship_owner: owner','paginateContacts(visible, currentPage, NETWORK_LIST_PAGE_SIZE)','Page {currentPage} of {pageCount}','General – Tech Adjacent'];
 for(const token of requiredApp) if(!app.includes(token)) throw new Error(`critical UI flow missing ${token}`);
 for(const token of ['overflow-wrap:anywhere','grid-template-columns:1fr','.raw-source { max-height:240px; overflow:auto']) if(!css.includes(token)) throw new Error(`layout hardening missing ${token}`);
 for(const token of ['rawMarkup','mojibake','jsonBlob','longUnbounded','collisions','horizontal overflow','CLICK_AUDIT_PHASE']) if(!audit.includes(token)) throw new Error(`populated audit missing ${token}`);
