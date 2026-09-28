@@ -1,4 +1,5 @@
 import { cookieHeader, redirect, requireAuthEnv, createSignedValue, type AuthEnv } from '../_shared/auth';
+import { json } from '../_shared/json';
 
 type Context = { request: Request; env: AuthEnv };
 
@@ -11,7 +12,11 @@ const scopes = [
 ];
 
 export async function onRequestGet({ request, env }: Context) {
-  requireAuthEnv(env);
+  try {
+    requireAuthEnv(env);
+  } catch {
+    return json({ ok: false, error: 'Google sign-in is not configured for this deployment.' }, { status: 503, headers: { 'cache-control': 'no-store' } });
+  }
   const url = new URL(request.url);
   const next = url.searchParams.get('next') || '/';
 
