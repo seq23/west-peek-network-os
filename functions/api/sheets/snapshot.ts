@@ -53,8 +53,20 @@ export async function onRequestGet({ request, env }: Context) {
       return json({ ...(snapshotCache.payload as Record<string, unknown>), source: 'google_sheets_batch_cache', freshness_requested: false, cache_age_ms: Math.max(0, SNAPSHOT_CACHE_TTL_MS - (snapshotCache.expiresAt - Date.now())) }, { headers: { 'cache-control': 'private, no-store, max-age=0' } });
     }
 
-    // One batchGet request replaces per-tab reads and avoids repeated header requests.
-    const raw = await batchReadTabs(env, tabs);
+    // The introductions schema can be upgraded independently. Its failure must not
+    // make the established contacts and relationship data disappear from the OS.
+    const coreTabs = tabs.filter((tab) => tab !== 'introductions');
+    const raw: Partial<Record<SheetTab, Array<Record<string, unknown>>>> = coreTabs.length ? await batchReadTabs(env, coreTabs) : {};
+    let introductionsError: string | undefined;
+    if (tabs.includes('introductions')) {
+      try {
+        raw.introductions = (await batchReadTabs(env, ['introductions'])).introductions;
+      } catch (error) {
+        if (asked.length) throw error;
+        introductionsError = error instanceof Error ? error.message : 'Introductions unavailable.';
+        raw.introductions = [];
+      }
+    }
     const changedSince = (row: Record<string, unknown>) => {
       if (since === null) return true;
       const stamp = Date.parse(String(row.updated_at || row.created_at || ''));
@@ -67,7 +79,7 @@ export async function onRequestGet({ request, env }: Context) {
       totals[tab] = rows.length;
       return [tab, rows.filter(changedSince)];
     }));
-    const payload = { ok: true, persistence: 'google_sheets', source: 'google_sheets_batch', freshness_requested: forceFresh, proof_data_included: includeProof, cache_age_ms: 0, refreshed_at: new Date().toISOString(), user_email: user.email, data, ...(since !== null ? { since: new Date(since).toISOString(), totals_before_since: totals } : {}) };
+    const payload = { ok: true, persistence: 'google_sheets', source: 'google_sheets_batch', freshness_requested: forceFresh, proof_data_included: includeProof, cache_age_ms: 0, refreshed_at: new Date().toISOString(), user_email: user.email, data, ...(introductionsError ? { warnings: { introductions: introductionsError } } : {}), ...(since !== null ? { since: new Date(since).toISOString(), totals_before_since: totals } : {}) };
     snapshotCache = { userEmail: user.email, includeProof, tabs: cacheKey, payload, expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS };
     return json(payload, { headers: { 'cache-control': 'private, no-store, max-age=0' } });
   } catch (error) {

@@ -5,6 +5,7 @@ export type SheetSnapshot = {
   refreshedAt?: string;
   freshnessRequested?: boolean;
   cacheAgeMs?: number;
+  warnings?: Record<string, string>;
   contacts: ContactRecord[];
   intake: IntakeRecord[];
   touches: RelationshipTouch[];
@@ -21,7 +22,7 @@ export type AddEventContextInput = { event_id: string; public_name?: string; pub
 
 export async function fetchSheetSnapshot(options: { fresh?: boolean } = {}): Promise<SheetSnapshot> {
   const url = options.fresh ? '/api/sheets/snapshot?fresh=1' : '/api/sheets/snapshot';
-  const payload = await requestJson<{ data?: Record<string, unknown[]>; source?: string; refreshed_at?: string; freshness_requested?: boolean; cache_age_ms?: number }>(url, {
+  const payload = await requestJson<{ data?: Record<string, unknown[]>; source?: string; refreshed_at?: string; freshness_requested?: boolean; cache_age_ms?: number; warnings?: Record<string, string> }>(url, {
     cache: 'no-store'
   });
   const data = payload.data || {};
@@ -30,6 +31,7 @@ export async function fetchSheetSnapshot(options: { fresh?: boolean } = {}): Pro
     refreshedAt: payload.refreshed_at,
     freshnessRequested: payload.freshness_requested,
     cacheAgeMs: payload.cache_age_ms,
+    warnings: payload.warnings,
     contacts: rows(data.contacts).map(normalizeContact),
     intake: rows(data.intake_queue).map(normalizeIntake),
     touches: rows(data.relationship_touches).map(normalizeTouch),
