@@ -87,7 +87,7 @@ export function App() {
       const snapshot = await fetchSheetSnapshot({ fresh });
       setSheetData(snapshot);
       const freshness = snapshot.source === 'google_sheets_batch_cache' ? `Cached snapshot (${Math.round((snapshot.cacheAgeMs || 0) / 1000)}s old).` : `Fresh Google Sheets snapshot${snapshot.refreshedAt ? ` at ${new Date(snapshot.refreshedAt).toLocaleTimeString()}` : ''}.`;
-      setSheetStatus(freshness);
+      setSheetStatus(snapshot.warnings?.introductions ? `${freshness} Introductions unavailable: ${snapshot.warnings.introductions}` : freshness);
       if (nextMessage) setMessage(nextMessage);
       return snapshot;
     } catch (error) {
