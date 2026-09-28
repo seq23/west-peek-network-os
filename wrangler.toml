@@ -17,6 +17,8 @@ compatibility_date = "2026-06-07"
 [vars]
 ADMIN_EMAIL_ALLOWLIST = "info@westpeek.ventures,sequoia@westpeek.ventures,scooter@westpeek.ventures"
 
-# Introduction sending is disabled until the external guard Worker is deployed.
-# Bind INTRO_SEND_GUARD to IntroSendGuard in west-peek-intro-send-guard only after
-# that Worker exists. The send API refuses every request without the binding.
+# External Durable Object Worker deployed to the Pages account on 2026-09-27.
+[[durable_objects.bindings]]
+name = "INTRO_SEND_GUARD"
+class_name = "IntroSendGuard"
+script_name = "west-peek-intro-send-guard"
