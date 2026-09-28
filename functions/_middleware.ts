@@ -9,6 +9,16 @@ const PUBLIC_PREFIXES = [
   '/api/session',
   '/api/intake/pitch-lab',
   '/api/intake/pitch-lab-profile',
+  // The sheet door for every West Peek website form (functions/api/intake/
+  // site-form.ts). It is called server-to-server by functions/api/lead.js in
+  // join-west-peek-main with the shared secret as its gate - there is no
+  // session. It was missing here, so this middleware answered every site-form
+  // POST 401 "Authentication required." before the handler ran, and no
+  // website submission ever reached the contacts tab while /api/health said
+  // ready:true. Measured 28 Sep 2026 on a joinwestpeek.com preview:
+  // {"ok":true,"sheet":"failed"}. tests/domain/site-form-intake.mjs now
+  // drives this middleware for both directions.
+  '/api/intake/site-form',
   '/api/triggers/check',
   '/e/',
   '/assets/'

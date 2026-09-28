@@ -53,6 +53,23 @@ const CONTACT_MODULE = new URL('../../functions/_shared/siteFormContact.ts', imp
  * that only runs on the author's machine is not a gate. Transpiling here keeps
  * the test executing the real module on every Node this repo supports.
  */
+/**
+ * Load functions/_middleware.ts the same way, with its one import (the session
+ * reader) replaced by a stub that finds no session - exactly a server-to-server
+ * call from lead.js, which carries no cookie. This runs the shipping gate.
+ */
+async function loadMiddlewareWithoutSession() {
+  const ts = (await import('typescript')).default;
+  const source = readFileSync(new URL('../../functions/_middleware.ts', import.meta.url), 'utf8')
+    .replace("from './_shared/auth'", "from 'data:text/javascript,export const authenticatedUserEmail = async () => null;'");
+  ok(source.includes("data:text/javascript,export const authenticatedUserEmail"), 'middleware test replaced the auth import with a no-session stub');
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+    fileName: '_middleware.ts'
+  });
+  return import(`data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`);
+}
+
 async function loadContactModule() {
   const ts = (await import('typescript')).default;
   const source = readFileSync(CONTACT_MODULE, 'utf8');
@@ -273,5 +290,33 @@ ok(health.includes('failure_visibility'), 'health says how a failed intake becom
 // The proof rows this door writes must be selectable by the cleanup path.
 ok(cleanup.includes("'contacts'"), 'the cleanup path covers the contacts tab');
 ok(cleanup.includes('proof_fixture'), 'the cleanup path selects on proof_fixture');
+
+// --------------------------------------------------------------------------
+// 3. The door is reachable. functions/_middleware.ts gates every route behind
+//    a session unless the path is public; lead.js calls this door with no
+//    session and only the shared secret. Until 28 Sep 2026 /api/intake/
+//    site-form was not public, so the middleware answered 401 before
+//    site-form.ts ran and every website submission's sheet write "failed".
+//    Both directions: the door passes through unauthenticated, an internal
+//    route still does not.
+// --------------------------------------------------------------------------
+{
+  const middleware = await loadMiddlewareWithoutSession();
+  const pass = async (path) => {
+    let reached = false;
+    const res = await middleware.onRequest({
+      request: new Request(`https://network.joinwestpeek.com${path}`, { method: 'POST', headers: { 'content-type': 'application/json' } }),
+      env: {},
+      next: async () => { reached = true; return new Response('handler', { status: 200 }); }
+    });
+    return { reached, status: res.status };
+  };
+  const door = await pass('/api/intake/site-form');
+  ok(door.reached && door.status === 200, `/api/intake/site-form must reach its handler without a session (got status ${door.status}, reached=${door.reached}) - lead.js carries only the shared secret`);
+  const internal = await pass('/api/contacts/create');
+  ok(!internal.reached && internal.status === 401, `/api/contacts/create must still be refused without a session (got status ${internal.status}, reached=${internal.reached})`);
+  const pitchLab = await pass('/api/intake/pitch-lab');
+  ok(pitchLab.reached, '/api/intake/pitch-lab stays public');
+}
 
 console.log(`site-form intake contract PASS — ${checks} checks`);
