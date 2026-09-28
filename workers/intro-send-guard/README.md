@@ -1,6 +1,14 @@
 # Introduction send guard
 
-Deploy this Worker (`wrangler deploy --config workers/intro-send-guard/wrangler.toml`) before enabling in-app sends. Its durable object migration is in the Worker configuration. Once it exists, add the following binding to the Pages `wrangler.toml` and redeploy Pages. Until then, the missing binding disables all in-app sends:
+Deploy this Worker before enabling in-app sends. The account ID in its config is the account shown by the existing Cloudflare Pages deployment for this repository; `wrangler deploy` will fail if the signed-in operator cannot deploy there. From a checkout of PR #11 on a computer with access to the owner's Cloudflare account:
+
+```bash
+npx wrangler login
+npx wrangler whoami
+npx wrangler deploy --config workers/intro-send-guard/wrangler.toml
+```
+
+The login happens in the operator's own browser. Do not paste a token into a chat, commit one, or alter the account ID to make deployment succeed. Save the Wrangler deployment result (Worker name, account, version and timestamp) for release proof. Its durable object migration is in the Worker configuration. Once it exists, add the following binding to the Pages `wrangler.toml` and redeploy Pages. Until then, the missing binding disables all in-app sends:
 
 ```toml
 [[durable_objects.bindings]]
