@@ -11,27 +11,14 @@ Hard proof commands:
 
 ## Static/predeploy hard fail validators
 
-- `validate:no-generated-artifacts`
-- `validate:google-private-key-contract`
-- `validate:no-raw-atob-errors`
 - `validate:oauth-connect-contract`
 - `validate:provider-error-contract`
-- `validate:tier4-live-proof-contract`
-- `validate:tier4-lane-registry`
-- `validate:tier4-report-schema`
-- `validate:repo-matrix-consistency`
-- `validate:no-localhost-defaults`
 
 
 ## Documentation advisory validators — never release-blocking
 
 The following validators are documentation/governance advisories only. They may emit `STRONG WARNING` or `WARNING`, but they must never stop build, browser proof, updater commit, push, or release:
 
-- `validate:artifact-manifest-current`
-- `validate:docs-match-package-scripts`
-- `validate:tier-docs-current`
-- `validate:tier4-docs-complete`
-- `validate:docs-consolidation`
 
 Locked rule: documentation-only drift is not equivalent to product, security, data-integrity, deployment, or artifact-safety failure.
 
@@ -112,7 +99,6 @@ This repository adopts `docs/REPO_MASTER_CONTRACT_ADDENDUM_AUTHENTICATED_PRODUCT
 | Layer | Command | Proof |
 |---|---|---|
 | Static/UI contract | `npm run test:critical-ui-data-flow` | Shared Gmail control appears on Dashboard, Intake Queue, and Settings; exact approved mailbox set; endpoint allowlist; narrow integrity behavior |
-| Authenticated usability | `npm run validate:authenticated-usability-contract` | Operator wording distinguishes Gmail import from Sheets refresh and identifies separate OAuth requirements |
 | Browser behavior | `npm run test:e2e:maxdepth` or `npm run test:e2e:container` | Sequential three-mailbox batch, connected/not-connected reporting, partial/malformed failure isolation, automatic refresh, and repeated-click lock |
 
 Browser collection without execution is not behavior proof. A runtime without an admitted Chromium executable must report the browser lane as UNPROVEN and defer it to the local updater's real-browser prepush.

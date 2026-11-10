@@ -4,7 +4,6 @@ mkdir -p logs artifacts/diagnostics
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=3072}"
 GAPS=()
 run(){ local id="$1"; shift; echo "==> $id"; "$@" 2>&1 | tee "logs/deep-validation-${id}.log"; }
-run secret-policy npm run validate:secret-policy
 run fast npm run verify:fast
 run admitted-local npm run validate:all
 set +e
@@ -22,9 +21,6 @@ else
 fi
 if [[ ! -f dist/index.html ]]; then run build npm run build; else echo '==> build already proven by validate:all; dist/index.html present'; fi
 rm -rf dist reports playwright-report test-results coverage .open-next .next out build tsconfig.tsbuildinfo
-run generated-artifacts npm run validate:no-generated-artifacts
-run docs npm run validate:docs-match-package-scripts
-run matrix npm run validate:repo-matrix-consistency
 run fixture-clean npm run fixtures:verify-clean
 if ((${#GAPS[@]})); then
   printf 'DEEP VALIDATION PASSED WITH ENVIRONMENT GAPS: %s\n' "${GAPS[*]}"

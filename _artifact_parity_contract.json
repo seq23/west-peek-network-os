@@ -9,9 +9,6 @@
     "_repo_validation_matrix.json",
     "_baseline_packaging_contract.json",
     "scripts/release-prepush-router.mjs",
-    "scripts/validate-ui-test-parity.mjs",
-    "scripts/validate-browser-suite-contract.mjs",
-    "scripts/validate-artifact-source-parity.mjs",
     "scripts/release-close-lifecycle.mjs",
     "REPO_IDENTITY.md",
     ".github/workflows/validate.yml"

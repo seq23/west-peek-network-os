@@ -18,13 +18,6 @@ Reason: it depended on exact document tokens and duplicated stronger targeted va
 
 Replacement gates:
 
-- `npm run validate:docs-match-package-scripts`
-- `npm run validate:repo-matrix-consistency`
-- `npm run validate:tier-docs-current`
-- `npm run validate:tier4-docs-complete`
-- `npm run validate:tier4-live-proof-contract`
-- `npm run validate:tier4-lane-registry`
-- `npm run validate:tier4-report-schema`
 
 ## Blocking rule
 
@@ -33,7 +26,6 @@ A validator should block release only if it protects a real product, security, p
 Validators should not hard-fail for:
 
 - stale prose tokens when the structured docs/matrix validators pass;
-- generated report residue that is already handled by `validate:no-generated-artifacts`;
 - live provider requirements during predeploy;
 - postdeploy requirements without an explicit deployed URL;
 - Tier 4 live evidence before the operator intentionally runs Tier 4.

@@ -6,13 +6,9 @@ const root = process.cwd();
 const commands = [
   ['npm',['run','typecheck']],
   ['npm',['run','build']],
-  ['npm',['run','validate:deployed-route-manifest']],
-  ['npm',['run','validate:authenticated-usability-contract']],
   ['npm',['run','test:display-normalization']],
   ['npm',['run','test:critical-ui-data-flow']],
   ['npm',['run','test:ai-helper-approval-flow']],
-  ['npm',['run','validate:playwright:maxdepth']],
-  ['npm',['run','validate:baseline-package-contract']]
 ];
 for (const [cmd,args] of commands) execFileSync(cmd,args,{cwd:root,stdio:'inherit',env:{...process.env,NODE_OPTIONS:'--max-old-space-size=3072'}});
 

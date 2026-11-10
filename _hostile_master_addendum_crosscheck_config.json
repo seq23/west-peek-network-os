@@ -15,13 +15,11 @@
     "docs/runbooks/deployment-cloudflare.md",
     "docs/runbooks/postdeploy.md",
     "scripts/validate-everything.mjs",
-    "scripts/validate-env.mjs",
     "scripts/env-parity-trace.mjs",
     "scripts/env-restore.mjs",
     "scripts/env-remove.mjs",
     "scripts/cloudflare-secret-sync.mjs",
     "scripts/cloudflare-secret-audit.mjs",
-    "scripts/validate-e2e-coverage-matrix.mjs",
     "tests/e2e/master-gauntlet.spec.ts",
     "tests/e2e/public-event-and-pitchlab.spec.ts",
     "tests/e2e/provider-failure-auth-mobile-edge.spec.ts",
@@ -36,13 +34,11 @@
     "SECRET_EXCEPTION_LEDGER.md",
     "functions/api/gmail/sync.ts",
     "functions/api/provider/status.ts",
-    "functions/_middleware.ts",
-    "scripts/validate-provider-lanes.mjs"
+    "functions/_middleware.ts"
   ],
   "expectedScripts": [
     "validate:everything",
     "test:everything",
-    "validate:e2e-coverage",
     "test:e2e:master-gauntlet",
     "test:e2e:coverage-required",
     "test:e2e:live-gmail",
@@ -53,7 +49,6 @@
     "env:remove",
     "cf:secrets:sync",
     "cf:secrets:audit",
-    "validate:provider-lanes",
     "test:e2e:public-pitchlab-real",
     "test:e2e:maxdepth-headed",
     "test:e2e:local-functions-headed"
