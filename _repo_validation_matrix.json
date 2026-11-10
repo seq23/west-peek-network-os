@@ -1028,6 +1028,23 @@
       "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk."
     },
     {
+      "validator": "Provider Lane Contract Validation",
+      "command": "npm run validate:provider-lanes",
+      "category": "provider contract",
+      "severity": "STRONG WARNING",
+      "productionRisk": "Provider claims drift from runtime implementation, docs, or real-provider runbooks.",
+      "proves": "Repo owns provider matrices, Gmail sync endpoint, session spoof guard, and Pitch Lab signature parity.",
+      "doesNotProve": "Real provider credentials, deployed runtime, OAuth browser completion, or production Sheets writes.",
+      "failureHandling": "Juniper investigates and normally repairs before release; local work may continue when proof is environment-bound.",
+      "ownerDecisionNeeded": false,
+      "tier": "tier1",
+      "name": "provider lane implementation and documentation inventory",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "whatItProves": "Required provider matrices/runbooks exist and static anchors for Gmail sync, Pitch Lab signatures, provider status, session hardening, and human-review guardrails are present.",
+      "whatItDoesNotProve": "Does not prove deployed provider credentials, OAuth, Gmail messages, Sheets writes, Claude/OCR/voice calls, or real runtime success.",
+      "blockerPolicy": "Normally resolve before release; not a security/data corruption failure by itself."
+    },
+    {
       "name": "no plaintext secrets",
       "command": "npm run validate:secrets",
       "tier": "tier1",
@@ -1070,6 +1087,18 @@
       "owner": "Juniper / autonomous engineering department",
       "blockerPolicy": "Blocks delivery or push.",
       "simplificationDisposition": "KEEP"
+    },
+    {
+      "name": "trigger product promises",
+      "command": "npm run validate:triggers",
+      "tier": "tier1",
+      "category": "product promise",
+      "severity": "WARNING",
+      "productionRisk": "#wpnetwork/#wpdealflow missing or unsafe",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "live Gmail provider ingestion",
+      "blockerPolicy": "Noncritical validator; visible but nonblocking unless evidence promotes severity.",
+      "failureHandling": "Record and repair without blocking unrelated runtime validation."
     },
     {
       "name": "gmail:forward-only:generate-seeds",
