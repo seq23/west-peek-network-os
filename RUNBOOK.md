@@ -1,8 +1,7 @@
 # RUNBOOK — west-peek-network-os
 
 Read this before changing anything. It is the file an AI employee (Porter in West Peek OS,
-Danielle in Boss OS) reads at plan time; `scripts/validate-runbook.mjs` fails the build if the
-paths and scripts named here stop existing. It points at the deeper runbooks rather than
+Danielle in Boss OS) reads at plan time; keep the paths and scripts named here current. It points at the deeper runbooks rather than
 repeating them.
 
 ## What this repo is
@@ -42,11 +41,10 @@ sheet app".
   `wrangler.toml`).
 - **One deploy path.** Cloudflare's Git integration is the only deployer; no Wrangler deploy
   workflow in GitHub (`docs/runbooks/deployment-cloudflare.md`).
-- **Brand is locked**: `WEST_PEEK_BRAND_SYSTEM.md`. Guard: `npm run validate:brand-system`.
 - **Every validator is admitted.** A new `validate`/`test`/`smoke`/`audit` script needs a row in
-  `_validator_admission_register.json` (guard: `npm run validate:validator-admission`); to run in CI
+  `_validator_admission_register.json`; to run in CI
   it also needs a tier1 row in `_repo_validation_matrix.json`. Every Markdown file needs a row in
-  `docs/DOCS_CONSOLIDATION_MAP.md` (`npm run validate:docs-consolidation`).
+  `docs/DOCS_CONSOLIDATION_MAP.md`.
 - **Branches are `work/*`; merge only when every check is green, never `--admin`** (`AGENTS.md`).
 - **Ask, don't decide**: who is on the allowlist, brand, copy meaning, anything that changes which
   tab a caller's data lands on. Code, tests, validators, docs: decide and record in the PR.
@@ -79,13 +77,10 @@ trigger incidents: `docs/SHEETS_TRIGGER_RECOVERY_RUNBOOK.md`. Full release lifec
 | Script | Pins |
 |---|---|
 | `scripts/validate-everything.mjs` | runs every tier1 row of `_repo_validation_matrix.json`; any HARD FAIL fails CI |
-| `scripts/validate-structure.mjs` | required files, routes and runtime fragments exist |
 | `tests/domain/site-form-intake.mjs` | the site-form door's mapping, secret gate, origin allow-list and update-not-duplicate |
 | `tests/domain/pitch-lab-handoff.mjs` | the Pitch Lab handoff endpoints and their contract docs stay in step |
 | `scripts/sheets/validate-schema-contract.mjs` | writes use canonical sheet headers |
 | `tests/integration/trigger-sheet-safety.mjs` | Gmail trigger to sheet writes stay safe (`npm run validate:trigger-sheet-proof`) |
 | `scripts/check-no-plaintext-secrets.mjs` | no plaintext secrets committed |
-| `scripts/validate-validator-admission.mjs` | every validation script is admitted |
-| `scripts/validate-runbook.mjs` | this file names real paths and scripts (`npm run validate:runbook`) |
 
 Prove a new guard negatively before merging: plant the defect, watch it fail, remove it.

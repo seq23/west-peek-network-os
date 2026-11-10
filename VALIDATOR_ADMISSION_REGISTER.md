@@ -29,6 +29,5 @@ No new package command was introduced. The change extends already admitted lanes
 
 - `test:e2e:maxdepth` / `test:e2e:container` — three-surface Gmail sync behavior, sequential approved-mailbox requests, partial failure isolation, malformed response handling, completion reporting, and rapid-repeat lock.
 - `test:critical-ui-data-flow` — shared component placement, three-mailbox allowlist, server rejection of unapproved mailboxes, refresh-failure reporting, and narrow post-cleanup integrity.
-- `validate:authenticated-usability-contract` — operator-visible wording, shared control presence, and approved-mailbox policy.
 
 All three commands already exist in `_validator_admission_register.json` and `_repo_validation_matrix.json`; therefore no unregistered validator was added.

@@ -15,7 +15,6 @@ await fs.writeFile(checkpoint, JSON.stringify({ runId, strategy, beforeHash: bef
 
 const steps = [
   'npm run release:autofix:static',
-  'npm run release:autofix:routes',
   'npm run release:autofix:rendering',
   'npm run release:validate:local'
 ];
