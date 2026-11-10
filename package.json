@@ -35,6 +35,8 @@
     "validate:everything": "node scripts/validate-everything.mjs --tier=1",
     "validate:release": "npm run validate:all && npm run build",
     "validate:secrets": "node scripts/check-no-plaintext-secrets.mjs",
+    "validate:env": "node scripts/validate-env.mjs",
+    "validate:secret-policy": "node scripts/testing/validate-secret-policy.mjs",
     "test:e2e:live-gmail:real": "LIVE_GMAIL_TRIGGER_E2E=1 playwright test tests/e2e/live-gmail-trigger-ingestion.spec.ts --trace on --workers=1",
     "test:e2e:live-gmail-forward-only:real": "LIVE_GMAIL_FORWARD_ONLY_E2E=1 playwright test tests/e2e/live-gmail-forward-only-runtime.spec.ts --trace on --workers=1",
     "release:gmail-forward-only-proof": "npm run test:e2e:live-gmail-forward-only:real",

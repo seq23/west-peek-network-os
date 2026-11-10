@@ -976,6 +976,30 @@
       "simplificationDisposition": "KEEP"
     },
     {
+      "name": "env contract",
+      "command": "npm run validate:env",
+      "tier": "tier1",
+      "category": "environment",
+      "severity": "HARD FAIL",
+      "productionRisk": "missing env names/client secret exposure",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "secret correctness",
+      "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk.",
+      "failureHandling": "Juniper repairs and reruns. Selected lifecycle stage remains blocked."
+    },
+    {
+      "name": "secret policy",
+      "command": "npm run validate:secret-policy",
+      "tier": "tier1",
+      "category": "security",
+      "severity": "HARD FAIL",
+      "productionRisk": "a real .env file or private-key file tracked in a public repo",
+      "proofLayer": "STATIC VALIDATION PASSED",
+      "doesNotProve": "secrets inside other files (validate:secrets)",
+      "blockerPolicy": "Blocks selected lifecycle stage due to security, data, build, critical journey, cleanup, or artifact risk.",
+      "failureHandling": "Juniper repairs and reruns. Selected lifecycle stage remains blocked."
+    },
+    {
       "name": "validate:oauth-connect-contract",
       "command": "npm run validate:oauth-connect-contract",
       "category": "provider-contract",

@@ -4,6 +4,7 @@ mkdir -p logs artifacts/diagnostics
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=3072}"
 GAPS=()
 run(){ local id="$1"; shift; echo "==> $id"; "$@" 2>&1 | tee "logs/deep-validation-${id}.log"; }
+run secret-policy npm run validate:secret-policy
 run fast npm run verify:fast
 run admitted-local npm run validate:all
 set +e
